@@ -131,6 +131,37 @@ button { cursor: pointer }
 .sv-item .open small { display: block; color: var(--muted); font-size: .72rem }
 .sv-item .x { border: 0; background: none; color: var(--muted); font-size: 1.1rem; padding: 4px 10px }
 .sv-empty { color: var(--muted); font-size: .8rem; padding: 4px 10px }
+/* bubble tab */
+.bb-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin: 4px 0 12px; font-size: .82rem }
+.bb-head .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--profit); margin-inline-end: 6px; vertical-align: middle }
+.bb-head .dot.old { background: var(--muted) }
+.bb-in .fields { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+@media (max-width: 520px) { .bb-in .fields { grid-template-columns: repeat(2, minmax(0, 1fr)) } .bb-in .fields .f:last-child { grid-column: 1 / -1 } }
+.bb-edited { font-size: .78rem; color: var(--muted); margin-top: 10px }
+.bb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; margin-top: 14px; align-items: start }
+.bb-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 16px; min-width: 0 }
+.bb-card[data-open="true"] { border-color: var(--accent); grid-column: 1 / -1 }
+.bb-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; width: 100%; border: 0; background: none; color: var(--fg); padding: 0; text-align: start }
+.bb-top b { font-size: 1rem; font-weight: 800 }
+.bb-top small { display: block; color: var(--muted); font-size: .74rem; margin-top: 2px }
+.bb-pct { flex: none; font-weight: 900; font-size: 1.35rem; line-height: 1.2; text-align: end }
+.bb-pct small { display: block; font-size: .68rem; font-weight: 700; color: var(--muted) }
+.bb-pct.low { color: var(--profit) } .bb-pct.mid { color: var(--accent) } .bb-pct.high { color: var(--loss) }
+.bb-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; font-size: .72rem; color: var(--muted) }
+.bb-row b { display: block; color: var(--fg); font-size: .9rem; font-weight: 800; overflow-wrap: anywhere }
+.bb-more { margin-top: 14px; border-top: 1px solid var(--line-soft); padding-top: 12px; display: grid; gap: 12px }
+.bb-more .fields { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+.bb-formula { background: var(--raised); border-radius: var(--r-sm); padding: 10px 12px; font-size: .8rem; line-height: 1.9 }
+.bb-formula .eq { direction: ltr; unicode-bidi: isolate; display: inline-block; font-weight: 700 }
+.bb-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
+.bb-facts div { background: var(--raised); border-radius: var(--r-sm); padding: 8px 10px; font-size: .74rem; color: var(--muted) }
+.bb-facts b { display: block; color: var(--fg); font-size: .92rem }
+.bb-sc label { display: flex; justify-content: space-between; font-size: .8rem; margin-bottom: 2px }
+.bb-sc input[type=range] { width: 100%; accent-color: var(--accent) }
+.bb-sc .out { font-size: .82rem; background: var(--raised); border-radius: var(--r-sm); padding: 8px 12px; margin-top: 6px; line-height: 1.8 }
+.bb-help { margin-top: 14px }
+.bb-help summary { cursor: pointer; font-weight: 700 }
+.bb-help p { font-size: .84rem; line-height: 1.9; margin: 10px 0 0 }
 .toast { position: fixed; bottom: 86px; left: 50%; transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: .82rem; font-weight: 700; z-index: 60; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: calc(100% - 32px); text-align: center }
 .toast.on { opacity: 1 }
 .cmpbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; font-size: .82rem }
@@ -226,8 +257,8 @@ tfoot td { font-weight: 800; border-bottom: 0 }
 /* sticky mini summary (phones) */
 .dock { position: fixed; inset: auto 0 0 0; z-index: 20; background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -8px 24px rgba(0,0,0,.18);
   padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
-  display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: .82rem; transform: translateY(110%); transition: transform .2s ease }
-.dock.on { transform: none }
+  display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: .82rem; transform: translateY(110%); visibility: hidden; transition: transform .2s ease, visibility .2s }
+.dock.on { transform: none; visibility: visible }
 .dock b { font-size: 1.05rem; font-weight: 900 }
 .dock button { border: 1px solid var(--line); background: var(--raised); border-radius: 999px; padding: 4px 12px; font-size: .78rem }
 @media (min-width: 960px) { .dock { display: none } }
@@ -280,6 +311,7 @@ footer a { color: var(--accent) }
     <div class="tabs" role="tablist">
       <button role="tab" id="tab-payoff" aria-selected="true" aria-controls="view-payoff">سود و زیان</button>
       <button role="tab" id="tab-pricing" aria-selected="false" aria-controls="view-pricing">قیمت تئوری</button>
+      <button role="tab" id="tab-bubble" aria-selected="false" aria-controls="view-bubble">حباب</button>
     </div>
     </div>
   </header>
@@ -406,6 +438,26 @@ footer a { color: var(--accent) }
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- ================= BUBBLE ================= -->
+  <section id="view-bubble" role="tabpanel" aria-labelledby="tab-bubble" hidden>
+    <div class="bb-head"><span id="bb-src"></span><button type="button" class="ghost" id="bb-refresh">به‌روزرسانی قیمت‌ها</button></div>
+    <div class="card bb-in">
+      <div class="fields">
+        <div class="f"><label for="bb-ons">اونس طلا</label><div class="box"><input id="bb-ons" inputmode="decimal" autocomplete="off"><span class="u">دلار</span></div></div>
+        <div class="f"><label for="bb-silver">اونس نقره</label><div class="box"><input id="bb-silver" inputmode="decimal" autocomplete="off"><span class="u">دلار</span></div></div>
+        <div class="f"><label for="bb-usd">دلار بازار آزاد</label><div class="box"><input id="bb-usd" inputmode="decimal" autocomplete="off"><span class="u">تومان</span></div></div>
+      </div>
+      <div class="bb-edited" id="bb-edited" hidden>با قیمت‌های خودتان حساب شده · <button type="button" class="link" id="bb-reset">برگرد به قیمت لحظه‌ای</button></div>
+    </div>
+    <div class="bb-grid" id="bb-grid"></div>
+    <details class="card bb-help">
+      <summary>حباب یعنی چی؟</summary>
+      <p><b>ارزش ذاتی</b> قیمت طلای خالصِ داخل سکه است، اگر با قیمت جهانی اونس و دلار بازار آزاد حساب شود. <b>حباب</b> فاصله‌ی قیمت بازار با این ارزش است. حباب زیاد یعنی بخشی از قیمت به خاطر تقاضا و انتظار بازار است، نه طلای داخلش؛ اگر هیجان بخوابد، حباب می‌تواند کم شود حتی وقتی طلا و دلار ثابت مانده‌اند.</p>
+      <p><b>دلار ضمنی</b> نرخی از دلار است که با آن حباب صفر می‌شد؛ یعنی قیمت فعلی سکه با چه دلاری «منصفانه» است.</p>
+    </details>
+    <p class="fee-note">منبع قیمت‌ها: tgju.org · وزن سکه‌ها استاندارد بانک مرکزی با عیار ۹۰۰ است و با زدن روی هر کارت قابل تغییر است. حباب صندوق‌های طلا به ارزش روز واحدها نیاز دارد که این منبع نمی‌دهد.</p>
   </section>
 
   <footer>
@@ -708,6 +760,37 @@ const Margin = (() => {
   return { DEFAULTS, perShare, perContract, total };
 })();
 Engine.Margin = Margin;
+
+/* ---------- bubble of gold coins, gold and silver ----------
+   intrinsic value = world ounce price (USD) × dollar rate ÷ 31.1034768 g × weight × fineness
+   bubble = market price − intrinsic value. All prices here are per one coin or per one gram, in the same money unit as the dollar rate. */
+const Bubble = (() => {
+  const OZ = 31.1034768;
+  // weights in grams; coin weights are the Central Bank standard (editable in the page)
+  const ITEMS = [
+    { id: 'sekee', name: 'سکه امامی', metal: 'gold', w: 8.133, f: 0.9, unit: 'هر سکه' },
+    { id: 'sekeb', name: 'سکه بهار آزادی', metal: 'gold', w: 8.133, f: 0.9, unit: 'هر سکه' },
+    { id: 'nim', name: 'نیم سکه', metal: 'gold', w: 4.0665, f: 0.9, unit: 'هر سکه' },
+    { id: 'rob', name: 'ربع سکه', metal: 'gold', w: 2.03325, f: 0.9, unit: 'هر سکه' },
+    { id: 'gerami', name: 'سکه گرمی', metal: 'gold', w: 1.011, f: 0.9, unit: 'هر سکه' },
+    { id: 'geram18', name: 'طلای ۱۸ عیار', metal: 'gold', w: 1, f: 0.75, unit: 'هر گرم' },
+    { id: 'silver_999', name: 'نقره ۹۹۹', metal: 'silver', w: 1, f: 0.999, unit: 'هر گرم' },
+  ];
+  const pure = it => it.w * it.f;
+  const intrinsic = (it, ounceUsd, usd) => ounceUsd * usd / OZ * pure(it);
+  function calc(it, price, ounceUsd, usd, gram24) {
+    const iv = intrinsic(it, ounceUsd, usd), b = price - iv;
+    const r = { intrinsic: iv, bubble: b, pct: iv > 0 ? b / iv : NaN,
+      impliedUsd: ounceUsd > 0 && pure(it) > 0 ? price / (ounceUsd / OZ * pure(it)) : NaN };
+    // against the gold already inside Iran: domestic 24-carat gram price × pure grams
+    if (it.metal === 'gold' && gram24 > 0) { const d = gram24 * pure(it); r.domestic = d; r.domesticPct = (price - d) / d; }
+    return r;
+  }
+  // price that keeps today's bubble % when the ounce or the dollar moves
+  const sameBubblePrice = (it, pct, ounceUsd, usd) => intrinsic(it, ounceUsd, usd) * (1 + pct);
+  return { OZ, ITEMS, pure, intrinsic, calc, sameBubblePrice };
+})();
+Engine.Bubble = Bubble;
 if (typeof module !== 'undefined') module.exports = Engine;
 </script>
 
@@ -1229,6 +1312,92 @@ function initTheme() {
 
 /* ---------- boot ---------- */
 let show;
+/* ---------- bubble tab: prices come from prices.json (refreshed every 15 min on the server), a built-in snapshot, or the user ---------- */
+const BB = E.Bubble, SNAPSHOT = {"updated":"2026-10-22T20:30:42Z","source":"tgju.org","unit":"rial","items":{"ons":{"p":4028.3,"t":"2026-10-22 23:04:32"},"silver":{"p":54.68,"t":"2026-10-22 23:03:16"},"price_dollar_rl":{"p":2719050.0,"t":"2026-10-22 16:59:57"},"sekee":{"p":2739650000.0,"t":"2026-10-22 16:59:57"},"sekeb":{"p":2650400000.0,"t":"2026-10-22 16:59:57"},"nim":{"p":1439800000.0,"t":"2026-10-22 15:11:35"},"rob":{"p":765200000.0,"t":"2026-10-22 15:07:31"},"gerami":{"p":390000000.0,"t":"2026-10-22 15:11:35"},"geram18":{"p":272231000.0,"t":"2026-10-22 16:59:54"},"geram24":{"p":362971000.0,"t":"2026-10-22 16:59:54"},"silver_999":{"p":5034600.0,"t":"2026-10-22 22:47:17"}}};
+const bb = { src: null, live: false, base: null, cur: null, w: {}, open: null, sc: { usd: 0, ons: 0 } };
+const BB_KEY = { sekee: 'sekee', sekeb: 'sekeb', nim: 'nim', rob: 'rob', gerami: 'gerami', geram18: 'geram18', silver_999: 'silver_999' };
+function bbFrom(json) {
+  const it = json.items || {}, t = k => it[k] ? it[k].p / 10 : NaN;   // rial → toman
+  const prices = {}; for (const [id, k] of Object.entries(BB_KEY)) prices[id] = t(k);
+  return { ons: it.ons ? it.ons.p : NaN, silver: it.silver ? it.silver.p : NaN, usd: t('price_dollar_rl'), gram24: t('geram24'), prices };
+}
+const bbClone = o => ({ ...o, prices: { ...o.prices } });
+function bbUse(json, live) {
+  const edited = bb.cur && bb.base && JSON.stringify(bb.cur) !== JSON.stringify(bb.base);
+  bb.src = json; bb.live = live; bb.base = bbFrom(json);
+  if (!edited) bb.cur = bbClone(bb.base);
+}
+function ago(iso) {
+  const m = Math.round((Date.now() - Date.parse(iso)) / 60000);
+  if (!isFinite(m)) return '';
+  if (m < 1) return 'همین الان';
+  if (m < 60) return `${fmt(m, 0)} دقیقه پیش`;
+  if (m < 60 * 24) return `${fmt(Math.round(m / 60), 0)} ساعت پیش`;
+  return `${fmt(Math.round(m / 1440), 0)} روز پیش`;
+}
+async function bbFetch(manual) {
+  try {
+    const r = await fetch('prices.json', { cache: 'no-store' });
+    if (!r.ok) throw 0;
+    const j = await r.json();
+    if (!j.items || !j.updated) throw 0;
+    if (!bb.src || j.updated >= bb.src.updated) bbUse(j, true); else bb.live = true;
+    if (manual) toast('قیمت‌ها به‌روز شد');
+  } catch (e) { if (manual) toast('اتصال برقرار نشد؛ آخرین قیمت‌های ذخیره‌شده نمایش داده می‌شود'); }
+  bbRender();
+}
+const bbTone = p => !isFinite(p) ? '' : p < 0.03 ? 'low' : p < 0.10 ? 'mid' : 'high';
+const bbW = it => bb.w[it.id] ?? it.w;
+function bbCalc(it, c = bb.cur) {
+  const item = { ...it, w: bbW(it) };
+  return { item, r: BB.calc(item, c.prices[it.id], it.metal === 'silver' ? c.silver : c.ons, c.usd, c.gram24) };
+}
+function bbPctTxt(p) { return isFinite(p) ? `${p < 0 ? '−' : ''}${fmt(Math.abs(p) * 100, 1)}٪` : '—'; }
+function bbCard(it) {
+  const { item, r } = bbCalc(it), price = bb.cur.prices[it.id], open = bb.open === it.id, tone = bbTone(r.pct);
+  const pureG = fmt(BB.pure(item), 3);
+  let h = `<article class="bb-card" data-id="${it.id}" data-open="${open}">
+    <button type="button" class="bb-top" aria-expanded="${open}"><div><b>${it.name}</b><small>${it.unit} · ${pureG} گرم ${it.metal === 'silver' ? 'نقره‌ی' : 'طلای'} خالص</small></div>
+    <span class="bb-pct ${tone}">${bbPctTxt(r.pct)}<small>${r.pct < 0 ? 'زیر ارزش ذاتی' : 'حباب'}</small></span></button>
+    <div class="bb-row"><span>قیمت بازار<b>${fmt(price, 0)}</b></span><span>ارزش ذاتی<b>${fmt(r.intrinsic, 0)}</b></span><span>حباب (تومان)<b class="${r.bubble > 0 ? '' : 'pos'}">${fmt(r.bubble, 0)}</b></span></div>`;
+  if (open) {
+    const oz = it.metal === 'silver' ? bb.cur.silver : bb.cur.ons;
+    const ozS = oz * (1 + bb.sc.ons / 100), usdS = bb.cur.usd * (1 + bb.sc.usd / 100);
+    const ivS = BB.intrinsic(item, ozS, usdS), keep = BB.sameBubblePrice(item, r.pct, ozS, usdS);
+    h += `<div class="bb-more">
+      <div class="fields">
+        <div class="f"><label for="bbp-${it.id}">قیمت بازار (${it.unit})</label><div class="box"><input id="bbp-${it.id}" data-k="price" inputmode="decimal" autocomplete="off" value="${latin(price)}"><span class="u">تومان</span></div></div>
+        <div class="f"><label for="bbw-${it.id}">وزن</label><div class="box"><input id="bbw-${it.id}" data-k="w" inputmode="decimal" autocomplete="off" value="${latin(item.w)}"><span class="u">گرم</span></div></div>
+      </div>
+      <div class="bb-formula">ارزش ذاتی = اونس × دلار ÷ ۳۱٫۱ × وزن × عیار<br><span class="eq">${fmt(oz, 2)} × ${fmt(bb.cur.usd, 0)} ÷ ${fmt(BB.OZ, 2)} × ${fmt(item.w, 4)} × ${fmt(item.f, 3)} = ${fmt(r.intrinsic, 0)}</span></div>
+      <div class="bb-facts">
+        <div>دلار ضمنی<b>${fmt(r.impliedUsd, 0)} <small class="mut">تومان</small></b>با این دلار حباب صفر می‌شد</div>
+        ${r.domestic ? `<div>نسبت به طلای خام داخل<b class="${bbTone(r.domesticPct) === 'high' ? 'neg' : ''}">${bbPctTxt(r.domesticPct)}</b>با قیمت هر گرم ۲۴ عیار بازار ایران</div>` : `<div>اونس نقره<b>${fmt(bb.cur.silver, 2)} <small class="mut">دلار</small></b>قیمت جهانی</div>`}
+      </div>
+      <div class="bb-sc">
+        <label for="bbs-usd"><span>اگر دلار تغییر کند</span><b class="n">${bb.sc.usd > 0 ? '+' : ''}${fmt(bb.sc.usd, 0)}٪</b></label>
+        <input type="range" id="bbs-usd" data-sc="usd" min="-30" max="30" step="1" value="${bb.sc.usd}">
+        <label for="bbs-ons"><span>اگر اونس تغییر کند</span><b class="n">${bb.sc.ons > 0 ? '+' : ''}${fmt(bb.sc.ons, 0)}٪</b></label>
+        <input type="range" id="bbs-ons" data-sc="ons" min="-30" max="30" step="1" value="${bb.sc.ons}">
+        <div class="out">${bb.sc.usd || bb.sc.ons ? `ارزش ذاتی می‌شود <b>${fmt(ivS, 0)}</b> تومان. اگر حباب همین ${bbPctTxt(r.pct)} بماند، قیمت حدود <b>${fmt(keep, 0)}</b> تومان می‌شود (${keep > price ? '+' : ''}${bbPctTxt(keep / price - 1)} نسبت به الان).` : 'لغزنده‌ها را حرکت دهید تا ببینید با تغییر دلار یا اونس، قیمت چقدر جابه‌جا می‌شود.'}</div>
+      </div>
+    </div>`;
+  }
+  return h + '</article>';
+}
+function bbRender() {
+  if (!bb.cur) return;
+  const c = bb.cur;
+  setVal('bb-ons', c.ons); setVal('bb-silver', c.silver); setVal('bb-usd', c.usd);
+  $('bb-src').innerHTML = `<span class="dot ${bb.live ? '' : 'old'}"></span>${bb.live ? 'قیمت‌ها' : 'آخرین قیمت‌های ذخیره‌شده'}: ${ago(bb.src.updated)} · منبع tgju`;
+  $('bb-edited').hidden = JSON.stringify(bb.cur) === JSON.stringify(bb.base) && !Object.keys(bb.w).length;
+  const items = BB.ITEMS.filter(it => isFinite(c.prices[it.id]) && c.prices[it.id] > 0)
+    .map(it => ({ it, p: bbCalc(it).r.pct })).sort((a, b) => (isFinite(a.p) ? a.p : 9) - (isFinite(b.p) ? b.p : 9));
+  const g = $('bb-grid'), f = document.activeElement, fid = f && g.contains(f) ? f.id : null, pos = fid && f.selectionStart;
+  g.innerHTML = items.map(x => bbCard(x.it)).join('');
+  if (fid && $(fid)) { const el = $(fid); el.focus(); try { if (pos != null) el.setSelectionRange(pos, pos); } catch (e) {} }
+}
+
 /* ---------- save & share: a position is a short code in the link (#p=...) or in this browser's storage ---------- */
 const KIND = { c: 'call', p: 'put', s: 'stock' };
 const b64e = t => btoa(unescape(encodeURIComponent(t))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -1292,6 +1461,27 @@ function boot() {
   bindInput($('mB'), v => v >= 0 && v <= 100, v => { state.mB = v; update(); });
   bindInput($('mC'), v => v >= 0, v => { state.mC = v; update(); });
   $('sv-toggle').addEventListener('click', () => openSaved($('sv-sheet').hidden));
+  bbUse(SNAPSHOT, false);
+  bindInput($('bb-ons'), v => v > 0, v => { bb.cur.ons = v; bbRender(); });
+  bindInput($('bb-silver'), v => v > 0, v => { bb.cur.silver = v; bbRender(); });
+  bindInput($('bb-usd'), v => v > 0, v => { bb.cur.usd = v; bbRender(); });
+  $('bb-reset').addEventListener('click', () => { bb.cur = bbClone(bb.base); bb.w = {}; bbRender(); });
+  $('bb-refresh').addEventListener('click', () => bbFetch(true));
+  $('bb-grid').addEventListener('click', e => {
+    const t = e.target.closest('.bb-top'); if (!t) return;
+    const id = t.closest('.bb-card').dataset.id; bb.open = bb.open === id ? null : id; bb.sc = { usd: 0, ons: 0 }; bbRender();
+  });
+  $('bb-grid').addEventListener('input', e => {
+    const el = e.target, id = el.closest('.bb-card')?.dataset.id; if (!id) return;
+    if (el.dataset.sc) { bb.sc[el.dataset.sc] = Number(el.value); bbRender(); return; }
+    const t = el.value.replace(/[0-9]/g, d => FA[d]).replace(/\./g, '٫');
+    if (t !== el.value) { const p = el.selectionStart; el.value = t; try { el.setSelectionRange(p, p); } catch (x) {} }
+    const v = parseNum(el.value), good = isFinite(v) && v > 0;
+    el.closest('.box')?.setAttribute('data-bad', String(!good)); if (!good) return;
+    if (el.dataset.k === 'price') bb.cur.prices[id] = v; else bb.w[id] = v;
+    bbRender();
+  });
+  bbFetch(false);
   $('sv-save').addEventListener('click', () => { openSaved(true); const n = $('sv-name'); n.value = curName(); n.focus(); n.select(); $('sv-sheet').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
   $('sv-form').addEventListener('submit', e => {
     e.preventDefault();
@@ -1327,7 +1517,7 @@ function boot() {
   if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => { const on = !en.isIntersecting && !$('view-payoff').hidden; $('dock').classList.toggle('on', on); $('dock').setAttribute('aria-hidden', String(!on)); }, { threshold: 0.05 }).observe(res);
   $('dock-go').addEventListener('click', () => res.scrollIntoView({ behavior: 'smooth', block: 'start' }));
 
-  const tabs = { payoff: [$('tab-payoff'), $('view-payoff')], pricing: [$('tab-pricing'), $('view-pricing')] };
+  const tabs = { payoff: [$('tab-payoff'), $('view-payoff')], pricing: [$('tab-pricing'), $('view-pricing')], bubble: [$('tab-bubble'), $('view-bubble')] };
   show = k => {
     for (const [n, [t, v]] of Object.entries(tabs)) { t.setAttribute('aria-selected', String(n === k)); v.hidden = n !== k; }
     if (k === 'payoff') drawChart(); else $('dock').classList.remove('on');
@@ -1344,6 +1534,7 @@ function boot() {
   const fromLink = location.hash.match(/^#p=([\w-]+)/);
   if (!(fromLink && applyCode(fromLink[1], 'این موقعیت از لینک باز شد.'))) applyExample('e1');
   if (location.hash === '#pricing') show('pricing');
+  if (location.hash === '#bubble') show('bubble');
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
   // Inside Telegram (Mini App): follow Telegram's day/night, fill the screen, use its back button,
   // and open a shared position passed as t.me/<bot>?startapp=<code>
@@ -1363,7 +1554,7 @@ function boot() {
     const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
     if (sp && /^[\w-]+$/.test(sp)) applyCode(sp, 'این موقعیت از لینک باز شد.');
     if (!tg.BackButton || !tg.isVersionAtLeast('6.1')) return;
-    const syncBack = () => { (!$('view-pricing').hidden || !$('sv-sheet').hidden || !$('ex-sheet').hidden) ? tg.BackButton.show() : tg.BackButton.hide(); };
+    const syncBack = () => { (!$('view-pricing').hidden || !$('view-bubble').hidden || !$('sv-sheet').hidden || !$('ex-sheet').hidden) ? tg.BackButton.show() : tg.BackButton.hide(); };
     tg.BackButton.onClick(() => {
       if (!$('sv-sheet').hidden) openSaved(false);
       else if (!$('ex-sheet').hidden) { $('ex-sheet').hidden = true; $('ex-toggle').setAttribute('aria-expanded', 'false'); }

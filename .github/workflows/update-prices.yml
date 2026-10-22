@@ -1,0 +1,26 @@
+# Every 15 minutes: fetch gold, coin, silver and dollar prices from tgju and save them as prices.json next to the site.
+name: update-prices
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: update-prices
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch prices
+        run: |
+          curl -sf -m 30 -A "Mozilla/5.0" -o /tmp/tgju.json "https://call1.tgju.org/ajax.json"
+          python3 scripts/update_prices.py /tmp/tgju.json prices.json
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions"; git config user.email "github-actions@users.noreply.github.com"
+          git add prices.json
+          git diff --cached --quiet || (git commit -m "Update prices" && git push)
