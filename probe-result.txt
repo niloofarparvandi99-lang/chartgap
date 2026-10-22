@@ -1,9 +1,11 @@
+-rw-r--r-- 1 runner runner 191483 Oct 22 20:27 tgju-ajax.json
+-rw-r--r-- 1 runner runner 1767406 Oct 22 20:27 tgju-home.html
 ==================================================
 https://www.tgju.org/
-RESULT: 200 1768141B 0.219658s
+RESULT: 200 1767406B 0.090085s
 
 <!doctype html>
-<html dir="rtl"  data-dir="rtl" lang="fa" data-revision="2026102222">
+<html dir="rtl"  data-dir="rtl" lang="fa" data-revision="2026102223">
 <head>
 	<title>قیمت طلا, قیمت سکه, قیمت دلار - شبکه اطلاع رسانی طلا و ارز</title>
 	<meta charset="utf-8">
@@ -13,15 +15,15 @@ RESULT: 200 1768141B 0.219658s
 	<link rel="dns-prefetch" href="https://static.tgju.
 ==================================================
 https://call1.tgju.org/ajax.json
-RESULT: 200 191483B 0.302518s
+RESULT: 200 191483B 0.050183s
 {"current":{"zinc":{"p":"2575.6","h":"2575.6","l":"2575.6","d":"0","dp":0,"dt":"","t":"۷ تیر","t_en":"28 Jun","t-g":"۷ تیر","ts":"2021-06-28 14:00:00"},"yemen@kwd-sell":{"p":"815.6168","h":"815.6168","l":"815.6168","d":"0","dp":0,"dt":"","t":"۲۱ اردیبهشت","t_en":"11 May","t-g":"۲۰ اردیبهشت","ts":"2022-05-10 23:29:41"},"xrp-irr":{"p":"70000","h":"70000","l":"69000","d":"
 ==================================================
 https://api.tgju.org/v1/market/indicator/summary-table-data/sekee
-RESULT: 200 772148B 1.540778s
+RESULT: 200 772148B 1.507793s
 {"draw":null,"recordsTotal":4321,"recordsFiltered":4321,"data":[["2,698,000,000","2,684,900,000","2,714,400,000","2,714,250,000","<span class=\"high\" dir=\"ltr\">52950000<\/span>","<span class=\"high\" dir=\"ltr\">1.99%<\/span>","2026\/10\/21","1405\/07\/29"],["2,678,250,000","2,659,100,000","2,684,400,000","2,661,300,000","<span class=\"high\" dir=\"ltr\">8000000<\/span>","<span class=\"high\" d
 ==================================================
 https://www.bonbast.com/
-RESULT: 200 43342B 0.194785s
+RESULT: 200 43342B 0.205213s
 ﻿<!DOCTYPE html>
 <html lang="en" prefix="og: http://ogp.me/ns#">
   <head>
@@ -37,7 +39,7 @@ RESULT: 200 43342B 0.194785s
     
 ==================================================
 https://alanchand.com/
-RESULT: 200 44229B 0.330865s
+RESULT: 200 44389B 0.219660s
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -50,7 +52,7 @@ RESULT: 200 44229B 0.330865s
     <link rel="alternate" hreflang="fa" h
 ==================================================
 https://cdn.tsetmc.com/api/ClosingPrice/GetMarketWatch?market=0&industrialGroup=&paperTypes%5B0%5D=1&showTraded=false&withBestLimits=true
-RESULT: 000 0B 20.002930sFAILED
+RESULT: 000 0B 20.002092sFAILED
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -63,7 +65,7 @@ RESULT: 000 0B 20.002930sFAILED
     <link rel="alternate" hreflang="fa" h
 ==================================================
 https://old.tsetmc.com/tsev2/data/MarketWatchPlus.aspx
-RESULT: 000 0B 20.002716sFAILED
+RESULT: 000 0B 20.002514sFAILED
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -76,7 +78,7 @@ RESULT: 000 0B 20.002716sFAILED
     <link rel="alternate" hreflang="fa" h
 ==================================================
 https://www.tsetmc.com/
-RESULT: 000 0B 20.002920sFAILED
+RESULT: 000 0B 20.002243sFAILED
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -89,7 +91,7 @@ RESULT: 000 0B 20.002920sFAILED
     <link rel="alternate" hreflang="fa" h
 ==================================================
 https://www.ime.co.ir/
-RESULT: 000 0B 20.001647sFAILED
+RESULT: 000 0B 20.001594sFAILED
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -102,18 +104,9 @@ RESULT: 000 0B 20.001647sFAILED
     <link rel="alternate" hreflang="fa" h
 ==================================================
 https://api.gold-api.com/price/XAU
-RESULT: 000 0B 0.127566sFAILED
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="index, follow">
-    <title>الان چند؟ - قیمت های لحظه ای ارز، طلا و کریپتو</title>
-
-    <link rel="canonical" href="https://alanchand.com">
-    <link rel="alternate" hreflang="fa" h
+RESULT: 200 182B 0.260238s
+{"currency":"USD","currencySymbol":"$","exchangeRate":1.0,"name":"Gold","price":4022.600098,"symbol":"XAU","updatedAt":"2026-10-22T20:28:41Z","updatedAtReadable":"a few seconds ago"}
 ==================================================
 https://api.gold-api.com/price/XAG
-RESULT: 200 179B 0.236402s
-{"currency":"USD","currencySymbol":"$","exchangeRate":1.0,"name":"Silver","price":54.709,"symbol":"XAG","updatedAt":"2026-10-22T20:22:10Z","updatedAtReadable":"a few seconds ago"}
+RESULT: 200 182B 0.272094s
+{"currency":"USD","currencySymbol":"$","exchangeRate":1.0,"name":"Silver","price":54.692001,"symbol":"XAG","updatedAt":"2026-10-22T20:28:40Z","updatedAtReadable":"a few seconds ago"}
