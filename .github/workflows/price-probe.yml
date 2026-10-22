@@ -23,6 +23,8 @@ jobs:
             head -c 400 body.txt 2>/dev/null; echo
           }
           # gold, coin, dollar
+          curl -s -m 30 -A "Mozilla/5.0" -o tgju-ajax.json "https://call1.tgju.org/ajax.json"; ls -la tgju-ajax.json
+          curl -s -m 30 -A "Mozilla/5.0" -o tgju-home.html "https://www.tgju.org/"; ls -la tgju-home.html
           probe "https://www.tgju.org/"
           probe "https://call1.tgju.org/ajax.json"
           probe "https://api.tgju.org/v1/market/indicator/summary-table-data/sekee"
@@ -40,4 +42,4 @@ jobs:
       - name: Save the result in the branch
         run: |
           git config user.name "github-actions"; git config user.email "github-actions@users.noreply.github.com"
-          git add probe-result.txt && git commit -m "probe result" && git push
+          git add probe-result.txt tgju-ajax.json tgju-home.html && git commit -m "probe result" && git push
