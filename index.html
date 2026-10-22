@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>[hidden]{display:none!important}</style>
-<title>ماشین‌حساب آپشن</title>
+<title>ابزارهای چارت گپ</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <script data-tg src="https://telegram.org/js/telegram-web-app.js" async></script>
 <link rel="manifest" href="manifest.webmanifest">
@@ -54,6 +54,26 @@ button { cursor: pointer }
 .themebtn:hover { border-color: var(--accent) }
 .themebtn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round }
 .themebtn .moon { display: none } .themebtn[data-dark="true"] .sun { display: none } .themebtn[data-dark="true"] .moon { display: block }
+.backbtn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--fg); display: grid; place-items: center; padding: 0; flex: none }
+.backbtn:hover { border-color: var(--accent); color: var(--accent) }
+.backbtn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round }
+.backbtn[hidden] { display: none }
+.backbtn:not([hidden]) + .mark { width: 34px; height: 34px }
+.home-lead { margin: 6px 0 10px; color: var(--muted); font-size: .9rem }
+.tools { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)) }
+.tool { display: flex; align-items: center; gap: 14px; padding: 18px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg, 16px); color: var(--fg); text-decoration: none; transition: border-color .15s, transform .15s }
+.tool:hover { border-color: var(--accent) } .tool:active { transform: scale(.985) }
+.tool-ic { width: 56px; height: 56px; flex: none; border-radius: 14px; background: var(--raised); display: grid; place-items: center; color: var(--accent) }
+.tool-ic svg { width: 38px; height: 38px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round }
+.tool-ic .ax { stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 3 3 }
+.tool-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px }
+.tool-tx b { font-size: 1.08rem; font-weight: 900 }
+.tool-tx small { color: var(--muted); font-size: .82rem; line-height: 1.7 }
+.tool-tx small b { font-size: inherit; color: var(--accent) }
+.tool-go { font-size: 1.8rem; color: var(--muted); line-height: 1 }
+.tabs[hidden] { display: none }
+.top > .actions { order: 2 } .top > .tabs { order: 1; margin-inline-start: auto }
+@media (max-width: 700px) { .top > .tabs { order: 3; flex-basis: 100% } .top > .tabs button { flex: 1; padding: 8px 10px } }
 .tabs { display: flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px; gap: 4px }
 .tabs button { border: 0; background: none; padding: 6px 14px; border-radius: 999px; color: var(--muted); font-weight: 700; font-size: .88rem }
 .tabs button[aria-selected="true"] { background: var(--accent); color: var(--on-accent) }
@@ -300,24 +320,41 @@ footer a { color: var(--accent) }
   </div></div>
   <header class="top">
     <div class="brand">
+      <button type="button" class="backbtn" id="back" aria-label="برگشت به خانه" title="خانه" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
       <svg class="mark" viewBox="0 0 30 30" role="img" aria-label="لوگوی چارت گپ"><rect x="2" y="20" width="8" height="8" fill="#F9A21E"/><rect x="11" y="20" width="8" height="8" fill="#F06A1C"/><rect x="20" y="20" width="8" height="8" fill="#E5421A"/><rect x="11" y="11" width="8" height="8" fill="#F99A1F"/><rect x="20" y="11" width="8" height="8" fill="#EE6A1E"/><rect x="20" y="2" width="8" height="8" fill="#F9A21E"/></svg>
-      <div><h1>ماشین‌حساب آپشن</h1><p>چارت گپ</p></div>
+      <div><h1 id="h-title">چارت گپ</h1><p id="h-sub">ابزارهای بازار</p></div>
     </div>
     <div class="actions">
     <button type="button" class="themebtn" id="theme" aria-label="تغییر حالت روز و شب" title="روز / شب">
       <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
       <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
     </button>
-    <div class="tabs" role="tablist">
+    </div>
+    <div class="tabs" role="tablist" id="opt-tabs" hidden>
       <button role="tab" id="tab-payoff" aria-selected="true" aria-controls="view-payoff">سود و زیان</button>
       <button role="tab" id="tab-pricing" aria-selected="false" aria-controls="view-pricing">قیمت تئوری</button>
-      <button role="tab" id="tab-bubble" aria-selected="false" aria-controls="view-bubble">حباب</button>
-    </div>
     </div>
   </header>
 
+  <!-- ================= HOME ================= -->
+  <section id="view-home">
+    <p class="home-lead">کدوم ابزار؟</p>
+    <div class="tools">
+      <a class="tool" href="#options" data-go="payoff">
+        <span class="tool-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="ax" d="M4 30h40"/><path d="M4 38l18 0 22-26"/></svg></span>
+        <span class="tool-tx"><b>ماشین‌حساب آپشن</b><small>سود و زیان استراتژی‌ها، قیمت تئوری، احتمال سود و وجه تضمین</small></span>
+        <span class="tool-go" aria-hidden="true">‹</span>
+      </a>
+      <a class="tool" href="#bubble" data-go="bubble">
+        <span class="tool-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="34" rx="15" ry="6"/><path d="M9 34v-7M39 34v-7"/><ellipse cx="24" cy="27" rx="15" ry="6"/><ellipse cx="24" cy="16" rx="9" ry="9"/></svg></span>
+        <span class="tool-tx"><b>حباب طلا و سکه</b><small id="home-bb">قیمت لحظه‌ای سکه، طلا و نقره و حباب هر کدام</small></span>
+        <span class="tool-go" aria-hidden="true">‹</span>
+      </a>
+    </div>
+  </section>
+
   <!-- ================= PAYOFF ================= -->
-  <section id="view-payoff" role="tabpanel" aria-labelledby="tab-payoff">
+  <section id="view-payoff" role="tabpanel" aria-labelledby="tab-payoff" hidden>
     <div class="rail-head">
       <span class="label">استراتژی</span>
       <div class="rail-actions">
@@ -441,7 +478,7 @@ footer a { color: var(--accent) }
   </section>
 
   <!-- ================= BUBBLE ================= -->
-  <section id="view-bubble" role="tabpanel" aria-labelledby="tab-bubble" hidden>
+  <section id="view-bubble" hidden>
     <div class="bb-head"><span id="bb-src"></span><button type="button" class="ghost" id="bb-refresh">به‌روزرسانی قیمت‌ها</button></div>
     <div class="card bb-in">
       <div class="fields">
@@ -461,7 +498,7 @@ footer a { color: var(--accent) }
   </section>
 
   <footer>
-    <span>محاسبه در سررسید و برای اختیار اروپایی است. وجه تضمین تقریبی است.</span>
+    <span id="foot-opt" hidden>محاسبه در سررسید و برای اختیار اروپایی است. وجه تضمین تقریبی است.</span>
     <span>ابزار آموزشی است، نه توصیه‌ی سرمایه‌گذاری · <a href="https://t.me/chartGapp" target="_blank" rel="noopener">t.me/chartGapp</a></span>
   </footer>
 </div>
@@ -1285,7 +1322,7 @@ function openInPayoff(type, price) {
   Object.assign(state, { S, days, sig, r, st: S, preset: type === 'call' ? 'lc' : 'lp', example: null });
   state.legs = [{ side: 1, kind: type, K, prem: round(price), qty: 1 }];
   $('exnote').innerHTML = `پریمیوم <b>${fmt(round(price))}</b> = قیمت تئوری بلک-شولز.`;
-  syncAll(); show('payoff'); scrollTo({ top: 0 });
+  syncAll(); go('payoff'); scrollTo({ top: 0 });
 }
 
 /* ---------- theme ---------- */
@@ -1311,7 +1348,7 @@ function initTheme() {
 }
 
 /* ---------- boot ---------- */
-let show;
+let show, go;
 /* ---------- bubble tab: prices come from prices.json (refreshed every 15 min on the server), a built-in snapshot, or the user ---------- */
 const BB = E.Bubble, SNAPSHOT = {"updated":"2026-10-22T20:30:42Z","source":"tgju.org","unit":"rial","items":{"ons":{"p":4028.3,"t":"2026-10-22 23:04:32"},"silver":{"p":54.68,"t":"2026-10-22 23:03:16"},"price_dollar_rl":{"p":2719050.0,"t":"2026-10-22 16:59:57"},"sekee":{"p":2739650000.0,"t":"2026-10-22 16:59:57"},"sekeb":{"p":2650400000.0,"t":"2026-10-22 16:59:57"},"nim":{"p":1439800000.0,"t":"2026-10-22 15:11:35"},"rob":{"p":765200000.0,"t":"2026-10-22 15:07:31"},"gerami":{"p":390000000.0,"t":"2026-10-22 15:11:35"},"geram18":{"p":272231000.0,"t":"2026-10-22 16:59:54"},"geram24":{"p":362971000.0,"t":"2026-10-22 16:59:54"},"silver_999":{"p":5034600.0,"t":"2026-10-22 22:47:17"}}};
 const bb = { src: null, live: false, base: null, cur: null, w: {}, open: null, sc: { usd: 0, ons: 0 } };
@@ -1396,6 +1433,8 @@ function bbRender() {
   const g = $('bb-grid'), f = document.activeElement, fid = f && g.contains(f) ? f.id : null, pos = fid && f.selectionStart;
   g.innerHTML = items.map(x => bbCard(x.it)).join('');
   if (fid && $(fid)) { const el = $(fid); el.focus(); try { if (pos != null) el.setSelectionRange(pos, pos); } catch (e) {} }
+  const se = BB.ITEMS.find(i => i.id === 'sekee'), sp = se && bb.base && bbCalc(se, bb.base).r.pct;
+  if (isFinite(sp)) $('home-bb').innerHTML = `حباب سکه‌ی امامی الان <b class="n">${bbPctTxt(sp)}</b> · ${ago(bb.src.updated)}`;
 }
 
 /* ---------- save & share: a position is a short code in the link (#p=...) or in this browser's storage ---------- */
@@ -1517,12 +1556,37 @@ function boot() {
   if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => { const on = !en.isIntersecting && !$('view-payoff').hidden; $('dock').classList.toggle('on', on); $('dock').setAttribute('aria-hidden', String(!on)); }, { threshold: 0.05 }).observe(res);
   $('dock-go').addEventListener('click', () => res.scrollIntoView({ behavior: 'smooth', block: 'start' }));
 
-  const tabs = { payoff: [$('tab-payoff'), $('view-payoff')], pricing: [$('tab-pricing'), $('view-pricing')], bubble: [$('tab-bubble'), $('view-bubble')] };
+  // Home screen lists the tools; each tool has its own title, and the option tool keeps its two tabs
+  const views = { home: $('view-home'), payoff: $('view-payoff'), pricing: $('view-pricing'), bubble: $('view-bubble') };
+  const tabs = { payoff: $('tab-payoff'), pricing: $('tab-pricing') };
+  const TOOL = { home: 'home', payoff: 'options', pricing: 'options', bubble: 'bubble' };
+  const HEAD = { home: ['چارت گپ', 'ابزارهای بازار'], options: ['ماشین‌حساب آپشن', 'چارت گپ'], bubble: ['حباب طلا و سکه', 'چارت گپ'] };
+  const HASH = { home: '', payoff: '#options', pricing: '#pricing', bubble: '#bubble' };
   show = k => {
-    for (const [n, [t, v]] of Object.entries(tabs)) { t.setAttribute('aria-selected', String(n === k)); v.hidden = n !== k; }
+    const tool = TOOL[k];
+    for (const [n, v] of Object.entries(views)) v.hidden = n !== k;
+    for (const [n, t] of Object.entries(tabs)) t.setAttribute('aria-selected', String(n === k));
+    $('opt-tabs').hidden = tool !== 'options';
+    $('back').hidden = tool === 'home';
+    $('foot-opt').hidden = tool !== 'options';
+    $('h-title').textContent = HEAD[tool][0]; $('h-sub').textContent = HEAD[tool][1];
+    document.title = tool === 'home' ? 'ابزارهای چارت گپ' : HEAD[tool][0] + ' · چارت گپ';
     if (k === 'payoff') drawChart(); else $('dock').classList.remove('on');
   };
-  for (const [n, [t]] of Object.entries(tabs)) t.addEventListener('click', () => { show(n); try { history.replaceState(null, '', '#' + n); } catch (e) {} });
+  go = (k, push) => {
+    const from = TOOL[Object.keys(views).find(n => !views[n].hidden)];
+    show(k);
+    try { history[push ? 'pushState' : 'replaceState'](push ? { cg: 1 } : history.state, '', HASH[k] || location.pathname + location.search); } catch (e) {}
+    if (from !== TOOL[k]) scrollTo({ top: 0 });
+  };
+  const route = () => {
+    const h = location.hash;
+    show(/^#p=/.test(h) ? 'payoff' : { '#options': 'payoff', '#payoff': 'payoff', '#pricing': 'pricing', '#bubble': 'bubble' }[h] || 'home');
+  };
+  for (const [n, t] of Object.entries(tabs)) t.addEventListener('click', () => go(n));
+  for (const a of document.querySelectorAll('[data-go]')) a.addEventListener('click', e => { e.preventDefault(); go(a.dataset.go, true); });
+  $('back').addEventListener('click', () => { if (history.state && history.state.cg) history.back(); else go('home'); });
+  window.addEventListener('popstate', route);
 
   for (const [k, ok] of [['S', v => v > 0], ['K', v => v > 0], ['days', v => v >= 0], ['sig', v => v >= 0], ['r', v => v > -100], ['q', v => v > -100]])
     bindInput($('b-' + k), ok, v => { bsState[k] = v; bsUpdate(); });
@@ -1533,8 +1597,7 @@ function boot() {
 
   const fromLink = location.hash.match(/^#p=([\w-]+)/);
   if (!(fromLink && applyCode(fromLink[1], 'این موقعیت از لینک باز شد.'))) applyExample('e1');
-  if (location.hash === '#pricing') show('pricing');
-  if (location.hash === '#bubble') show('bubble');
+  route();
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
   // Inside Telegram (Mini App): follow Telegram's day/night, fill the screen, use its back button,
   // and open a shared position passed as t.me/<bot>?startapp=<code>
@@ -1552,16 +1615,19 @@ function boot() {
     tg.onEvent('themeChanged', follow);
     new MutationObserver(header).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
-    if (sp && /^[\w-]+$/.test(sp)) applyCode(sp, 'این موقعیت از لینک باز شد.');
+    const TOOLS = { options: 'payoff', pricing: 'pricing', bubble: 'bubble' };
+    if (sp && TOOLS[sp]) go(TOOLS[sp]);
+    else if (sp && /^[\w-]+$/.test(sp) && applyCode(sp, 'این موقعیت از لینک باز شد.')) go('payoff');
     if (!tg.BackButton || !tg.isVersionAtLeast('6.1')) return;
-    const syncBack = () => { (!$('view-pricing').hidden || !$('view-bubble').hidden || !$('sv-sheet').hidden || !$('ex-sheet').hidden) ? tg.BackButton.show() : tg.BackButton.hide(); };
+    const syncBack = () => { ($('view-home').hidden || !$('sv-sheet').hidden || !$('ex-sheet').hidden) ? tg.BackButton.show() : tg.BackButton.hide(); };
     tg.BackButton.onClick(() => {
       if (!$('sv-sheet').hidden) openSaved(false);
       else if (!$('ex-sheet').hidden) { $('ex-sheet').hidden = true; $('ex-toggle').setAttribute('aria-expanded', 'false'); }
-      else show('payoff');
+      else $('back').click();
       syncBack();
     });
     document.addEventListener('click', () => setTimeout(syncBack, 0));
+    window.addEventListener('popstate', () => setTimeout(syncBack, 0));
     syncBack();
   };
   tgInit();
