@@ -1,0 +1,45 @@
+name: site-look
+on:
+  push:
+    paths: ['.github/workflows/site-look.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  look:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i playwright@1.47.2 && npx playwright install --with-deps chromium
+      - name: Capture vibecoders.ir
+        run: |
+          mkdir -p look
+          cat > look.js <<'JS'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          (async () => {
+            const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 900 } });
+            const seen = new Set(); const queue = ['https://vibecoders.ir/']; let n = 0;
+            while (queue.length && n < 12) {
+              const u = queue.shift(); if (seen.has(u)) continue; seen.add(u);
+              try {
+                await p.goto(u, { waitUntil: 'networkidle', timeout: 45000 }); await p.waitForTimeout(1500);
+                const name = String(n).padStart(2, '0');
+                await p.screenshot({ path: `look/${name}.png`, fullPage: true });
+                fs.writeFileSync(`look/${name}.txt`, u + '\n\n' + await p.innerText('body'));
+                const links = await p.$$eval('a[href]', as => as.map(a => a.href));
+                fs.appendFileSync('look/links.txt', u + '\n' + links.join('\n') + '\n\n');
+                for (const l of links) if (l.startsWith('https://vibecoders.ir') && /financ|mali|money|calc|tool|مال|ابزار/i.test(decodeURIComponent(l))) queue.push(l.split('#')[0]);
+                if (n === 0) for (const l of links) if (l.startsWith('https://vibecoders.ir')) queue.push(l.split('#')[0]);
+                n++;
+              } catch (e) { fs.appendFileSync('look/errors.txt', u + ' ' + e.message + '\n'); }
+            }
+            await b.close();
+          })();
+          JS
+          node look.js
+      - run: |
+          git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
+          git add look && git commit -m "Capture of vibecoders.ir" && git push
