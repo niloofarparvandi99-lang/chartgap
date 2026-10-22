@@ -1,0 +1,35 @@
+# One-off test: can GitHub's servers read Iranian price sites?
+# Run it from the Actions tab ("Run workflow"); the log shows a status code and the first bytes of each answer.
+name: price-probe
+on:
+  push:
+    branches: [price-probe]
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe price sources
+        run: |
+          probe() {
+            echo "=================================================="
+            echo "$1"
+            code=$(curl -s -m 20 -A "Mozilla/5.0" -o body.txt -w '%{http_code} %{size_download}B %{time_total}s' "$1" || echo "FAILED")
+            echo "RESULT: $code"
+            head -c 400 body.txt 2>/dev/null; echo
+          }
+          # gold, coin, dollar
+          probe "https://www.tgju.org/"
+          probe "https://call1.tgju.org/ajax.json"
+          probe "https://api.tgju.org/v1/market/indicator/summary-table-data/sekee"
+          probe "https://www.bonbast.com/"
+          probe "https://alanchand.com/"
+          # stock exchange and options
+          probe "https://cdn.tsetmc.com/api/ClosingPrice/GetMarketWatch?market=0&industrialGroup=&paperTypes%5B0%5D=1&showTraded=false&withBestLimits=true"
+          probe "https://old.tsetmc.com/tsev2/data/MarketWatchPlus.aspx"
+          probe "https://www.tsetmc.com/"
+          # commodity exchange (coin futures)
+          probe "https://www.ime.co.ir/"
+          # world gold price
+          probe "https://api.gold-api.com/price/XAU"
+          probe "https://api.gold-api.com/price/XAG"
