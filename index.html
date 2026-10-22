@@ -1598,7 +1598,7 @@ function boot() {
   const fromLink = location.hash.match(/^#p=([\w-]+)/);
   if (!(fromLink && applyCode(fromLink[1], 'این موقعیت از لینک باز شد.'))) applyExample('e1');
   route();
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});
   // Inside Telegram (Mini App): follow Telegram's day/night, fill the screen, use its back button,
   // and open a shared position passed as t.me/<bot>?startapp=<code>
   const tgInit = () => {
