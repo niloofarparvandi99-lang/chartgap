@@ -5,12 +5,16 @@ on:
   push:
     branches: [price-probe]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Probe price sources
         run: |
+          exec > >(tee probe-result.txt) 2>&1
           probe() {
             echo "=================================================="
             echo "$1"
@@ -33,3 +37,7 @@ jobs:
           # world gold price
           probe "https://api.gold-api.com/price/XAU"
           probe "https://api.gold-api.com/price/XAG"
+      - name: Save the result in the branch
+        run: |
+          git config user.name "github-actions"; git config user.email "github-actions@users.noreply.github.com"
+          git add probe-result.txt && git commit -m "probe result" && git push
