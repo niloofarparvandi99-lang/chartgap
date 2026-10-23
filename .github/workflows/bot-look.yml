@@ -1,0 +1,23 @@
+name: bot-look
+on:
+  push:
+    paths: ['.github/workflows/bot-look.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  look:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read public Telegram previews
+        run: |
+          mkdir -p look-bots
+          for b in mohsentahlil_bot etfbaz_bot; do
+            curl -sSL -m 30 -A 'Mozilla/5.0' "https://t.me/$b" -o "look-bots/$b.html" || true
+            grep -oE '<(meta|div)[^>]*(og:title|og:description|tgme_page_title|tgme_page_description|tgme_page_extra)[^>]*>([^<]*)?' "look-bots/$b.html" > "look-bots/$b.txt" || true
+            sed -n '/tgme_page_description/,/<\/div>/p' "look-bots/$b.html" >> "look-bots/$b.txt" || true
+          done
+      - run: |
+          git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
+          git add look-bots && git commit -m "Telegram bot previews" && git push
