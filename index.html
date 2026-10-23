@@ -2059,6 +2059,19 @@ function boot() {
   const HEAD = { home: ['چارت گپ', 'ابزارهای بازار'], options: ['ماشین‌حساب آپشن', 'چارت گپ'], gold: ['آپشن صندوق طلا', 'چارت گپ'], bubble: ['حباب طلا و سکه', 'چارت گپ'], fx: ['نرخ ارز', 'چارت گپ'], hist: ['نمودار حباب', 'چارت گپ'], assets: ['دارایی من', 'چارت گپ'] };
   const NAV = { home: 'home', payoff: 'payoff', pricing: 'payoff', gold: 'payoff', bubble: 'bubble', hist: 'bubble', fx: 'fx', assets: 'assets' };
   const HASH = { home: '', payoff: '#options', pricing: '#pricing', gold: '#gold', bubble: '#bubble', fx: '#fx', hist: '#history', assets: '#assets' };
+  // usage stats: tells the bot's worker which tool someone stayed on for a second, once per tool per visit.
+  // inside Telegram it sends initData too, so the bot can count the person; empty address = off
+  const STATS = 'https://chartgap-bot.niloofarparvandi99.workers.dev/ping';
+  const pinged = new Set();
+  const ping = k => {
+    if (!STATS || pinged.has(k)) return;
+    setTimeout(() => {
+      if (views[k].hidden || pinged.has(k)) return;
+      pinged.add(k);
+      const tg = window.Telegram && window.Telegram.WebApp, body = JSON.stringify({ t: k, d: (tg && tg.initData) || '' });
+      try { if (!(navigator.sendBeacon && navigator.sendBeacon(STATS, body))) fetch(STATS, { method: 'POST', body, keepalive: true, mode: 'no-cors' }).catch(() => {}); } catch (e) {}
+    }, 1500);
+  };
   show = k => {
     const tool = TOOL[k];
     for (const [n, v] of Object.entries(views)) v.hidden = n !== k;
@@ -2070,6 +2083,7 @@ function boot() {
     $('h-title').textContent = HEAD[tool][0]; $('h-sub').textContent = HEAD[tool][1];
     document.title = tool === 'home' ? 'ابزارهای چارت گپ' : HEAD[tool][0] + ' · چارت گپ';
     if (k === 'payoff') drawChart(); else $('dock').classList.remove('on');
+    ping(k);
     if (k === 'gold') goRender(); else if (k === 'fx') fxRender(); else if (k === 'assets') asRender(); else if (k === 'hist') { hsRender(); hsLoad(); }
   };
   go = (k, push) => {
