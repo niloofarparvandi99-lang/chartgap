@@ -1579,9 +1579,11 @@ function boot() {
     try { history[push ? 'pushState' : 'replaceState'](push ? { cg: 1 } : history.state, '', HASH[k] || location.pathname + location.search); } catch (e) {}
     if (from !== TOOL[k]) scrollTo({ top: 0 });
   };
-  const route = () => {
-    const h = location.hash;
-    show(/^#p=/.test(h) ? 'payoff' : { '#options': 'payoff', '#payoff': 'payoff', '#pricing': 'pricing', '#bubble': 'bubble' }[h] || 'home');
+  // ?tool= survives inside Telegram, which replaces the hash with its own #tgWebAppData
+  const route = first => {
+    const h = location.hash, q = first && new URLSearchParams(location.search).get('tool');
+    show(/^#p=/.test(h) ? 'payoff' : { '#options': 'payoff', '#payoff': 'payoff', '#pricing': 'pricing', '#bubble': 'bubble' }[h]
+      || { options: 'payoff', pricing: 'pricing', bubble: 'bubble' }[q] || 'home');
   };
   for (const [n, t] of Object.entries(tabs)) t.addEventListener('click', () => go(n));
   for (const a of document.querySelectorAll('[data-go]')) a.addEventListener('click', e => { e.preventDefault(); go(a.dataset.go, true); });
@@ -1597,7 +1599,7 @@ function boot() {
 
   const fromLink = location.hash.match(/^#p=([\w-]+)/);
   if (!(fromLink && applyCode(fromLink[1], 'این موقعیت از لینک باز شد.'))) applyExample('e1');
-  route();
+  route(true);
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});
   // Inside Telegram (Mini App): follow Telegram's day/night, fill the screen, use its back button,
   // and open a shared position passed as t.me/<bot>?startapp=<code>
