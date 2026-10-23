@@ -182,6 +182,61 @@ button { cursor: pointer }
 .bb-help { margin-top: 14px }
 .bb-help summary { cursor: pointer; font-weight: 700 }
 .bb-help p { font-size: .84rem; line-height: 1.9; margin: 10px 0 0 }
+.bb-hist { justify-self: start }
+/* currency tab */
+.fx-search { margin-bottom: 4px }
+.fx-search input { direction: rtl; text-align: start; font-weight: 500 }
+.fx-group { font-size: .78rem; color: var(--muted); margin: 14px 2px 8px; font-weight: 700 }
+.fx-list { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); align-items: start }
+.fx-item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); min-width: 0 }
+.fx-item[data-open="true"] { border-color: var(--accent) }
+.fx-row { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; background: none; color: var(--fg); padding: 12px 14px; text-align: start }
+.fx-code { flex: none; width: 48px; height: 34px; border-radius: 10px; background: var(--raised); display: grid; place-items: center; font-size: .72rem; font-weight: 900; color: var(--accent); direction: ltr }
+.fx-name { flex: 1; min-width: 0 }
+.fx-name b { display: block; font-size: .95rem; font-weight: 800 }
+.fx-name small { color: var(--muted); font-size: .72rem; line-height: 1.7 }
+.fx-val { flex: none; text-align: end }
+.fx-val b { display: block; font-size: 1.02rem; font-weight: 900 }
+.fx-val small { font-size: .74rem; font-weight: 700 }
+.fx-conv { padding: 0 14px 14px }
+.fx-empty { padding: 28px 12px; text-align: center; color: var(--muted); font-size: .86rem }
+/* bubble history */
+.hs-items { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px }
+.hs-items button { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px; font-size: .84rem; color: var(--fg) }
+.hs-items button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 800; background: var(--raised) }
+.hs-bar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr); gap: 8px; margin: 10px 0 12px }
+.hs-now { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; flex-wrap: wrap }
+.hs-now small { display: block; color: var(--muted); font-size: .76rem }
+.hs-now b { font-size: 1.45rem; font-weight: 900 }
+.hs-now .end { text-align: end } .hs-now .end b { font-size: 1.05rem }
+.hs-now .low { color: var(--profit) } .hs-now .mid { color: var(--accent) } .hs-now .high { color: var(--loss) }
+.hs-chart { position: relative; height: 250px; margin-top: 12px; touch-action: pan-y; user-select: none; -webkit-user-select: none }
+.hs-chart svg { display: block; width: 100%; height: 100%; direction: ltr }
+.h-grid { stroke: var(--line-soft); stroke-width: 1 } .h-zero { stroke: var(--muted); stroke-dasharray: 4 4; stroke-width: 1 }
+.h-ax { fill: var(--muted); font-size: 11px; font-family: var(--font) }
+.h-line { fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round }
+.h-area { fill: url(#hs-fill) } .hs-g0 { stop-color: var(--accent); stop-opacity: .32 } .hs-g1 { stop-color: var(--accent); stop-opacity: 0 }
+.h-cross { stroke: var(--fg); stroke-width: 1; opacity: .45 } .h-dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2 }
+.hs-tip { position: absolute; top: 0; transform: translateX(-50%); background: var(--raised); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 3px 10px; font-size: .74rem; white-space: nowrap; pointer-events: none }
+.hs-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 12px }
+.hs-stats div { background: var(--raised); border-radius: var(--r-sm); padding: 8px 10px; font-size: .7rem; color: var(--muted) }
+.hs-stats b { display: block; color: var(--fg); font-size: .92rem; font-weight: 800 }
+@media (max-width: 460px) { .hs-stats { grid-template-columns: repeat(2, minmax(0, 1fr)) } .hs-bar { grid-template-columns: 1fr } }
+/* my assets */
+.as-total .big { display: block; font-size: 1.7rem; font-weight: 900; margin: 2px 0 6px }
+.as-total .big small { font-size: .8rem; font-weight: 500 }
+.as-total .row { display: flex; gap: 6px 18px; flex-wrap: wrap; font-size: .8rem; color: var(--muted) }
+.as-total .row b { color: var(--fg) } .as-total .row b.pos { color: var(--profit) } .as-total .row b.neg { color: var(--loss) }
+.as-list { display: grid; gap: 8px; margin: 12px 0 }
+.as-item { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 6px 12px 14px }
+.as-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px } .as-top > small:last-child { flex: none; font-size: .74rem; font-weight: 700 }
+.as-item .fx-name small { display: block } .as-top small { display: inline } .as-top small.pos { color: var(--profit) } .as-top small.neg { color: var(--loss) }
+.as-item .x { flex: none; border: 0; background: none; color: var(--muted); font-size: 1.3rem; padding: 4px 8px; line-height: 1 }
+.as-form .fields { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+@media (max-width: 560px) { .as-form .fields { grid-template-columns: repeat(2, minmax(0, 1fr)) } .as-form .fields .f:first-child { grid-column: 1 / -1 } }
+.box select { flex: 1; min-width: 0; border: 0; background: none; padding: 8px 10px; font-weight: 700; outline: none; color: var(--fg) }
+.box select option, .box select optgroup { background: var(--surface); color: var(--fg) }
+.as-form button[type=submit] { margin-top: 12px; width: 100%; min-height: 44px; border: 0; border-radius: var(--r-sm); background: var(--accent); color: var(--on-accent); font-weight: 800 }
 .toast { position: fixed; bottom: 86px; left: 50%; transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: .82rem; font-weight: 700; z-index: 60; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: calc(100% - 32px); text-align: center }
 .toast.on { opacity: 1 }
 .cmpbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; font-size: .82rem }
@@ -350,6 +405,21 @@ footer a { color: var(--accent) }
         <span class="tool-tx"><b>حباب طلا و سکه</b><small id="home-bb">قیمت لحظه‌ای سکه، طلا و نقره و حباب هر کدام</small></span>
         <span class="tool-go" aria-hidden="true">‹</span>
       </a>
+      <a class="tool" href="#fx" data-go="fx">
+        <span class="tool-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="18" cy="19" r="11"/><path d="M27.5 24.5A11 11 0 1 1 23 37.4"/><path d="M18 14v10M15 16.5h4.5a2 2 0 0 1 0 4H16a2 2 0 0 0 0 4h5"/></svg></span>
+        <span class="tool-tx"><b>نرخ ارز</b><small id="home-fx">دلار، یورو، درهم و ۱۹ ارز و رمزارز دیگر، با تغییر امروز و تبدیل</small></span>
+        <span class="tool-go" aria-hidden="true">‹</span>
+      </a>
+      <a class="tool" href="#history" data-go="hist">
+        <span class="tool-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="ax" d="M5 40h38"/><path d="M5 33l9-9 8 5 9-14 12 7"/></svg></span>
+        <span class="tool-tx"><b>نمودار حباب</b><small id="home-hs">حباب و قیمت سکه، طلا و نقره از یک هفته تا یک سال گذشته</small></span>
+        <span class="tool-go" aria-hidden="true">‹</span>
+      </a>
+      <a class="tool" href="#assets" data-go="assets">
+        <span class="tool-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 15h29a4 4 0 0 1 4 4v17a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4h22"/><path d="M41 23h-8a4 4 0 0 0 0 8h8"/></svg></span>
+        <span class="tool-tx"><b>دارایی من</b><small id="home-as">سکه، طلا و ارزی که دارید را وارد کنید تا ارزش روزش را ببینید</small></span>
+        <span class="tool-go" aria-hidden="true">‹</span>
+      </a>
     </div>
   </section>
 
@@ -495,6 +565,41 @@ footer a { color: var(--accent) }
       <p><b>دلار ضمنی</b> نرخی از دلار است که با آن حباب صفر می‌شد؛ یعنی قیمت فعلی سکه با چه دلاری «منصفانه» است.</p>
     </details>
     <p class="fee-note">منبع قیمت‌ها: tgju.org · وزن سکه‌ها استاندارد بانک مرکزی با عیار ۹۰۰ است و با زدن روی هر کارت قابل تغییر است. حباب صندوق‌های طلا به ارزش روز واحدها نیاز دارد که این منبع نمی‌دهد.</p>
+  </section>
+
+  <!-- ================= FX ================= -->
+  <section id="view-fx" hidden>
+    <div class="bb-head"><span id="fx-src"></span><button type="button" class="ghost" id="fx-refresh">به‌روزرسانی قیمت‌ها</button></div>
+    <div class="box fx-search"><input id="fx-q" type="search" placeholder="جستجو، مثلاً یورو یا درهم" autocomplete="off" aria-label="جستجوی ارز"></div>
+    <div id="fx-list"></div>
+    <p class="fee-note">نرخ بازار آزاد تهران از tgju.org، هر ۱۵ دقیقه به‌روز می‌شود. درصد کنار هر نرخ تغییر نسبت به روز قبل است. روی هر ارز بزنید تا تبدیلش کنید.</p>
+  </section>
+
+  <!-- ================= BUBBLE HISTORY ================= -->
+  <section id="view-hist" hidden>
+    <div class="hs-items" id="hs-items" role="group" aria-label="انتخاب سکه یا طلا"></div>
+    <div class="hs-bar">
+      <div class="seg" id="hs-mode" role="group" aria-label="نوع نمودار"><button type="button" data-v="b">حباب ٪</button><button type="button" data-v="p">قیمت</button></div>
+      <div class="seg" id="hs-range" role="group" aria-label="بازه"><button type="button" data-v="7">۷ روز</button><button type="button" data-v="30">۱ ماه</button><button type="button" data-v="90">۳ ماه</button><button type="button" data-v="365">۱ سال</button></div>
+    </div>
+    <div class="card"><div class="hs-now" id="hs-now"></div><div class="hs-chart" id="hs-chart"></div><div class="hs-stats" id="hs-stats"></div></div>
+    <p class="fee-note">هر نقطه قیمت پایانی یک روز است و حبابش با اونس و دلار همان روز حساب شده (منبع tgju.org، روزی یک بار به‌روز می‌شود). روی نمودار بزنید یا انگشت بکشید تا عدد هر روز را ببینید.</p>
+  </section>
+
+  <!-- ================= MY ASSETS ================= -->
+  <section id="view-assets" hidden>
+    <div class="card as-total" id="as-total"></div>
+    <div class="as-list" id="as-list"></div>
+    <form class="card as-form" id="as-form" novalidate>
+      <h2>افزودن دارایی</h2>
+      <div class="fields">
+        <div class="f"><label for="as-kind">چه چیزی</label><div class="box"><select id="as-kind"></select></div></div>
+        <div class="f"><label for="as-qty">مقدار</label><div class="box"><input id="as-qty" inputmode="decimal" autocomplete="off"><span class="u" id="as-unit">عدد</span></div></div>
+        <div class="f"><label for="as-buy">قیمت خرید هر واحد (اختیاری)</label><div class="box"><input id="as-buy" inputmode="decimal" autocomplete="off"><span class="u">تومان</span></div></div>
+      </div>
+      <button type="submit">اضافه کن</button>
+    </form>
+    <p class="fee-note">فهرست دارایی‌ها فقط روی همین دستگاه ذخیره می‌شود و به هیچ جایی فرستاده نمی‌شود. ارزش‌ها با نرخ لحظه‌ای بازار آزاد حساب می‌شود، نه قیمت خرید و فروش صرافی یا طلافروشی.</p>
   </section>
 
   <footer>
@@ -1350,7 +1455,7 @@ function initTheme() {
 /* ---------- boot ---------- */
 let show, go;
 /* ---------- bubble tab: prices come from prices.json (refreshed every 15 min on the server), a built-in snapshot, or the user ---------- */
-const BB = E.Bubble, SNAPSHOT = {"updated":"2026-10-22T20:30:42Z","source":"tgju.org","unit":"rial","items":{"ons":{"p":4028.3,"t":"2026-10-22 23:04:32"},"silver":{"p":54.68,"t":"2026-10-22 23:03:16"},"price_dollar_rl":{"p":2719050.0,"t":"2026-10-22 16:59:57"},"sekee":{"p":2739650000.0,"t":"2026-10-22 16:59:57"},"sekeb":{"p":2650400000.0,"t":"2026-10-22 16:59:57"},"nim":{"p":1439800000.0,"t":"2026-10-22 15:11:35"},"rob":{"p":765200000.0,"t":"2026-10-22 15:07:31"},"gerami":{"p":390000000.0,"t":"2026-10-22 15:11:35"},"geram18":{"p":272231000.0,"t":"2026-10-22 16:59:54"},"geram24":{"p":362971000.0,"t":"2026-10-22 16:59:54"},"silver_999":{"p":5034600.0,"t":"2026-10-22 22:47:17"}}};
+const BB = E.Bubble, SNAPSHOT = {"updated":"2026-10-23T05:02:46Z","source":"tgju.org","unit":"rial","items":{"ons":{"p":4028.3,"t":"2026-10-22 23:04:32","c":-2.6},"silver":{"p":54.68,"t":"2026-10-22 23:03:16","c":-5.81},"price_dollar_rl":{"p":2719050.0,"t":"2026-10-22 16:59:57","c":0.93},"sekee":{"p":2739650000.0,"t":"2026-10-22 16:59:57","c":0.94},"sekeb":{"p":2650400000.0,"t":"2026-10-22 16:59:57","c":1.14},"nim":{"p":1439800000.0,"t":"2026-10-22 15:11:35","c":0.84},"rob":{"p":765200000.0,"t":"2026-10-22 15:07:31","c":0.58},"gerami":{"p":390000000.0,"t":"2026-10-22 15:11:35","c":2.6},"geram18":{"p":272231000.0,"t":"2026-10-22 16:59:54","c":0.62},"geram24":{"p":362971000.0,"t":"2026-10-22 16:59:54","c":0.62},"silver_999":{"p":5034600.0,"t":"2026-10-22 22:47:17","c":-3.02}},"fx":{"price_eur":{"p":3053600.0,"t":"2026-10-22 16:59:55","c":0.63},"price_gbp":{"p":3648400.0,"t":"2026-10-22 16:59:55","c":0.72},"price_aed":{"p":745890.0,"t":"2026-10-22 16:59:55","c":0.82},"price_try":{"p":55100.0,"t":"2026-10-22 15:55:24","c":0.92},"price_cny":{"p":408500.0,"t":"2026-10-22 15:56:27","c":0.81},"price_cad":{"p":1943100.0,"t":"2026-10-22 16:59:55","c":1.01},"price_aud":{"p":1912900.0,"t":"2026-10-22 16:59:55","c":0.63},"price_chf":{"p":3310800.0,"t":"2026-10-22 16:59:55","c":0.94},"price_sar":{"p":727070.0,"t":"2026-10-22 16:59:55","c":0.83},"price_kwd":{"p":8795500.0,"t":"2026-10-22 16:59:55","c":0.73},"price_qar":{"p":721200.0,"t":"2026-10-22 16:59:49","c":0.81},"price_omr":{"p":7091800.0,"t":"2026-10-22 16:59:55","c":0.82},"price_afn":{"p":41940.0,"t":"2026-10-22 16:59:45","c":0.79},"price_rub":{"p":33820.0,"t":"2026-10-22 16:59:45","c":2.48},"price_inr":{"p":28660.0,"t":"2026-10-22 16:57:39","c":0.42},"price_azn":{"p":1607500.0,"t":"2026-10-22 16:59:55","c":0.82},"price_amd":{"p":7700.0,"t":"2026-10-22 15:55:36","c":0.92},"price_jpy":{"p":1736310.0,"t":"2026-10-22 16:59:55","c":1.37},"crypto-tether-irr":{"p":2717370.0,"t":"2026-10-22 23:04:55","c":1.9},"crypto-bitcoin":{"p":81545.12,"t":"2026-10-22 23:04:14","c":-3.7},"crypto-ethereum":{"p":2391.67,"t":"2026-10-22 23:04:14","c":-4.26}}};
 const bb = { src: null, live: false, base: null, cur: null, w: {}, open: null, sc: { usd: 0, ons: 0 } };
 const BB_KEY = { sekee: 'sekee', sekeb: 'sekeb', nim: 'nim', rob: 'rob', gerami: 'gerami', geram18: 'geram18', silver_999: 'silver_999' };
 function bbFrom(json) {
@@ -1381,7 +1486,8 @@ async function bbFetch(manual) {
     if (!bb.src || j.updated >= bb.src.updated) bbUse(j, true); else bb.live = true;
     if (manual) toast('قیمت‌ها به‌روز شد');
   } catch (e) { if (manual) toast('اتصال برقرار نشد؛ آخرین قیمت‌های ذخیره‌شده نمایش داده می‌شود'); }
-  bbRender();
+  bbRender(); fxRender(); asRender();
+  if (!$('view-hist').hidden) hsRender();
 }
 const bbTone = p => !isFinite(p) ? '' : p < 0.03 ? 'low' : p < 0.10 ? 'mid' : 'high';
 const bbW = it => bb.w[it.id] ?? it.w;
@@ -1418,6 +1524,7 @@ function bbCard(it) {
         <input type="range" id="bbs-ons" data-sc="ons" min="-30" max="30" step="1" value="${bb.sc.ons}">
         <div class="out">${bb.sc.usd || bb.sc.ons ? `ارزش ذاتی می‌شود <b>${fmt(ivS, 0)}</b> تومان. اگر حباب همین ${bbPctTxt(r.pct)} بماند، قیمت حدود <b>${fmt(keep, 0)}</b> تومان می‌شود (${keep > price ? '+' : ''}${bbPctTxt(keep / price - 1)} نسبت به الان).` : 'لغزنده‌ها را حرکت دهید تا ببینید با تغییر دلار یا اونس، قیمت چقدر جابه‌جا می‌شود.'}</div>
       </div>
+      <button type="button" class="ghost bb-hist" data-hist="${it.id}">نمودار حباب ${it.name} در روزهای گذشته ‹</button>
     </div>`;
   }
   return h + '</article>';
@@ -1426,7 +1533,7 @@ function bbRender() {
   if (!bb.cur) return;
   const c = bb.cur;
   setVal('bb-ons', c.ons); setVal('bb-silver', c.silver); setVal('bb-usd', c.usd);
-  $('bb-src').innerHTML = `<span class="dot ${bb.live ? '' : 'old'}"></span>${bb.live ? 'قیمت‌ها' : 'آخرین قیمت‌های ذخیره‌شده'}: ${ago(bb.src.updated)} · منبع tgju`;
+  $('bb-src').innerHTML = srcLine();
   $('bb-edited').hidden = JSON.stringify(bb.cur) === JSON.stringify(bb.base) && !Object.keys(bb.w).length;
   const items = BB.ITEMS.filter(it => isFinite(c.prices[it.id]) && c.prices[it.id] > 0)
     .map(it => ({ it, p: bbCalc(it).r.pct })).sort((a, b) => (isFinite(a.p) ? a.p : 9) - (isFinite(b.p) ? b.p : 9));
@@ -1435,6 +1542,161 @@ function bbRender() {
   if (fid && $(fid)) { const el = $(fid); el.focus(); try { if (pos != null) el.setSelectionRange(pos, pos); } catch (e) {} }
   const se = BB.ITEMS.find(i => i.id === 'sekee'), sp = se && bb.base && bbCalc(se, bb.base).r.pct;
   if (isFinite(sp)) $('home-bb').innerHTML = `حباب سکه‌ی امامی الان <b class="n">${bbPctTxt(sp)}</b> · ${ago(bb.src.updated)}`;
+}
+
+// typing in a number box: show Persian digits and clear the error mark
+function faInput(el) {
+  const t = el.value.replace(/[0-9]/g, d => FA[d]).replace(/\./g, '٫');
+  if (t !== el.value) { const p = el.selectionStart; el.value = t; try { el.setSelectionRange(p, p); } catch (x) {} }
+  el.closest('.box')?.setAttribute('data-bad', 'false');
+}
+const srcLine = () => `<span class="dot ${bb.live ? '' : 'old'}"></span>${bb.live ? 'قیمت‌ها' : 'آخرین قیمت‌های ذخیره‌شده'}: ${ago(bb.src.updated)} · منبع tgju`;
+const chg = c => typeof c === 'number' ? `<small class="n ${c > 0 ? 'pos' : c < 0 ? 'neg' : 'mut'}">${c > 0 ? '▲' : c < 0 ? '▼' : ''} ${fmt(Math.abs(c), 2)}٪</small>` : '';
+
+/* ---------- currency tab: free-market rates from prices.json (fx, plus the dollar from items) ---------- */
+// per = the quoted price is for this many units; usd = quoted in dollars instead of rials
+const FXL = [
+  ['price_dollar_rl', 'دلار آمریکا', 'USD'], ['price_eur', 'یورو', 'EUR'], ['price_gbp', 'پوند انگلیس', 'GBP'], ['price_aed', 'درهم امارات', 'AED'],
+  ['price_try', 'لیر ترکیه', 'TRY'], ['price_cny', 'یوان چین', 'CNY'], ['price_cad', 'دلار کانادا', 'CAD'], ['price_aud', 'دلار استرالیا', 'AUD'],
+  ['price_chf', 'فرانک سوئیس', 'CHF'], ['price_sar', 'ریال عربستان', 'SAR'], ['price_kwd', 'دینار کویت', 'KWD'], ['price_qar', 'ریال قطر', 'QAR'],
+  ['price_omr', 'ریال عمان', 'OMR'], ['price_afn', 'افغانی', 'AFN'], ['price_rub', 'روبل روسیه', 'RUB'], ['price_inr', 'روپیه هند', 'INR'],
+  ['price_azn', 'منات آذربایجان', 'AZN'], ['price_amd', 'درام ارمنستان', 'AMD'], ['price_jpy', 'ین ژاپن', 'JPY', 100],
+  ['crypto-tether-irr', 'تتر', 'USDT', 1, false, true], ['crypto-bitcoin', 'بیت‌کوین', 'BTC', 1, true, true], ['crypto-ethereum', 'اتریوم', 'ETH', 1, true, true],
+].map(([k, name, code, per = 1, usd = false, crypto = false]) => ({ k, name, code, per, usd, crypto }));
+const fx = { q: '', open: null, amt: 1 };
+const quotes = () => ({ ...(bb.src.items || {}), ...(bb.src.fx || {}) });
+// toman per one unit, the dollar price for crypto, and today's change in %
+function fxRate(x) {
+  const all = quotes(), v = all[x.k], d = all.price_dollar_rl;
+  if (!v || !(v.p > 0)) return null;
+  return { t: x.usd ? (d ? v.p * d.p / 10 : NaN) : v.p / 10 / x.per, usd: v.p, c: v.c };
+}
+const fxNorm = s => s.toLowerCase().replace(/ي/g, 'ی').replace(/ك/g, 'ک').replace(/[‌\s]/g, '');
+function fxItem({ x, r }) {
+  const open = fx.open === x.k;
+  const sub = x.per > 1 ? `برای ${fmt(x.per, 0)} ${x.name.split(' ')[0]}` : x.usd ? `${fmt(r.usd, r.usd < 100 ? 2 : 0)} دلار` : `${fmt(r.t * 10, 0)} ریال`;
+  return `<div class="fx-item" data-k="${x.k}" data-open="${open}">
+    <button type="button" class="fx-row" aria-expanded="${open}"><span class="fx-code">${x.code}</span>
+      <span class="fx-name"><b>${x.name}</b><small>${sub}</small></span>
+      <span class="fx-val"><b class="n">${fmt(r.t * x.per, 0)}</b>${chg(r.c)}</span></button>
+    ${open ? `<div class="fx-conv"><div class="fields">
+      <div class="f"><label for="fxa">${x.name}</label><div class="box"><input id="fxa" data-cv="a" inputmode="decimal" autocomplete="off" value="${latin(fx.amt)}"><span class="u">${x.code}</span></div></div>
+      <div class="f"><label for="fxt">تومان</label><div class="box"><input id="fxt" data-cv="t" inputmode="decimal" autocomplete="off" value="${latin(Math.round(fx.amt * r.t))}"><span class="u">تومان</span></div></div>
+    </div></div>` : ''}</div>`;
+}
+function fxRender() {
+  if (!bb.src) return;
+  $('fx-src').innerHTML = srcLine();
+  const q = fxNorm(fx.q), rows = FXL.map(x => ({ x, r: fxRate(x) })).filter(o => o.r && (!q || fxNorm(o.x.name + o.x.code).includes(q)));
+  const fiat = rows.filter(o => !o.x.crypto), cr = rows.filter(o => o.x.crypto);
+  $('fx-list').innerHTML = !rows.length ? '<div class="fx-empty">ارزی با این نام پیدا نشد.</div>'
+    : (fiat.length ? `<div class="fx-group">ارزها · به تومان</div><div class="fx-list">${fiat.map(fxItem).join('')}</div>` : '')
+    + (cr.length ? `<div class="fx-group">رمزارزها · به تومان</div><div class="fx-list">${cr.map(fxItem).join('')}</div>` : '');
+  const d = fxRate(FXL[0]), e = fxRate(FXL[1]);
+  if (d && e) $('home-fx').innerHTML = `دلار <b class="n">${fmt(d.t, 0)}</b> · یورو <b class="n">${fmt(e.t, 0)}</b> تومان`;
+}
+
+/* ---------- bubble history: history.json is rebuilt once a day on the server, one point per trading day ---------- */
+const hs = { data: null, loading: false, err: false, item: 'sekee', mode: 'b', range: 30, pick: null, pts: null };
+const HP = { l: 6, r: 50, t: 42, b: 22 };
+const JM = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+const jdate = (j, year) => { const [y, m, d] = j.split('/').map(Number); return `${fmt(d, 0)} ${JM[m - 1]}${year ? ' ' + String(y).replace(/\d/g, c => FA[c]) : ''}`; };
+const shortT = v => v >= 1e9 ? fmt(v / 1e9, 2) + ' میلیارد' : v >= 1e6 ? fmt(v / 1e6, v >= 1e8 ? 0 : 1) + ' م' : v >= 1e3 ? fmt(v / 1e3, 0) + ' هزار' : fmt(v, 0);
+async function hsLoad() {
+  if (hs.data || hs.loading) return;
+  hs.loading = true; hs.err = false; hsRender();
+  try {
+    const r = await fetch('history.json', { cache: 'no-cache' });
+    if (!r.ok) throw 0;
+    const j = await r.json(); if (!j.dates || !j.items) throw 0;
+    hs.data = j;
+  } catch (e) { hs.err = true; }
+  hs.loading = false; hsRender();
+}
+function hsSeries() {
+  const d = hs.data, a = d.items[hs.item] || [], n = d.dates.length, day = s => Date.parse(s.replace(/\//g, '-'));
+  const cut = day(d.dates[n - 1]) - (hs.range - 0.5) * 864e5, pts = [];
+  for (let i = 0; i < n; i++) if (a[i] && day(d.dates[i]) >= cut) pts.push({ j: d.jdates[i], p: a[i][0], b: a[i][1] });
+  return pts;
+}
+const hsVal = p => hs.mode === 'b' ? p.b : p.p;
+function hsRender() {
+  $('hs-items').innerHTML = BB.ITEMS.map(it => `<button type="button" data-id="${it.id}" aria-pressed="${it.id === hs.item}">${it.name}</button>`).join('');
+  for (const b of $('hs-mode').children) b.setAttribute('aria-pressed', String(b.dataset.v === hs.mode));
+  for (const b of $('hs-range').children) b.setAttribute('aria-pressed', String(+b.dataset.v === hs.range));
+  const it = BB.ITEMS.find(i => i.id === hs.item), live = bb.base && bbCalc(it, bb.base).r, lp = bb.base && bb.base.prices[it.id];
+  $('hs-now').innerHTML = live && isFinite(live.pct) ? `<div><small>${it.name} · حباب الان</small><b class="n ${bbTone(live.pct)}">${bbPctTxt(live.pct)}</b></div>
+    <div class="end"><small>قیمت الان (${it.unit})</small><b class="n">${fmt(lp, 0)}</b> <small style="display:inline">تومان</small></div>` : '';
+  const box = $('hs-chart');
+  hs.pts = hs.data ? hsSeries() : null;
+  if (!hs.pts || hs.pts.length < 2) {
+    box.innerHTML = `<div class="fx-empty">${!hs.data ? (hs.err ? 'تاریخچه باز نشد؛ اتصال اینترنت را بررسی کنید و دوباره وارد این صفحه شوید.' : 'در حال گرفتن تاریخچه…') : 'در این بازه معامله‌ای ثبت نشده.'}</div>`;
+    $('hs-stats').innerHTML = ''; return;
+  }
+  hsDraw();
+  const pts = hs.pts, v = pts.map(hsVal), f = x => hs.mode === 'b' ? bbPctTxt(x / 100) : fmt(x, 0);
+  const lo = Math.min(...v), hi = Math.max(...v), avg = v.reduce((s, x) => s + x, 0) / v.length, a = pts[0], z = pts[pts.length - 1];
+  $('hs-stats').innerHTML = `<div>کمترین<b class="n">${f(lo)}</b>${jdate(pts[v.indexOf(lo)].j)}</div><div>بیشترین<b class="n">${f(hi)}</b>${jdate(pts[v.indexOf(hi)].j)}</div>
+    <div>میانگین<b class="n">${f(avg)}</b>در این بازه</div><div>تغییر قیمت<b class="n ${cls(z.p - a.p)}">${sg((z.p / a.p - 1) * 100, 1)}٪</b>از ${jdate(a.j)}</div>`;
+}
+function hsDraw() {
+  const box = $('hs-chart'), pts = hs.pts, W = box.clientWidth, H = box.clientHeight;
+  if (!pts || pts.length < 2 || !W) return;
+  const v = pts.map(hsVal), n = pts.length;
+  let lo = Math.min(...v), hi = Math.max(...v);
+  if (hs.mode === 'b') { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
+  if (hi - lo < 1e-9) { hi += Math.abs(hi) * 0.01 || 1; lo -= Math.abs(lo) * 0.01 || 1; }
+  const step = niceStep((hi - lo) / 4); lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+  const X = i => HP.l + (W - HP.l - HP.r) * i / (n - 1), Y = y => HP.t + (H - HP.t - HP.b) * (hi - y) / (hi - lo);
+  let g = '';
+  for (let y = lo; y <= hi + step / 2; y += step) {
+    const zero = hs.mode === 'b' && Math.abs(y) < step / 1e6;
+    g += `<line class="${zero ? 'h-zero' : 'h-grid'}" x1="${HP.l}" x2="${W - HP.r}" y1="${Y(y)}" y2="${Y(y)}"/><text class="h-ax" x="${W - HP.r + 6}" y="${Y(y) + 4}">${hs.mode === 'b' ? fmt(y, 1) + '٪' : shortT(y)}</text>`;
+  }
+  const ticks = [...new Set([0, Math.round((n - 1) / 3), Math.round(2 * (n - 1) / 3), n - 1])];
+  ticks.forEach((i, k) => g += `<text class="h-ax" x="${X(i)}" y="${H - 4}" text-anchor="${k === 0 ? 'start' : k === ticks.length - 1 ? 'end' : 'middle'}">${jdate(pts[i].j)}</text>`);
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(v[i]).toFixed(1)}`).join(''), base = Y(hs.mode === 'b' ? 0 : lo).toFixed(1);
+  const i = hs.pick != null && hs.pick < n ? hs.pick : n - 1, p = pts[i], x = X(i);
+  const tip = `${jdate(p.j, true)} · <span class="n">${fmt(p.p, 0)}</span> تومان · حباب <b class="n">${bbPctTxt(p.b / 100)}</b>`;
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="نمودار ${hs.mode === 'b' ? 'حباب' : 'قیمت'}"><defs><linearGradient id="hs-fill" x1="0" y1="0" x2="0" y2="1"><stop class="hs-g0" offset="0"/><stop class="hs-g1" offset="1"/></linearGradient></defs>${g}<path class="h-area" d="${line}L${X(n - 1).toFixed(1)},${base}L${X(0).toFixed(1)},${base}Z"/><path class="h-line" d="${line}"/>
+    <line class="h-cross" x1="${x}" x2="${x}" y1="${HP.t - 6}" y2="${H - HP.b}"/><circle class="h-dot" cx="${x}" cy="${Y(v[i])}" r="5"/></svg>
+    <div class="hs-tip" style="left:${Math.min(Math.max(x, 120), W - 120)}px">${tip}</div>`;
+}
+
+/* ---------- my assets: kept only in this browser (localStorage) and valued with the live prices ---------- */
+const AS_KEY = 'cg-assets';
+const ASSETS = [
+  ...BB.ITEMS.map(it => ({ k: it.id, name: it.name, unit: it.unit === 'هر گرم' ? 'گرم' : 'عدد', chip: it.metal === 'silver' ? 'نقره' : it.unit === 'هر گرم' ? 'طلا' : 'سکه', bb: it })),
+  { k: 'geram24', name: 'طلای ۲۴ عیار', unit: 'گرم', chip: 'طلا' },
+  ...FXL.map(x => ({ k: x.k, name: x.name, unit: x.code, chip: x.code, fx: x })),
+];
+function loadAssets() { try { const a = JSON.parse(localStorage.getItem(AS_KEY) || '[]'); return Array.isArray(a) ? a.filter(h => h && ASSETS.some(s => s.k === h.k) && h.q > 0) : []; } catch (e) { return []; } }
+function storeAssets(a) { try { localStorage.setItem(AS_KEY, JSON.stringify(a)); return true; } catch (e) { return false; } }
+// toman per unit, today's change % and, for coins and gold, the bubble inside each unit
+function asUnit(a) {
+  if (a.fx) { const r = fxRate(a.fx); return r && isFinite(r.t) ? { t: r.t, c: r.c, bub: 0 } : null; }
+  const t = a.k === 'geram24' ? bb.base.gram24 : bb.base.prices[a.k], q = quotes()[a.k];
+  return isFinite(t) && t > 0 ? { t, c: q && q.c, bub: a.bb ? bbCalc(a.bb, bb.base).r.bubble : 0 } : null;
+}
+function asRender() {
+  if (!bb.src) return;
+  const list = loadAssets();
+  let tot = 0, bub = 0, day = 0, cost = 0, now = 0;
+  const rows = list.map((h, i) => {
+    const a = ASSETS.find(s => s.k === h.k), u = asUnit(a), del = `<button type="button" class="x" data-del="${i}" aria-label="حذف ${a.name}">×</button>`;
+    if (!u) return `<div class="as-item"><span class="fx-code">${a.chip}</span><span class="fx-name"><b>${a.name}</b><small>قیمتش الان در دسترس نیست</small></span>${del}</div>`;
+    const v = u.t * h.q;
+    tot += v; bub += u.bub * h.q; if (typeof u.c === 'number') day += v - v / (1 + u.c / 100);
+    let pl = '';
+    if (h.b > 0) { const c = h.b * h.q; cost += c; now += v; pl = `<small>سود و زیان نسبت به خرید <span class="n ${cls(v - c)}">${sg(v - c, 0)}</span> (<span class="n">${sg((v / c - 1) * 100, 1)}٪</span>)</small>`; }
+    return `<div class="as-item"><span class="fx-code">${a.chip}</span><span class="fx-name"><span class="as-top"><b>${a.name}</b><b class="n">${fmt(v, 0)}</b></span>
+      <span class="as-top"><small><span class="n">${fmt(h.q, 4)}</span> <bdi>${a.unit}</bdi>، هر واحد <span class="n">${fmt(u.t, 0)}</span></small>${chg(u.c)}</span>${pl}</span>${del}</div>`;
+  });
+  $('as-list').innerHTML = rows.join('');
+  $('as-total').innerHTML = list.length ? `<span class="mut">ارزش کل دارایی‌ها</span><span class="big"><span class="n">${fmt(tot, 0)}</span> <small class="mut">تومان</small></span>
+    <div class="row"><span>تغییر امروز <b class="n ${cls(day)}">${sg(day, 0)}</b></span>${bub ? `<span>حباب داخل سکه و طلا <b class="n">${sg(bub, 0)}</b> (${pct(bub / tot)} کل)</span>` : ''}${cost ? `<span>سود و زیان نسبت به خرید <b class="n ${cls(now - cost)}">${sg(now - cost, 0)}</b></span>` : ''}</div>`
+    : `<span class="mut">هنوز دارایی‌ای اضافه نکرده‌اید.</span><p class="fee-note">سکه، طلا، نقره یا ارزی که دارید را پایین وارد کنید تا ارزش روزش، تغییر امروز و حبابی که در قیمتش هست را ببینید.</p>`;
+  $('home-as').innerHTML = list.length ? `ارزش کل دارایی‌ها: <b class="n">${fmt(tot, 0)}</b> تومان` : 'سکه، طلا و ارزی که دارید را وارد کنید تا ارزش روزش را ببینید';
 }
 
 /* ---------- save & share: a position is a short code in the link (#p=...) or in this browser's storage ---------- */
@@ -1507,6 +1769,7 @@ function boot() {
   $('bb-reset').addEventListener('click', () => { bb.cur = bbClone(bb.base); bb.w = {}; bbRender(); });
   $('bb-refresh').addEventListener('click', () => bbFetch(true));
   $('bb-grid').addEventListener('click', e => {
+    const hb = e.target.closest('[data-hist]'); if (hb) { hs.item = hb.dataset.hist; hs.pick = null; go('hist', true); return; }
     const t = e.target.closest('.bb-top'); if (!t) return;
     const id = t.closest('.bb-card').dataset.id; bb.open = bb.open === id ? null : id; bb.sc = { usd: 0, ons: 0 }; bbRender();
   });
@@ -1521,6 +1784,50 @@ function boot() {
     bbRender();
   });
   bbFetch(false);
+  $('fx-q').addEventListener('input', e => { fx.q = e.target.value; fxRender(); });
+  $('fx-refresh').addEventListener('click', () => bbFetch(true));
+  $('fx-list').addEventListener('click', e => {
+    const b = e.target.closest('.fx-row'); if (!b) return;
+    const k = b.closest('.fx-item').dataset.k; fx.open = fx.open === k ? null : k; fx.amt = 1; fxRender();
+  });
+  $('fx-list').addEventListener('input', e => {
+    const el = e.target; if (!el.dataset.cv) return;
+    faInput(el);
+    const v = parseNum(el.value), x = FXL.find(o => o.k === fx.open), r = x && fxRate(x);
+    if (!(isFinite(v) && v >= 0)) { el.closest('.box').setAttribute('data-bad', 'true'); return; }
+    if (!r) return;
+    if (el.dataset.cv === 'a') { fx.amt = v; $('fxt').value = latin(Math.round(v * r.t)); }
+    else { fx.amt = v / r.t; $('fxa').value = latin(+(v / r.t).toFixed(r.t > 1e5 ? 6 : 2)); }
+  });
+  $('hs-items').addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (!b) return; hs.item = b.dataset.id; hs.pick = null; hsRender(); });
+  for (const b of $('hs-mode').children) b.addEventListener('click', () => { hs.mode = b.dataset.v; hsRender(); });
+  for (const b of $('hs-range').children) b.addEventListener('click', () => { hs.range = +b.dataset.v; hs.pick = null; hsRender(); });
+  const hc = $('hs-chart');
+  const hsPick = e => {
+    if (!hs.pts || hs.pts.length < 2) return;
+    const r = hc.getBoundingClientRect(), i = Math.round((e.clientX - r.left - HP.l) / (r.width - HP.l - HP.r) * (hs.pts.length - 1));
+    const k = Math.max(0, Math.min(hs.pts.length - 1, i)); if (k !== hs.pick) { hs.pick = k; hsDraw(); }
+  };
+  hc.addEventListener('pointerdown', hsPick);
+  hc.addEventListener('pointermove', e => { if (e.buttons || e.pointerType === 'mouse') hsPick(e); });
+  hc.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { hs.pick = null; hsDraw(); } });
+  new ResizeObserver(() => hsDraw()).observe(hc);
+  const asSel = $('as-kind');
+  asSel.innerHTML = [['سکه و طلا', ASSETS.filter(a => !a.fx)], ['ارز', ASSETS.filter(a => a.fx && !a.fx.crypto)], ['رمزارز', ASSETS.filter(a => a.fx && a.fx.crypto)]]
+    .map(([g, l]) => `<optgroup label="${g}">${l.map(a => `<option value="${a.k}">${a.name}</option>`).join('')}</optgroup>`).join('');
+  const asSync = () => { $('as-unit').textContent = ASSETS.find(s => s.k === asSel.value).unit; };
+  asSel.addEventListener('change', asSync); asSync();
+  for (const id of ['as-qty', 'as-buy']) $(id).addEventListener('input', e => faInput(e.target));
+  $('as-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const q = parseNum($('as-qty').value), b = parseNum($('as-buy').value);
+    if (!(q > 0)) { $('as-qty').closest('.box').setAttribute('data-bad', 'true'); $('as-qty').focus(); return; }
+    if ($('as-buy').value.trim() && !(b > 0)) { $('as-buy').closest('.box').setAttribute('data-bad', 'true'); $('as-buy').focus(); return; }
+    const a = loadAssets(); a.push(b > 0 ? { k: asSel.value, q, b } : { k: asSel.value, q });
+    if (storeAssets(a.slice(-40))) { $('as-qty').value = ''; $('as-buy').value = ''; asRender(); toast('اضافه شد'); }
+    else toast('این مرورگر اجازه‌ی ذخیره نمی‌دهد');
+  });
+  $('as-list').addEventListener('click', e => { const d = e.target.closest('[data-del]'); if (!d) return; const a = loadAssets(); a.splice(+d.dataset.del, 1); storeAssets(a); asRender(); });
   $('sv-save').addEventListener('click', () => { openSaved(true); const n = $('sv-name'); n.value = curName(); n.focus(); n.select(); $('sv-sheet').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
   $('sv-form').addEventListener('submit', e => {
     e.preventDefault();
@@ -1557,11 +1864,11 @@ function boot() {
   $('dock-go').addEventListener('click', () => res.scrollIntoView({ behavior: 'smooth', block: 'start' }));
 
   // Home screen lists the tools; each tool has its own title, and the option tool keeps its two tabs
-  const views = { home: $('view-home'), payoff: $('view-payoff'), pricing: $('view-pricing'), bubble: $('view-bubble') };
+  const views = { home: $('view-home'), payoff: $('view-payoff'), pricing: $('view-pricing'), bubble: $('view-bubble'), fx: $('view-fx'), hist: $('view-hist'), assets: $('view-assets') };
   const tabs = { payoff: $('tab-payoff'), pricing: $('tab-pricing') };
-  const TOOL = { home: 'home', payoff: 'options', pricing: 'options', bubble: 'bubble' };
-  const HEAD = { home: ['چارت گپ', 'ابزارهای بازار'], options: ['ماشین‌حساب آپشن', 'چارت گپ'], bubble: ['حباب طلا و سکه', 'چارت گپ'] };
-  const HASH = { home: '', payoff: '#options', pricing: '#pricing', bubble: '#bubble' };
+  const TOOL = { home: 'home', payoff: 'options', pricing: 'options', bubble: 'bubble', fx: 'fx', hist: 'hist', assets: 'assets' };
+  const HEAD = { home: ['چارت گپ', 'ابزارهای بازار'], options: ['ماشین‌حساب آپشن', 'چارت گپ'], bubble: ['حباب طلا و سکه', 'چارت گپ'], fx: ['نرخ ارز', 'چارت گپ'], hist: ['نمودار حباب', 'چارت گپ'], assets: ['دارایی من', 'چارت گپ'] };
+  const HASH = { home: '', payoff: '#options', pricing: '#pricing', bubble: '#bubble', fx: '#fx', hist: '#history', assets: '#assets' };
   show = k => {
     const tool = TOOL[k];
     for (const [n, v] of Object.entries(views)) v.hidden = n !== k;
@@ -1572,6 +1879,7 @@ function boot() {
     $('h-title').textContent = HEAD[tool][0]; $('h-sub').textContent = HEAD[tool][1];
     document.title = tool === 'home' ? 'ابزارهای چارت گپ' : HEAD[tool][0] + ' · چارت گپ';
     if (k === 'payoff') drawChart(); else $('dock').classList.remove('on');
+    if (k === 'fx') fxRender(); else if (k === 'assets') asRender(); else if (k === 'hist') { hsRender(); hsLoad(); }
   };
   go = (k, push) => {
     const from = TOOL[Object.keys(views).find(n => !views[n].hidden)];
@@ -1582,8 +1890,8 @@ function boot() {
   // ?tool= survives inside Telegram, which replaces the hash with its own #tgWebAppData
   const route = first => {
     const h = location.hash, q = first && new URLSearchParams(location.search).get('tool');
-    show(/^#p=/.test(h) ? 'payoff' : { '#options': 'payoff', '#payoff': 'payoff', '#pricing': 'pricing', '#bubble': 'bubble' }[h]
-      || { options: 'payoff', pricing: 'pricing', bubble: 'bubble' }[q] || 'home');
+    show(/^#p=/.test(h) ? 'payoff' : { '#options': 'payoff', '#payoff': 'payoff', '#pricing': 'pricing', '#bubble': 'bubble', '#fx': 'fx', '#history': 'hist', '#assets': 'assets' }[h]
+      || { options: 'payoff', pricing: 'pricing', bubble: 'bubble', fx: 'fx', history: 'hist', assets: 'assets' }[q] || 'home');
   };
   for (const [n, t] of Object.entries(tabs)) t.addEventListener('click', () => go(n));
   for (const a of document.querySelectorAll('[data-go]')) a.addEventListener('click', e => { e.preventDefault(); go(a.dataset.go, true); });
@@ -1617,7 +1925,7 @@ function boot() {
     tg.onEvent('themeChanged', follow);
     new MutationObserver(header).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
-    const TOOLS = { options: 'payoff', pricing: 'pricing', bubble: 'bubble' };
+    const TOOLS = { options: 'payoff', pricing: 'pricing', bubble: 'bubble', fx: 'fx', history: 'hist', assets: 'assets' };
     if (sp && TOOLS[sp]) go(TOOLS[sp]);
     else if (sp && /^[\w-]+$/.test(sp) && applyCode(sp, 'این موقعیت از لینک باز شد.')) go('payoff');
     if (!tg.BackButton || !tg.isVersionAtLeast('6.1')) return;

@@ -1,5 +1,5 @@
 // Offline cache for the calculator. Bump VERSION whenever index.html changes.
-const VERSION = 'chartgap-v6';
+const VERSION = 'chartgap-v7';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
@@ -10,10 +10,12 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
-  // live prices: network first, the last saved copy when offline
-  if (new URL(req.url).pathname.endsWith('/prices.json')) {
-    e.respondWith(caches.open(VERSION).then(c => fetch(req).then(r => { if (r.ok) c.put('prices.json', r.clone()); return r; })
-      .catch(async () => await c.match('prices.json') || new Response('{}', { status: 504 }))));
+  // live prices and the bubble history: network first, the last saved copy when offline
+  const data = new URL(req.url).pathname.match(/\/(prices|history)\.json$/);
+  if (data) {
+    const name = data[1] + '.json';
+    e.respondWith(caches.open(VERSION).then(c => fetch(req).then(r => { if (r.ok) c.put(name, r.clone()); return r; })
+      .catch(async () => await c.match(name) || new Response('{}', { status: 504 }))));
     return;
   }
   if (req.mode === 'navigate' || new URL(req.url).pathname.endsWith('/index.html')) {

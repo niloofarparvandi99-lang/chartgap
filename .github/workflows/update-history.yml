@@ -1,0 +1,29 @@
+# Once a day after the Tehran market closes: rebuild history.json (last 365 days of price and bubble) for the bubble chart.
+name: update-history
+on:
+  schedule:
+    - cron: '45 13 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: update-history
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch daily series
+        run: |
+          mkdir -p /tmp/h
+          for k in sekee sekeb nim rob gerami geram18 silver_999 ons silver price_dollar_rl; do
+            curl -sf -m 60 --retry 2 -A "Mozilla/5.0" -o /tmp/h/$k.json "https://api.tgju.org/v1/market/indicator/summary-table-data/$k"
+          done
+          python3 scripts/update_history.py /tmp/h history.json
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions"; git config user.email "github-actions@users.noreply.github.com"
+          git add history.json
+          git diff --cached --quiet || (git commit -m "Update history" && git pull --rebase -q && git push)
