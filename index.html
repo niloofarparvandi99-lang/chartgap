@@ -2061,7 +2061,7 @@ function boot() {
   const HASH = { home: '', payoff: '#options', pricing: '#pricing', gold: '#gold', bubble: '#bubble', fx: '#fx', hist: '#history', assets: '#assets' };
   // usage stats: tells the bot's worker which tool someone stayed on for a second, once per tool per visit.
   // inside Telegram it sends initData too, so the bot can count the person; empty address = off
-  const STATS = '';
+  const STATS = 'https://chartgap-bot.niloofarparvandi99.workers.dev/ping';
   const pinged = new Set();
   const ping = k => {
     if (!STATS || pinged.has(k)) return;
