@@ -377,6 +377,42 @@ footer a { color: var(--accent) }
 @keyframes intro-pop { from { opacity: 0; transform: translateY(-40%) scale(.4) } to { opacity: 1; transform: none } }
 @keyframes intro-word { to { opacity: 1; transform: none } }
 @keyframes intro-out { to { opacity: 0; visibility: hidden } }
+/* bottom tab bar (phones and the Telegram mini app); the payoff dock and the toast sit above it */
+.nav { position: fixed; inset: auto 0 0 0; z-index: 30; display: flex; background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -6px 20px rgba(0,0,0,.14);
+  padding: 4px max(8px, env(safe-area-inset-right, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)) }
+.nav button { flex: 1; min-width: 0; border: 0; background: none; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 2px 3px; font-size: .68rem; font-weight: 700; line-height: 1.4 }
+.nav .ni { width: 46px; height: 28px; border-radius: 999px; display: grid; place-items: center; transition: background .2s, transform .12s }
+.nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round }
+.nav button[aria-current="page"] { color: var(--accent) }
+.nav button[aria-current="page"] .ni { background: var(--raised) }
+.nav button:active .ni { transform: scale(.88) }
+@media (max-width: 959px) {
+  .wrap { padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)) }
+  .dock { bottom: calc(60px + env(safe-area-inset-bottom, 0px)); padding-bottom: 8px; box-shadow: 0 -4px 14px rgba(0,0,0,.12) }
+  .toast { bottom: calc(76px + env(safe-area-inset-bottom, 0px)) }
+}
+@media (min-width: 960px) { .nav { display: none } }
+/* a view fades in when it opens; small presses shrink a little */
+.wrap > section:not([hidden]) { animation: view-in .22s ease-out }
+@keyframes view-in { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+.strat:active, .ghost:active, .seg button:active, .fx-row:active, .bb-top:active, .hs-items button:active { transform: scale(.97) }
+.strat, .ghost, .seg button, .fx-row, .bb-top, .hs-items button { transition: transform .12s }
+/* home sparklines: the last 30 days from history.json */
+.spark { display: block; width: 110px; height: 26px; margin-top: 4px; direction: ltr }
+.spark svg { display: block; width: 100%; height: 100%; overflow: visible }
+.spark .sl { fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke }
+.spark .sa { fill: var(--accent); opacity: .12 }
+.spark .sd { fill: var(--accent) }
+.spark-cap { font-size: .66rem; color: var(--muted); margin-inline-start: 6px; vertical-align: middle }
+.spark-row { display: flex; align-items: flex-end; gap: 4px }
+/* loading placeholders */
+.skel { background: linear-gradient(90deg, var(--raised) 25%, var(--line-soft) 50%, var(--raised) 75%); background-size: 200% 100%; animation: skel 1.3s linear infinite; border-radius: 8px }
+.skel-chart { height: 100%; border-radius: var(--r-md) }
+.hs-stats .skel { height: 52px; background: linear-gradient(90deg, var(--raised) 25%, var(--line-soft) 50%, var(--raised) 75%); background-size: 200% 100% }
+@keyframes skel { from { background-position: 200% 0 } to { background-position: -200% 0 } }
+.bb-head .dot.busy { animation: busy 1s ease-in-out infinite; background: var(--accent) }
+@keyframes busy { 50% { opacity: .25 } }
+@media (prefers-reduced-motion: reduce) { .wrap > section:not([hidden]), .skel, .bb-head .dot.busy { animation: none } }
 @media (prefers-reduced-motion: reduce) { .intro { display: none } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important } }
 </style>
@@ -421,7 +457,7 @@ footer a { color: var(--accent) }
       </a>
       <a class="tool" href="#bubble" data-go="bubble">
         <span class="tool-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="34" rx="15" ry="6"/><path d="M9 34v-7M39 34v-7"/><ellipse cx="24" cy="27" rx="15" ry="6"/><ellipse cx="24" cy="16" rx="9" ry="9"/></svg></span>
-        <span class="tool-tx"><b>حباب طلا و سکه</b><small id="home-bb">قیمت لحظه‌ای سکه، طلا و نقره و حباب هر کدام</small></span>
+        <span class="tool-tx"><b>حباب طلا و سکه</b><small id="home-bb">قیمت لحظه‌ای سکه، طلا و نقره و حباب هر کدام</small><span class="spark-row"><span class="spark skel" id="sp-bb" aria-hidden="true"></span><span class="spark-cap" id="sp-bb-cap"></span></span></span>
         <span class="tool-go" aria-hidden="true">‹</span>
       </a>
       <a class="tool" href="#fx" data-go="fx">
@@ -431,7 +467,7 @@ footer a { color: var(--accent) }
       </a>
       <a class="tool" href="#history" data-go="hist">
         <span class="tool-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="ax" d="M5 40h38"/><path d="M5 33l9-9 8 5 9-14 12 7"/></svg></span>
-        <span class="tool-tx"><b>نمودار حباب</b><small id="home-hs">حباب و قیمت سکه، طلا و نقره از یک هفته تا یک سال گذشته</small></span>
+        <span class="tool-tx"><b>نمودار حباب</b><small id="home-hs">حباب و قیمت سکه، طلا و نقره از یک هفته تا یک سال گذشته</small><span class="spark-row"><span class="spark skel" id="sp-hs" aria-hidden="true"></span><span class="spark-cap" id="sp-hs-cap"></span></span></span>
         <span class="tool-go" aria-hidden="true">‹</span>
       </a>
       <a class="tool" href="#assets" data-go="assets">
@@ -674,6 +710,13 @@ footer a { color: var(--accent) }
   <div class="mut" id="dock-be"></div>
   <button type="button" id="dock-go">نمودار ↑</button>
 </div>
+<nav class="nav" id="nav" aria-label="ابزارها">
+  <button type="button" data-nav="home"><span class="ni"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 22L24 8l16 14v18H30V28H18v12H8z"/></svg></span>خانه</button>
+  <button type="button" data-nav="payoff"><span class="ni"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 38h18l22-26"/></svg></span>آپشن</button>
+  <button type="button" data-nav="bubble"><span class="ni"><svg viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="34" rx="15" ry="6"/><path d="M9 34v-7M39 34v-7"/><ellipse cx="24" cy="27" rx="15" ry="6"/><ellipse cx="24" cy="14" rx="8" ry="8"/></svg></span>حباب</button>
+  <button type="button" data-nav="fx"><span class="ni"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="18" cy="19" r="11"/><path d="M27.5 24.5A11 11 0 1 1 23 37.4"/></svg></span>ارز</button>
+  <button type="button" data-nav="assets"><span class="ni"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 15h29a4 4 0 0 1 4 4v17a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4h22"/><path d="M41 23h-8a4 4 0 0 0 0 8h8"/></svg></span>دارایی</button>
+</nav>
 
 <script id="engine">
 
@@ -1599,6 +1642,7 @@ function ago(iso) {
   return `${fmt(Math.round(m / 1440), 0)} روز پیش`;
 }
 async function bbFetch(manual) {
+  for (const d of document.querySelectorAll('.bb-head .dot')) d.classList.add('busy');
   try {
     const r = await fetch('prices.json', { cache: 'no-store' });
     if (!r.ok) throw 0;
@@ -1725,14 +1769,31 @@ const jdate = (j, year) => { const [y, m, d] = j.split('/').map(Number); return 
 const shortT = v => v >= 1e9 ? fmt(v / 1e9, 2) + ' میلیارد' : v >= 1e6 ? fmt(v / 1e6, v >= 1e8 ? 0 : 1) + ' م' : v >= 1e3 ? fmt(v / 1e3, 0) + ' هزار' : fmt(v, 0);
 async function hsLoad() {
   if (hs.data || hs.loading) return;
-  hs.loading = true; hs.err = false; hsRender();
+  hs.loading = true; hs.err = false; if (!$('view-hist').hidden) hsRender();
   try {
     const r = await fetch('history.json', { cache: 'no-cache' });
     if (!r.ok) throw 0;
     const j = await r.json(); if (!j.dates || !j.items) throw 0;
     hs.data = j;
   } catch (e) { hs.err = true; }
-  hs.loading = false; hsRender();
+  hs.loading = false; if (!$('view-hist').hidden) hsRender();
+  homeSpark();
+}
+// home cards: a 30-day sparkline of the coin's bubble and the 18k gram price
+function sparkSvg(v) {
+  const lo = Math.min(...v), hi = Math.max(...v), span = hi - lo || 1, n = v.length - 1;
+  const xy = v.map((y, i) => [3 + i / n * 104, 23 - (y - lo) / span * 20]);
+  const d = xy.map(([x, y], i) => (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1)).join('');
+  const [ex, ey] = xy[n];
+  return `<svg viewBox="0 0 110 26"><path class="sa" d="${d}L107 26L3 26Z"/><path class="sl" d="${d}"/><circle class="sd" cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="2.6"/></svg>`;
+}
+function homeSpark() {
+  for (const [el, item, k, cap] of [['sp-bb', 'sekee', 1, 'حباب سکه · ۳۰ روز'], ['sp-hs', 'geram18', 0, 'طلای ۱۸ · ۳۰ روز']]) {
+    const box = $(el), row = box.parentNode;
+    const a = hs.data && hs.data.items[item] ? hs.data.items[item].slice(-30).filter(Boolean).map(x => x[k]) : [];
+    if (a.length < 2) { row.hidden = true; continue; }
+    box.classList.remove('skel'); box.innerHTML = sparkSvg(a); $(el + '-cap').textContent = cap;
+  }
 }
 function hsSeries() {
   const d = hs.data, a = d.items[hs.item] || [], n = d.dates.length, day = s => Date.parse(s.replace(/\//g, '-'));
@@ -1751,6 +1812,7 @@ function hsRender() {
   const box = $('hs-chart');
   hs.pts = hs.data ? hsSeries() : null;
   if (!hs.pts || hs.pts.length < 2) {
+    if (!hs.data && !hs.err) { box.innerHTML = '<div class="skel skel-chart" role="status" aria-label="در حال گرفتن تاریخچه"></div>'; $('hs-stats').innerHTML = '<div class="skel"></div>'.repeat(4); return; }
     box.innerHTML = `<div class="fx-empty">${!hs.data ? (hs.err ? 'تاریخچه باز نشد؛ اتصال اینترنت را بررسی کنید و دوباره وارد این صفحه شوید.' : 'در حال گرفتن تاریخچه…') : 'در این بازه معامله‌ای ثبت نشده.'}</div>`;
     $('hs-stats').innerHTML = ''; return;
   }
@@ -1904,7 +1966,7 @@ function boot() {
     if (el.dataset.k === 'price') bb.cur.prices[id] = v; else bb.w[id] = v;
     bbRender();
   });
-  bbFetch(false);
+  bbFetch(false); hsLoad();
   $('fx-q').addEventListener('input', e => { fx.q = e.target.value; fxRender(); });
   $('fx-refresh').addEventListener('click', () => bbFetch(true));
   $('fx-list').addEventListener('click', e => {
@@ -1995,6 +2057,7 @@ function boot() {
   const tabs = { payoff: $('tab-payoff'), pricing: $('tab-pricing') };
   const TOOL = { home: 'home', payoff: 'options', pricing: 'options', gold: 'gold', bubble: 'bubble', fx: 'fx', hist: 'hist', assets: 'assets' };
   const HEAD = { home: ['چارت گپ', 'ابزارهای بازار'], options: ['ماشین‌حساب آپشن', 'چارت گپ'], gold: ['آپشن صندوق طلا', 'چارت گپ'], bubble: ['حباب طلا و سکه', 'چارت گپ'], fx: ['نرخ ارز', 'چارت گپ'], hist: ['نمودار حباب', 'چارت گپ'], assets: ['دارایی من', 'چارت گپ'] };
+  const NAV = { home: 'home', payoff: 'payoff', pricing: 'payoff', gold: 'payoff', bubble: 'bubble', hist: 'bubble', fx: 'fx', assets: 'assets' };
   const HASH = { home: '', payoff: '#options', pricing: '#pricing', gold: '#gold', bubble: '#bubble', fx: '#fx', hist: '#history', assets: '#assets' };
   show = k => {
     const tool = TOOL[k];
@@ -2002,6 +2065,7 @@ function boot() {
     for (const [n, t] of Object.entries(tabs)) t.setAttribute('aria-selected', String(n === k));
     $('opt-tabs').hidden = tool !== 'options';
     $('back').hidden = tool === 'home';
+    for (const b of $('nav').children) b.setAttribute('aria-current', b.dataset.nav === NAV[k] ? 'page' : 'false');
     $('foot-opt').hidden = tool !== 'options';
     $('h-title').textContent = HEAD[tool][0]; $('h-sub').textContent = HEAD[tool][1];
     document.title = tool === 'home' ? 'ابزارهای چارت گپ' : HEAD[tool][0] + ' · چارت گپ';
@@ -2023,6 +2087,12 @@ function boot() {
   for (const [n, t] of Object.entries(tabs)) t.addEventListener('click', () => go(n));
   for (const a of document.querySelectorAll('[data-go]')) a.addEventListener('click', e => { e.preventDefault(); go(a.dataset.go, true); });
   $('back').addEventListener('click', () => { if (history.state && history.state.cg) history.back(); else go('home'); });
+  // bottom bar: home works like the back button; tool to tool replaces the entry so back still lands on home
+  for (const b of $('nav').children) b.addEventListener('click', () => {
+    const k = b.dataset.nav, cur = Object.keys(views).find(n => !views[n].hidden);
+    if (NAV[cur] === k) return scrollTo({ top: 0, behavior: 'smooth' });
+    if (k === 'home') $('back').click(); else go(k, cur === 'home');
+  });
   window.addEventListener('popstate', route);
 
   for (const [k, ok] of [['S', v => v > 0], ['K', v => v > 0], ['days', v => v >= 0], ['sig', v => v >= 0], ['r', v => v > -100], ['q', v => v > -100]])
@@ -2049,6 +2119,12 @@ function boot() {
     };
     const follow = () => { root.dataset.theme = tg.colorScheme === 'light' ? 'light' : 'dark'; };
     follow(); header();
+    // a light tap on the phone for presses: selection ticks for tabs and toggles, a soft knock for other buttons
+    if (tg.HapticFeedback && tg.isVersionAtLeast('6.1')) document.addEventListener('click', e => {
+      const el = e.target.closest('button, a.tool');
+      if (!el || el.disabled) return;
+      try { el.matches('[data-nav], [role=tab], [aria-pressed], .seg button') ? tg.HapticFeedback.selectionChanged() : tg.HapticFeedback.impactOccurred('light'); } catch (x) {}
+    }, true);
     tg.onEvent('themeChanged', follow);
     new MutationObserver(header).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
