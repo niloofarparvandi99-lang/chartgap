@@ -1,0 +1,21 @@
+name: hist-probe
+on:
+  push:
+    paths: ['.github/workflows/hist-probe.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p hist
+          for k in sekee sekeb nim rob gerami geram18 geram24 silver_999 ons silver price_dollar_rl; do
+            curl -sS -m 40 -A 'Mozilla/5.0' "https://api.tgju.org/v1/market/indicator/summary-table-data/$k" -o "/tmp/$k.json" || true
+            python3 -c "import json,sys; d=json.load(open('/tmp/$k.json')); d['data']=d['data'][:400]; json.dump(d,open('hist/$k.json','w'),ensure_ascii=False)" || cp "/tmp/$k.json" "hist/$k.raw"
+          done
+          ls -la hist
+      - run: |
+          git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
+          git add hist && git commit -m "History probe" && git push
