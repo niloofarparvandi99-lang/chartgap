@@ -180,6 +180,20 @@ button { cursor: pointer }
 .bb-sc input[type=range] { width: 100%; accent-color: var(--accent) }
 .bb-sc .out { font-size: .82rem; background: var(--raised); border-radius: var(--r-sm); padding: 8px 12px; margin-top: 6px; line-height: 1.8 }
 .bb-help { margin-top: 14px }
+.go-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px }
+.go-stats div { background: var(--raised); border-radius: var(--r-sm); padding: 8px 10px; font-size: .72rem; color: var(--muted); min-width: 0 }
+.go-stats b { display: block; color: var(--fg); font-size: .95rem; font-weight: 800; margin-top: 2px }
+.go-stats small { display: block; font-size: .7rem }
+@media (max-width: 520px) { .go-stats { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+.go-scen { overflow-x: auto }
+.go-scen table { width: 100%; border-collapse: collapse; font-size: .8rem }
+.go-scen th small { display: block; font-weight: 400; font-size: .66rem }
+.go-scen th, .go-scen td { padding: 7px 6px; text-align: right; border-bottom: 1px solid var(--line) }
+.go-scen th { color: var(--muted); font-weight: 700; font-size: .74rem }
+.go-scen tr.cur td { font-weight: 800 }
+.go-warn { font-size: .8rem; color: var(--muted); margin-top: 10px }
+#view-gold .card + .card, #view-gold .card + .go-open, #view-gold .go-open + details { margin-top: 12px }
+.go-open { width: 100%; min-height: 44px; border: 0; border-radius: var(--r-sm); background: var(--accent); color: var(--on-accent); font-weight: 800 }
 .bb-help summary { cursor: pointer; font-weight: 700 }
 .bb-help p { font-size: .84rem; line-height: 1.9; margin: 10px 0 0 }
 .bb-hist { justify-self: start }
@@ -400,6 +414,11 @@ footer a { color: var(--accent) }
         <span class="tool-tx"><b>ماشین‌حساب آپشن</b><small>سود و زیان استراتژی‌ها، قیمت تئوری، احتمال سود و وجه تضمین</small></span>
         <span class="tool-go" aria-hidden="true">‹</span>
       </a>
+      <a class="tool" href="#gold" data-go="gold">
+        <span class="tool-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 36h36l-6-12H12z"/><path d="M15 24l4-9h10l4 9"/><path class="ax" d="M24 6v5M14 9l2 3M34 9l-2 3"/></svg></span>
+        <span class="tool-tx"><b>آپشن صندوق طلا</b><small>کاورد کال، پروتکتیو پوت و کالر روی صندوق طلا با کارمزد بورس کالا</small></span>
+        <span class="tool-go" aria-hidden="true">‹</span>
+      </a>
       <a class="tool" href="#bubble" data-go="bubble">
         <span class="tool-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="34" rx="15" ry="6"/><path d="M9 34v-7M39 34v-7"/><ellipse cx="24" cy="27" rx="15" ry="6"/><ellipse cx="24" cy="16" rx="9" ry="9"/></svg></span>
         <span class="tool-tx"><b>حباب طلا و سکه</b><small id="home-bb">قیمت لحظه‌ای سکه، طلا و نقره و حباب هر کدام</small></span>
@@ -450,9 +469,9 @@ footer a { color: var(--accent) }
             <div class="f"><span class="lab">واحد پول</span><div class="seg" id="unit"><button type="button" data-u="ریال">ریال</button><button type="button" data-u="تومان">تومان</button></div></div>
           </div>
           <div class="f" style="margin-top:10px"><span class="lab">کارمزد معاملات</span>
-            <div class="seg" id="feeMkt"><button type="button" data-m="none">بدون کارمزد</button><button type="button" data-m="tse">بورس تهران</button><button type="button" data-m="ifb">فرابورس</button></div></div>
+            <div class="seg" id="feeMkt"><button type="button" data-m="none">بدون کارمزد</button><button type="button" data-m="tse">بورس تهران</button><button type="button" data-m="ifb">فرابورس</button><button type="button" data-m="ime">بورس کالا</button></div></div>
           <div id="feeBox" hidden>
-            <label class="switch"><input type="checkbox" id="exFee" checked> کارمزد اعمال در سررسید (۰٫۰۵٪)</label>
+            <label class="switch"><input type="checkbox" id="exFee" checked> کارمزد اعمال در سررسید (<span class="n" id="exRate">۰٫۰۵</span>٪)</label>
             <p class="fee-note" id="feeNote"></p>
           </div>
           <details class="adv" id="mgn">
@@ -545,6 +564,47 @@ footer a { color: var(--accent) }
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- ================= GOLD FUND OPTIONS ================= -->
+  <section id="view-gold" hidden>
+    <div class="card">
+      <h2>موقعیت شما <small>قیمت‌ها به ریال، برای هر واحد صندوق</small></h2>
+      <div class="f" style="margin-bottom:10px"><span class="lab">استراتژی</span>
+        <div class="seg" id="go-strat"><button type="button" data-v="cc">کاورد کال</button><button type="button" data-v="pp">پروتکتیو پوت</button><button type="button" data-v="col">کالر</button></div></div>
+      <div class="fields">
+        <div class="f"><label for="go-S">قیمت واحد صندوق</label><div class="box"><input id="go-S" inputmode="decimal" autocomplete="off"><span class="u">ریال</span></div></div>
+        <div class="f"><label for="go-units">تعداد واحد شما</label><div class="box"><input id="go-units" inputmode="numeric" autocomplete="off"><span class="u">واحد</span></div></div>
+        <div class="f"><label for="go-days">روز تا سررسید</label><div class="box"><input id="go-days" inputmode="numeric" autocomplete="off"><span class="u">روز</span></div></div>
+        <div class="f"><label for="go-size">اندازه قرارداد</label><div class="box"><input id="go-size" inputmode="numeric" autocomplete="off"><span class="u">واحد</span></div></div>
+      </div>
+      <div class="fields" id="go-call" style="margin-top:10px">
+        <div class="f"><label for="go-Kc">قیمت اعمال کال (فروش)</label><div class="box"><input id="go-Kc" inputmode="decimal" autocomplete="off"><span class="u">ریال</span></div></div>
+        <div class="f"><label for="go-Pc">پریمیوم کال</label><div class="box"><input id="go-Pc" inputmode="decimal" autocomplete="off"><span class="u">ریال</span></div></div>
+      </div>
+      <div class="fields" id="go-put" style="margin-top:10px">
+        <div class="f"><label for="go-Kp">قیمت اعمال پوت (خرید)</label><div class="box"><input id="go-Kp" inputmode="decimal" autocomplete="off"><span class="u">ریال</span></div></div>
+        <div class="f"><label for="go-Pp">پریمیوم پوت</label><div class="box"><input id="go-Pp" inputmode="decimal" autocomplete="off"><span class="u">ریال</span></div></div>
+      </div>
+      <label class="switch"><input type="checkbox" id="go-fee" checked> کارمزد بورس کالا (معامله و تسویه در سررسید)</label>
+    </div>
+    <div class="card">
+      <h2>نتیجه در سررسید <small id="go-n"></small></h2>
+      <div class="go-stats" id="go-stats"></div>
+      <p class="go-warn" id="go-iv"></p>
+    </div>
+    <div class="card">
+      <h2>سناریوها <small>مقایسه با نگه‌داشتن صندوق بدون آپشن</small></h2>
+      <div class="go-scen" id="go-scen"></div>
+    </div>
+    <button type="button" class="go-open" id="go-open">باز کردن در ماشین‌حساب آپشن (نمودار کامل)</button>
+    <details class="card bb-help">
+      <summary>کدوم استراتژی؟</summary>
+      <p><b>کاورد کال:</b> صندوق دارید و کال می‌فروشید. پریمیوم درآمد اضافه است، ولی سود بالای قیمت اعمال را از دست می‌دهید. برای وقتی که انتظار رشد تند ندارید.</p>
+      <p><b>پروتکتیو پوت:</b> صندوق دارید و پوت می‌خرید. مثل بیمه است: زیر قیمت اعمال ضرر بیشتری نمی‌کنید و هزینه‌اش پریمیوم است.</p>
+      <p><b>کالر:</b> هم پوت می‌خرید و هم کال می‌فروشید. پریمیوم کال هزینه‌ی پوت را می‌دهد و سود و زیان بین دو قیمت اعمال قفل می‌شود.</p>
+    </details>
+    <p class="fee-note">آپشن اروپایی و تسویه‌ی فیزیکی فرض شده است. کارمزد بورس کالا تقریبی است: معامله‌ی اختیار حدود ۰٫۱۳۶٪ ارزش پریمیوم برای هر طرف و تسویه حدود ۰٫۱۴٪ ارزش قرارداد در صورت اعمال (بولتن کارمزد سازمان بورس، ویرایش ۴۹). نوسان ضمنی با نرخ بهره‌ی ۳۵٪ حساب شده است. سود و زیان نسبت به قیمت امروز صندوق است.</p>
   </section>
 
   <!-- ================= BUBBLE ================= -->
@@ -758,8 +818,18 @@ const Fees = (() => {
       },
       stock: { buy: 0.003632, sell: 0.0088 },
     },
+    ime: {
+      name: 'بورس کالا',
+      option: {   // table 5: broker, exchange, SEO; no cap
+        buy:  [C(0.0008, Infinity), C(0.0004, Infinity), C(0.00016, Infinity)],
+        sell: [C(0.0008, Infinity), C(0.0004, Infinity), C(0.00016, Infinity)],
+      },
+      stock: { buy: 0.0012, sell: 0.0012 },   // table 6: fund units
+      exercise: 0.0014,                       // settlement and delivery, each side
+    },
   };
-  const EXERCISE = 0.0005;   // CSD exercise fee, share of exercise value (K × shares)
+  const EXERCISE = 0.0005;   // CSD exercise fee, share of exercise value (K × shares); a market may set its own
+  const exRate = cfg => (MARKETS[cfg.market] && MARKETS[cfg.market].exercise) || EXERCISE;
 
   // cfg: { market: 'none'|'tse'|'ifb', exercise: bool, rialPerUnit: 1 for rial, 10 for toman }
   function openFee(l, size, cfg) {
@@ -772,26 +842,26 @@ const Fees = (() => {
   // With exercise fees on, the holder exercises only when the intrinsic value beats the fee:
   // call when x > K(1 + 0.0005), put when x < K(1 − 0.0005). Holder and writer both pay the fee.
   const on = cfg => cfg.exercise && !!MARKETS[cfg.market];
-  const threshold = l => l.kind === 'call' ? l.K * (1 + EXERCISE) : l.K * (1 - EXERCISE);
+  const threshold = (l, cfg) => l.kind === 'call' ? l.K * (1 + exRate(cfg)) : l.K * (1 - exRate(cfg));
   function exercised(l, x, cfg) {
     if (l.kind === 'stock') return false;
     if (!on(cfg)) return l.kind === 'call' ? x > l.K : x < l.K;
-    return l.kind === 'call' ? x > threshold(l) : x < threshold(l);
+    return l.kind === 'call' ? x > threshold(l, cfg) : x < threshold(l, cfg);
   }
   function exerciseFee(l, x, size, cfg) {
     if (!on(cfg) || l.kind === 'stock') return 0;
-    return exercised(l, x, cfg) ? l.K * l.qty * size * EXERCISE : 0;
+    return exercised(l, x, cfg) ? l.K * l.qty * size * exRate(cfg) : 0;
   }
   // P&L of one leg at expiry, fees included (an unexercised option is worth zero)
   function legPnl(l, x, size, cfg) {
     const val = l.kind === 'stock' ? x : exercised(l, x, cfg) ? Engine.intrinsic(l, x) : 0;
     return l.side * (val - l.prem) * l.qty * size - openFee(l, size, cfg) - exerciseFee(l, x, size, cfg);
   }
-  const breaks = (legs, cfg) => legs.filter(l => l.kind !== 'stock').flatMap(l => on(cfg) ? [l.K, threshold(l)] : [l.K]);
+  const breaks = (legs, cfg) => legs.filter(l => l.kind !== 'stock').flatMap(l => on(cfg) ? [l.K, threshold(l, cfg)] : [l.K]);
   const totalOpen = (legs, size, cfg) => legs.reduce((s, l) => s + openFee(l, size, cfg), 0);
   const pnl = (legs, size, x, cfg) => legs.reduce((s, l) => s + legPnl(l, x, size, cfg), 0);
   const pnlToday = (legs, size, x, T, r, sig, cfg) => Engine.pnlToday(legs, size, x, T, r, sig) - totalOpen(legs, size, cfg);
-  return { MARKETS, EXERCISE, openFee, exerciseFee, exercised, threshold, legPnl, breaks, totalOpen, pnl, pnlToday };
+  return { MARKETS, EXERCISE, exRate, openFee, exerciseFee, exercised, threshold, legPnl, breaks, totalOpen, pnl, pnlToday };
 })();
 
 // Exact analysis for a payoff that is linear between breakpoints but may jump at one (exercise fees).
@@ -1059,6 +1129,7 @@ function syncInputs() {
   for (const b of $('unit').children) b.setAttribute('aria-pressed', String(b.dataset.u === state.unit));
   for (const b of $('feeMkt').children) b.setAttribute('aria-pressed', String(b.dataset.m === state.fee));
   $('feeBox').hidden = state.fee === 'none'; $('exFee').checked = state.exFee;
+  $('exRate').textContent = fmt(F.exRate(feeCfg()) * 100, 2);
   if (state.fee !== 'none') {
     const m = F.MARKETS[state.fee], op = m.option.buy.reduce((s, c) => s + c.r, 0), os = m.option.sell.reduce((s, c) => s + c.r, 0);
     $('feeNote').innerHTML = `اختیار: خرید ${fmt(op * 100, 3)}٪، فروش ${fmt(os * 100, 3)}٪ · سهم: خرید ${fmt(m.stock.buy * 100, 4)}٪، فروش ${fmt(m.stock.sell * 100, 2)}٪ · منبع: بولتن کارمزد سازمان بورس، ویرایش ۴۹`;
@@ -1430,6 +1501,56 @@ function openInPayoff(type, price) {
   syncAll(); go('payoff'); scrollTo({ top: 0 });
 }
 
+/* ---------- gold fund options: covered call, protective put, collar on fund units (IME) ---------- */
+const goState = { strat: 'cc', S: 40000, units: 100000, days: 60, size: 1000, Kc: 44000, Pc: 1500, Kp: 38000, Pp: 900, fee: true };
+function goLegs() {
+  const n = Math.max(1, Math.floor(goState.units / goState.size)), { strat } = goState, legs = [];
+  if (strat !== 'pp') legs.push({ side: -1, kind: 'call', K: goState.Kc, prem: goState.Pc, qty: n });
+  if (strat !== 'cc') legs.push({ side: 1, kind: 'put', K: goState.Kp, prem: goState.Pp, qty: n });
+  return { n, legs };
+}
+function goRender() {
+  const { S, days, size, strat } = goState, { n, legs } = goLegs(), F = E.Fees;
+  const cfg = { market: goState.fee ? 'ime' : 'none', exercise: goState.fee, rialPerUnit: 1 };
+  const held = n * size, value = S * held;
+  // the units are already held: P&L is measured against today's price, without a buy fee
+  const f = x => (x - S) * held + F.pnl(legs, size, x, cfg);
+  const A = E.analyzeGeneral(f, F.breaks(legs, cfg), strat === 'pp' ? held : 0);
+  for (const b of $('go-strat').children) b.setAttribute('aria-pressed', String(b.dataset.v === strat));
+  $('go-call').hidden = strat === 'pp'; $('go-put').hidden = strat === 'cc';
+  const net = legs.reduce((s, l) => s - l.side * l.prem * l.qty * size, 0), fees = F.totalOpen(legs, size, cfg);
+  const ofV = v => isFinite(v) ? `${fmt(v / value * 100, 2)}٪ ارزش صندوق` : '';
+  const yr = v => days > 0 && isFinite(v) ? ` · سالانه ${fmt(v / value * 36500 / days, 1)}٪` : '';
+  const flat = f(S);
+  const tile = (t, v, sub) => `<div>${t}<b class="n ${cls(v)}">${isFinite(v) ? sg(v) : fmt(v)}</b><small>${sub || ''}</small></div>`;
+  $('go-n').textContent = `${fmt(n, 0)} قرارداد · ${fmt(held, 0)} واحد`;
+  $('go-stats').innerHTML =
+    tile(net >= 0 ? 'پریمیوم دریافتی' : 'پریمیوم پرداختی', net, ofV(Math.abs(net))) +
+    tile('کارمزد معامله', -fees, goState.fee ? 'بورس کالا' : 'خاموش') +
+    tile('اگر قیمت ثابت بماند', flat, ofV(flat) + yr(flat)) +
+    tile('بیشترین سود', A.maxV, ofV(A.maxV) + yr(A.maxV)) +
+    tile('بیشترین ضرر', A.minV, ofV(A.minV)) +
+    `<div>سر به سر<b class="n">${A.be.length ? A.be.map(x => fmt(x, 0)).join(' و ') : '—'}</b><small>قیمت واحد صندوق</small></div>`;
+  const T = days / 365, iv = l => E.impliedVol(l.prem, l.kind, S, l.K, T, 0.35);
+  const ivTxt = legs.map(l => { const v = iv(l); return `${l.kind === 'call' ? 'کال' : 'پوت'} ${fmt(l.K, 0)}: ${isFinite(v) ? fmt(v * 100, 1) + '٪' : 'خارج از محدوده'}`; }).join(' · ');
+  const left = goState.units - held;
+  $('go-iv').innerHTML = `نوسان ضمنی پریمیوم‌ها: ${ivTxt}` + (left > 0 ? `<br>${fmt(left, 0)} واحد کمتر از یک قرارداد است و بدون پوشش می‌ماند.` : '') +
+    (goState.units < size ? '<br>تعداد واحد شما از اندازه‌ی یک قرارداد کمتر است؛ حساب با یک قرارداد انجام شده.' : '');
+  const rows = [-20, -10, -5, 0, 5, 10, 20].map(c => {
+    const x = S * (1 + c / 100), v = f(x), plain = (x - S) * held;
+    return `<tr class="${c === 0 ? 'cur' : ''}"><td class="n">${c > 0 ? '+' : ''}${fmt(c, 0)}٪</td><td class="n">${fmt(x, 0)}</td><td>${signed(v / 1e6, 1)}</td><td class="n ${cls(v)}">${fmt(v / value * 100, 1)}٪</td><td>${signed(plain / 1e6, 1)}</td></tr>`;
+  }).join('');
+  $('go-scen').innerHTML = `<table><thead><tr><th>تغییر قیمت</th><th>قیمت صندوق</th><th>با آپشن <small>میلیون ریال</small></th><th>درصد</th><th>بدون آپشن</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function goSync() { for (const k of ['S', 'units', 'days', 'size', 'Kc', 'Pc', 'Kp', 'Pp']) setVal('go-' + k, goState[k]); $('go-fee').checked = goState.fee; }
+function goOpen() {
+  const { n, legs } = goLegs(), { S, days, size } = goState;
+  Object.assign(state, { S, size, days, unit: 'ریال', st: S, preset: null, example: null, fee: goState.fee ? 'ime' : 'none', exFee: goState.fee });
+  state.legs = [{ side: 1, kind: 'stock', K: 0, prem: S, qty: n }, ...legs.map(l => ({ ...l }))];
+  $('exnote').innerHTML = '<b>از آپشن صندوق طلا:</b> واحدهای صندوق با قیمت امروز وارد شده‌اند.';
+  syncAll(); go('payoff', true); scrollTo({ top: 0 });
+}
+
 /* ---------- theme ---------- */
 const root = document.documentElement, mq = matchMedia('(prefers-color-scheme: dark)');
 const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : mq.matches;
@@ -1714,7 +1835,7 @@ function decodePos(code) {
     const legs = o.l.map(([side, k, K, prem, qty]) => ({ side: side < 0 ? -1 : 1, kind: KIND[k], K: +K, prem: +prem, qty: +qty }));
     if (legs.some(l => !l.kind || !ok(l.K, 0) || !ok(l.prem, 0) || !ok(l.qty, 0))) return null;
     const m = Array.isArray(o.m) && o.m.length === 3 && o.m.every(v => ok(v, 0)) ? o.m : [20, 10, 10000];
-    return { S: o.S, size: o.z, days: o.d, unit: o.u === 'r' ? 'ریال' : 'تومان', sig: o.s, r: o.r, fee: ['none', 'tse', 'ifb'].includes(o.f) ? o.f : 'none', exFee: o.x !== 0,
+    return { S: o.S, size: o.z, days: o.d, unit: o.u === 'r' ? 'ریال' : 'تومان', sig: o.s, r: o.r, fee: ['none', 'tse', 'ifb', 'ime'].includes(o.f) ? o.f : 'none', exFee: o.x !== 0,
       mA: m[0], mB: m[1], mC: m[2], legs, preset: PRESETS.some(p => p.id === o.p) ? o.p : null, example: EXAMPLES.some(e => e.id === o.e) ? o.e : null };
   } catch (e) { return null; }
 }
@@ -1847,6 +1968,12 @@ function boot() {
   for (const b of $('unit').children) b.addEventListener('click', () => { state.unit = b.dataset.u; syncInputs(); update(); });
   for (const b of $('feeMkt').children) b.addEventListener('click', () => { state.fee = b.dataset.m; syncInputs(); update(); });
   $('exFee').addEventListener('change', e => { state.exFee = e.target.checked; update(); });
+  for (const [k, ok] of [['S', v => v > 0], ['units', v => v >= 1], ['days', v => v >= 0], ['size', v => v >= 1], ['Kc', v => v > 0], ['Pc', v => v >= 0], ['Kp', v => v > 0], ['Pp', v => v >= 0]])
+    bindInput($('go-' + k), ok, v => { goState[k] = v; goRender(); });
+  for (const b of $('go-strat').children) b.addEventListener('click', () => { goState.strat = b.dataset.v; goRender(); });
+  $('go-fee').addEventListener('change', e => { goState.fee = e.target.checked; goRender(); });
+  $('go-open').addEventListener('click', goOpen);
+  goSync(); goRender();
   $('showToday').addEventListener('change', e => { state.showToday = e.target.checked; update(); });
   $('addleg').addEventListener('click', () => {
     const l = { side: 1, kind: 'call', K: Math.round(state.S), prem: 0, qty: 1 }; l.prem = Math.max(round(theoPrem(l)), 0);
@@ -1864,11 +1991,11 @@ function boot() {
   $('dock-go').addEventListener('click', () => res.scrollIntoView({ behavior: 'smooth', block: 'start' }));
 
   // Home screen lists the tools; each tool has its own title, and the option tool keeps its two tabs
-  const views = { home: $('view-home'), payoff: $('view-payoff'), pricing: $('view-pricing'), bubble: $('view-bubble'), fx: $('view-fx'), hist: $('view-hist'), assets: $('view-assets') };
+  const views = { home: $('view-home'), payoff: $('view-payoff'), pricing: $('view-pricing'), gold: $('view-gold'), bubble: $('view-bubble'), fx: $('view-fx'), hist: $('view-hist'), assets: $('view-assets') };
   const tabs = { payoff: $('tab-payoff'), pricing: $('tab-pricing') };
-  const TOOL = { home: 'home', payoff: 'options', pricing: 'options', bubble: 'bubble', fx: 'fx', hist: 'hist', assets: 'assets' };
-  const HEAD = { home: ['چارت گپ', 'ابزارهای بازار'], options: ['ماشین‌حساب آپشن', 'چارت گپ'], bubble: ['حباب طلا و سکه', 'چارت گپ'], fx: ['نرخ ارز', 'چارت گپ'], hist: ['نمودار حباب', 'چارت گپ'], assets: ['دارایی من', 'چارت گپ'] };
-  const HASH = { home: '', payoff: '#options', pricing: '#pricing', bubble: '#bubble', fx: '#fx', hist: '#history', assets: '#assets' };
+  const TOOL = { home: 'home', payoff: 'options', pricing: 'options', gold: 'gold', bubble: 'bubble', fx: 'fx', hist: 'hist', assets: 'assets' };
+  const HEAD = { home: ['چارت گپ', 'ابزارهای بازار'], options: ['ماشین‌حساب آپشن', 'چارت گپ'], gold: ['آپشن صندوق طلا', 'چارت گپ'], bubble: ['حباب طلا و سکه', 'چارت گپ'], fx: ['نرخ ارز', 'چارت گپ'], hist: ['نمودار حباب', 'چارت گپ'], assets: ['دارایی من', 'چارت گپ'] };
+  const HASH = { home: '', payoff: '#options', pricing: '#pricing', gold: '#gold', bubble: '#bubble', fx: '#fx', hist: '#history', assets: '#assets' };
   show = k => {
     const tool = TOOL[k];
     for (const [n, v] of Object.entries(views)) v.hidden = n !== k;
@@ -1879,7 +2006,7 @@ function boot() {
     $('h-title').textContent = HEAD[tool][0]; $('h-sub').textContent = HEAD[tool][1];
     document.title = tool === 'home' ? 'ابزارهای چارت گپ' : HEAD[tool][0] + ' · چارت گپ';
     if (k === 'payoff') drawChart(); else $('dock').classList.remove('on');
-    if (k === 'fx') fxRender(); else if (k === 'assets') asRender(); else if (k === 'hist') { hsRender(); hsLoad(); }
+    if (k === 'gold') goRender(); else if (k === 'fx') fxRender(); else if (k === 'assets') asRender(); else if (k === 'hist') { hsRender(); hsLoad(); }
   };
   go = (k, push) => {
     const from = TOOL[Object.keys(views).find(n => !views[n].hidden)];
@@ -1890,8 +2017,8 @@ function boot() {
   // ?tool= survives inside Telegram, which replaces the hash with its own #tgWebAppData
   const route = first => {
     const h = location.hash, q = first && new URLSearchParams(location.search).get('tool');
-    show(/^#p=/.test(h) ? 'payoff' : { '#options': 'payoff', '#payoff': 'payoff', '#pricing': 'pricing', '#bubble': 'bubble', '#fx': 'fx', '#history': 'hist', '#assets': 'assets' }[h]
-      || { options: 'payoff', pricing: 'pricing', bubble: 'bubble', fx: 'fx', history: 'hist', assets: 'assets' }[q] || 'home');
+    show(/^#p=/.test(h) ? 'payoff' : { '#options': 'payoff', '#payoff': 'payoff', '#pricing': 'pricing', '#gold': 'gold', '#bubble': 'bubble', '#fx': 'fx', '#history': 'hist', '#assets': 'assets' }[h]
+      || { options: 'payoff', pricing: 'pricing', gold: 'gold', bubble: 'bubble', fx: 'fx', history: 'hist', assets: 'assets' }[q] || 'home');
   };
   for (const [n, t] of Object.entries(tabs)) t.addEventListener('click', () => go(n));
   for (const a of document.querySelectorAll('[data-go]')) a.addEventListener('click', e => { e.preventDefault(); go(a.dataset.go, true); });
@@ -1925,7 +2052,7 @@ function boot() {
     tg.onEvent('themeChanged', follow);
     new MutationObserver(header).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
-    const TOOLS = { options: 'payoff', pricing: 'pricing', bubble: 'bubble', fx: 'fx', history: 'hist', assets: 'assets' };
+    const TOOLS = { options: 'payoff', pricing: 'pricing', gold: 'gold', bubble: 'bubble', fx: 'fx', history: 'hist', assets: 'assets' };
     if (sp && TOOLS[sp]) go(TOOLS[sp]);
     else if (sp && /^[\w-]+$/.test(sp) && applyCode(sp, 'این موقعیت از لینک باز شد.')) go('payoff');
     if (!tg.BackButton || !tg.isVersionAtLeast('6.1')) return;
