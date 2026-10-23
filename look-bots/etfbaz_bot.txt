@@ -1,0 +1,8 @@
+<meta property="og:title" content="ربات صندوق باز ( @etfbaz )">
+<div class="tgme_page_title">
+<div class="tgme_page_extra">
+<div class="tgme_page_description ">ربات صندوق‌باز با هدف نمایش شفاف داده‌های صندوق‌های سرمایه‌گذاری تشکل شده.
+<div class="tgme_page_description ">ربات صندوق‌باز با هدف نمایش شفاف داده‌های صندوق‌های سرمایه‌گذاری تشکل شده.<br/>کانال  <a href="https://t.me/etfbaz">@etfbaz</a><br/>سایت و اپلیکیشن www.etfbaz.com</div>
+<div class="tgme_page_action">
+  <a class="tgme_action_button_new shine" href="tg://resolve?domain=etfbaz_bot">Start Bot</a>
+</div>

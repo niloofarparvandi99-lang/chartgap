@@ -1,0 +1,8 @@
+<meta property="og:title" content="ربات محسن تحلیل">
+<div class="tgme_page_title">
+<div class="tgme_page_extra">
+<div class="tgme_page_description ">به ربات محسن تحلیل خوش امدین
+<div class="tgme_page_description ">به ربات محسن تحلیل خوش امدین<br/>برای استفاده از خدمات دکمه Start رو بزنین :)</div>
+<div class="tgme_page_action">
+  <a class="tgme_action_button_new shine" href="tg://resolve?domain=mohsentahlil_bot">Start Bot</a>
+</div>
