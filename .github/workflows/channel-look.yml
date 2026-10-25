@@ -1,0 +1,28 @@
+name: channel-look
+on:
+  push:
+    paths: ['.github/workflows/channel-look.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  look:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch public channel pages
+        run: |
+          mkdir -p channel
+          url="https://t.me/s/derivativesforall"
+          for i in $(seq -w 1 25); do
+            curl -sSL -m 30 -A "Mozilla/5.0" "$url" -o channel/page$i.html || break
+            before=$(grep -o 'data-post="derivativesforall/[0-9]*"' channel/page$i.html | head -1 | grep -o '[0-9]*"$' | tr -d '"')
+            [ -z "$before" ] && break
+            [ "$before" -le 1 ] && break
+            url="https://t.me/s/derivativesforall?before=$before"
+            sleep 2
+          done
+          ls -la channel
+      - run: |
+          git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
+          git add channel && git commit -m "Capture of t.me/s/derivativesforall" && git push
