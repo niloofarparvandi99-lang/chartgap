@@ -1,0 +1,52 @@
+name: probe-ime
+on: push
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          set +e
+          curl -s -m 20 -o /dev/null -D - -A "Mozilla/5.0" https://cdn.ime.co.ir/ | head -15
+          cat > /tmp/p.py <<'PY'
+          import json, time, urllib.parse, urllib.request, http.cookiejar, collections
+          B="https://cdn.ime.co.ir"; UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
+          op=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+          g=lambda u,a="*/*",t=20: op.open(urllib.request.Request(u,headers={"User-Agent":UA,"Accept":a,"Referer":B+"/"}),timeout=t)
+          conn=urllib.parse.quote(json.dumps([{"name":"marketshub"}],separators=(",",":")))
+          r=g(B+"/"); print("home",r.status, dict(r.headers).get("Access-Control-Allow-Origin"))
+          t0=time.time(); neg=json.loads(g(f"{B}/realTimeServer/negotiate?clientProtocol=2.1&connectionData={conn}&_=1","application/json").read()); print("neg",neg, time.time()-t0)
+          tok=urllib.parse.quote(neg["ConnectionToken"],safe="")
+          q=f"transport=serverSentEvents&clientProtocol=2.1&connectionToken={tok}&connectionData={conn}"
+          import threading
+          def st():
+              time.sleep(1.5); print("start", g(f"{B}/realTimeServer/start?{q}&_=2","application/json").read()[:200])
+          threading.Thread(target=st,daemon=True).start()
+          resp=g(f"{B}/realTimeServer/connect?{q}&tid=1","text/event-stream",90)
+          end=time.time()+40; cnt=collections.Counter(); samples={}
+          for raw in resp:
+              line=raw.decode("utf-8","replace").strip()
+              if not line.startswith("data:"): continue
+              body=line[5:].strip()
+              try: o=json.loads(body)
+              except: continue
+              if not isinstance(o,dict): continue
+              for it in o.get("M",[]):
+                  n=it.get("M"); a=(it.get("A") or [None])[0]; cnt[n]+=1
+                  if n not in samples: samples[n]=a
+              if time.time()>end: break
+          print(cnt)
+          for n,a in samples.items():
+              if isinstance(a,list):
+                  print("==",n,len(a)); print(json.dumps(a[0],ensure_ascii=False)[:1500])
+                  if n=="updateMarketsInfo":
+                      grp=collections.Counter((d.get("CommodityGroup"),d.get("ContractSubGroup")) for d in a); print(grp)
+                      seen=set()
+                      for d in a:
+                          k=d.get("CommodityGroup")
+                          if k in seen: continue
+                          seen.add(k); print(k, {x:d.get(x) for x in d if "Name" in x or "Desc" in x or "Title" in x or "Under" in x or x in ("StrikePrice","CallLastTradingPersianDate","CallContractSize","CallContractCode")})
+                  if n=="updateSandoqMarketsInfo":
+                      for d in a: print(d.get("Code"),d.get("Symbol"),d.get("LastPrice"),d.get("FinalPrice"),d.get("YesterdayPrice"), {x:d.get(x) for x in d if "Name" in x or "Title" in x})
+              else: print("==",n, json.dumps(a,ensure_ascii=False)[:600])
+          PY
+          python3 /tmp/p.py
