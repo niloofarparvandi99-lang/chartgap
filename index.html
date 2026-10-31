@@ -668,7 +668,7 @@ footer a { color: var(--accent) }
     <div class="bb-head"><span id="fx-src"></span><button type="button" class="ghost" id="fx-refresh">به‌روزرسانی قیمت‌ها</button></div>
     <div class="box fx-search"><input id="fx-q" type="search" placeholder="جستجو، مثلاً یورو یا درهم" autocomplete="off" aria-label="جستجوی ارز"></div>
     <div id="fx-list"></div>
-    <p class="fee-note">نرخ بازار آزاد تهران از tgju.org، هر ۱۵ دقیقه به‌روز می‌شود. درصد کنار هر نرخ تغییر نسبت به روز قبل است. روی هر ارز بزنید تا تبدیلش کنید.</p>
+    <p class="fee-note">نرخ بازار آزاد تهران از tgju.org، لحظه‌ای (هر دقیقه) به‌روز می‌شود. درصد کنار هر نرخ تغییر نسبت به روز قبل است. روی هر ارز بزنید تا تبدیلش کنید.</p>
   </section>
 
   <!-- ================= BUBBLE HISTORY ================= -->
@@ -1618,7 +1618,7 @@ function initTheme() {
 
 /* ---------- boot ---------- */
 let show, go;
-/* ---------- bubble tab: prices come from prices.json (refreshed every 15 min on the server), a built-in snapshot, or the user ---------- */
+/* ---------- bubble tab: prices come live from tgju (see bbFetch), else prices.json (refreshed on the server), a built-in snapshot, or the user ---------- */
 const BB = E.Bubble, SNAPSHOT = {"updated":"2026-10-23T05:02:46Z","source":"tgju.org","unit":"rial","items":{"ons":{"p":4028.3,"t":"2026-10-22 23:04:32","c":-2.6},"silver":{"p":54.68,"t":"2026-10-22 23:03:16","c":-5.81},"price_dollar_rl":{"p":2719050.0,"t":"2026-10-22 16:59:57","c":0.93},"sekee":{"p":2739650000.0,"t":"2026-10-22 16:59:57","c":0.94},"sekeb":{"p":2650400000.0,"t":"2026-10-22 16:59:57","c":1.14},"nim":{"p":1439800000.0,"t":"2026-10-22 15:11:35","c":0.84},"rob":{"p":765200000.0,"t":"2026-10-22 15:07:31","c":0.58},"gerami":{"p":390000000.0,"t":"2026-10-22 15:11:35","c":2.6},"geram18":{"p":272231000.0,"t":"2026-10-22 16:59:54","c":0.62},"geram24":{"p":362971000.0,"t":"2026-10-22 16:59:54","c":0.62},"silver_999":{"p":5034600.0,"t":"2026-10-22 22:47:17","c":-3.02}},"fx":{"price_eur":{"p":3053600.0,"t":"2026-10-22 16:59:55","c":0.63},"price_gbp":{"p":3648400.0,"t":"2026-10-22 16:59:55","c":0.72},"price_aed":{"p":745890.0,"t":"2026-10-22 16:59:55","c":0.82},"price_try":{"p":55100.0,"t":"2026-10-22 15:55:24","c":0.92},"price_cny":{"p":408500.0,"t":"2026-10-22 15:56:27","c":0.81},"price_cad":{"p":1943100.0,"t":"2026-10-22 16:59:55","c":1.01},"price_aud":{"p":1912900.0,"t":"2026-10-22 16:59:55","c":0.63},"price_chf":{"p":3310800.0,"t":"2026-10-22 16:59:55","c":0.94},"price_sar":{"p":727070.0,"t":"2026-10-22 16:59:55","c":0.83},"price_kwd":{"p":8795500.0,"t":"2026-10-22 16:59:55","c":0.73},"price_qar":{"p":721200.0,"t":"2026-10-22 16:59:49","c":0.81},"price_omr":{"p":7091800.0,"t":"2026-10-22 16:59:55","c":0.82},"price_afn":{"p":41940.0,"t":"2026-10-22 16:59:45","c":0.79},"price_rub":{"p":33820.0,"t":"2026-10-22 16:59:45","c":2.48},"price_inr":{"p":28660.0,"t":"2026-10-22 16:57:39","c":0.42},"price_azn":{"p":1607500.0,"t":"2026-10-22 16:59:55","c":0.82},"price_amd":{"p":7700.0,"t":"2026-10-22 15:55:36","c":0.92},"price_jpy":{"p":1736310.0,"t":"2026-10-22 16:59:55","c":1.37},"crypto-tether-irr":{"p":2717370.0,"t":"2026-10-22 23:04:55","c":1.9},"crypto-bitcoin":{"p":81545.12,"t":"2026-10-22 23:04:14","c":-3.7},"crypto-ethereum":{"p":2391.67,"t":"2026-10-22 23:04:14","c":-4.26}}};
 const bb = { src: null, live: false, base: null, cur: null, w: {}, open: null, sc: { usd: 0, ons: 0 } };
 const BB_KEY = { sekee: 'sekee', sekeb: 'sekeb', nim: 'nim', rob: 'rob', gerami: 'gerami', geram18: 'geram18', silver_999: 'silver_999' };
@@ -1641,19 +1641,71 @@ function ago(iso) {
   if (m < 60 * 24) return `${fmt(Math.round(m / 60), 0)} ساعت پیش`;
   return `${fmt(Math.round(m / 1440), 0)} روز پیش`;
 }
+/* live prices: the page reads tgju's public feed straight from the browser (it allows any site, and is reachable inside Iran
+   without a VPN), so prices are as fresh as tgju's own (~30 s). prices.json from GitHub stays as the fallback. */
+const LIVE_URLS = ['https://call2.tgju.org/ajax.json', 'https://call3.tgju.org/ajax.json'];
+const LIVE_KEYS = ['ons', 'silver', 'price_dollar_rl', 'sekee', 'sekeb', 'nim', 'rob', 'gerami', 'geram18', 'geram24', 'silver_999'];
+const LIVE_FX = ['price_eur', 'price_gbp', 'price_aed', 'price_try', 'price_cny', 'price_cad', 'price_aud', 'price_chf', 'price_sar', 'price_kwd',
+  'price_qar', 'price_omr', 'price_afn', 'price_rub', 'price_inr', 'price_azn', 'price_amd', 'price_jpy',
+  'crypto-tether-irr', 'crypto-bitcoin', 'crypto-ethereum'];
+// same shape as prices.json (see scripts/update_prices.py)
+function liveRead(cur, keys) {
+  const out = {};
+  for (const k of keys) {
+    const v = cur[k]; if (!v) continue;
+    const p = parseFloat(String(v.p).replace(/,/g, '')); if (!(p > 0)) continue;
+    out[k] = { p, t: v.ts || '' };
+    const c = parseFloat(v.dp || 0); if (isFinite(c)) out[k].c = Math.round(c * (v.dt === 'low' ? -1 : 1) * 100) / 100;
+  }
+  return out;
+}
+async function liveGet(url) {
+  const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 8000);
+  try {
+    const r = await fetch(url, { cache: 'no-store', signal: ac.signal });
+    if (!r.ok) throw 0;
+    const cur = (await r.json()).current;
+    const items = liveRead(cur, LIVE_KEYS);
+    if (Object.keys(items).length < LIVE_KEYS.length - 2) throw 0;
+    return { updated: new Date().toISOString().slice(0, 19) + 'Z', source: 'tgju.org', unit: 'rial', items, fx: liveRead(cur, LIVE_FX) };
+  } finally { clearTimeout(tm); }
+}
+async function liveFetch() {
+  for (const u of LIVE_URLS) { try { return await liveGet(u); } catch (e) {} }
+  throw 0;
+}
+async function fileFetch() {
+  const r = await fetch('prices.json', { cache: 'no-store' });
+  if (!r.ok) throw 0;
+  const j = await r.json();
+  if (!j.items || !j.updated) throw 0;
+  return j;
+}
+const LIVE_SAVE = 'cg-live';
+function liveSaved() { try { const j = JSON.parse(localStorage.getItem(LIVE_SAVE)); return j && j.items && j.updated ? j : null; } catch (e) { return null; } }
+let bbBusy = false;
 async function bbFetch(manual) {
+  if (bbBusy) return; bbBusy = true;
   for (const d of document.querySelectorAll('.bb-head .dot')) d.classList.add('busy');
   try {
-    const r = await fetch('prices.json', { cache: 'no-store' });
-    if (!r.ok) throw 0;
-    const j = await r.json();
-    if (!j.items || !j.updated) throw 0;
+    let j;
+    try { j = await liveFetch(); try { localStorage.setItem(LIVE_SAVE, JSON.stringify(j)); } catch (e) {} }
+    catch (e) {
+      j = await fileFetch();
+      const s = liveSaved(); if (s && s.updated > j.updated) j = s;
+    }
     if (!bb.src || j.updated >= bb.src.updated) bbUse(j, true); else bb.live = true;
     if (manual) toast('قیمت‌ها به‌روز شد');
   } catch (e) { if (manual) toast('اتصال برقرار نشد؛ آخرین قیمت‌های ذخیره‌شده نمایش داده می‌شود'); }
+  bbBusy = false;
   bbRender(); fxRender(); asRender();
   if (!$('view-hist').hidden) hsRender();
 }
+// refresh every minute while the page is on screen, and right away when the user comes back to it
+setInterval(() => { if (document.visibilityState === 'visible') bbFetch(false); }, 60000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && bb.src && Date.now() - Date.parse(bb.src.updated) > 60000) bbFetch(false);
+});
 const bbTone = p => !isFinite(p) ? '' : p < 0.03 ? 'low' : p < 0.10 ? 'mid' : 'high';
 const bbW = it => bb.w[it.id] ?? it.w;
 function bbCalc(it, c = bb.cur) {
@@ -1945,7 +1997,7 @@ function boot() {
   bindInput($('mB'), v => v >= 0 && v <= 100, v => { state.mB = v; update(); });
   bindInput($('mC'), v => v >= 0, v => { state.mC = v; update(); });
   $('sv-toggle').addEventListener('click', () => openSaved($('sv-sheet').hidden));
-  bbUse(SNAPSHOT, false);
+  { const s = liveSaved(); bbUse(s && s.updated > SNAPSHOT.updated ? s : SNAPSHOT, false); }
   bindInput($('bb-ons'), v => v > 0, v => { bb.cur.ons = v; bbRender(); });
   bindInput($('bb-silver'), v => v > 0, v => { bb.cur.silver = v; bbRender(); });
   bindInput($('bb-usd'), v => v > 0, v => { bb.cur.usd = v; bbRender(); });
