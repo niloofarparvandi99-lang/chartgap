@@ -5,10 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
+          set +e
           O="https://niloofarparvandi99-lang.github.io"
           for h in call1.tgju.org api.tgju.org api.nobitex.ir apiv2.nobitex.ir brsapi.ir api.wallex.ir cdn.tsetmc.com api.alanchand.com alanchand.com www.navasan.tech api.navasan.tech api.priceto.day tgju.org; do echo "DNS $h: $(dig +short $h | tr '\n' ' ')"; done
           for u in \
             "https://call1.tgju.org/ajax.json" \
+            "https://call2.tgju.org/ajax.json?x=1" \
             "https://call2.tgju.org/ajax.json" \
             "https://call3.tgju.org/ajax.json" \
             "https://api.nobitex.ir/market/stats?srcCurrency=usdt&dstCurrency=rls" \
@@ -21,7 +23,9 @@ jobs:
             "http://api.navasan.tech/latest/?api_key=freeKq" \
             "https://api.priceto.day/v1/latest/irr/usd" ; do
             echo "=== $u"
-            curl -s -m 25 -o /tmp/b -D /tmp/h -H "Origin: $O" -A "Mozilla/5.0" -w "code=%{http_code} time=%{time_total}\n" "$u"
+            curl -s -m 25 -o /tmp/b -D /tmp/h -H "Origin: $O" -A "Mozilla/5.0" --compressed -w "code=%{http_code} time=%{time_total} size=%{size_download}\n" "$u"
             grep -iE "^HTTP|access-control|cache-control|^server|cf-ray|age:" /tmp/h
             head -c 400 /tmp/b; echo
           done
+          for i in 1 2 3 4 5 6; do curl -s -m 20 https://call2.tgju.org/ajax.json | python3 -c "import json,sys;d=json.load(sys.stdin)['current'];print([(k,d[k]['p'],d[k]['ts']) for k in ('sekee','price_dollar_rl','geram18')])"; sleep 20; done
+          curl -s -m 20 -X OPTIONS -D - -o /dev/null -H "Origin: https://web.telegram.org" -H "Access-Control-Request-Method: GET" https://call2.tgju.org/ajax.json
