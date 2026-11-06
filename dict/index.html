@@ -59,6 +59,12 @@ h2 { font-size: 1.12rem; margin: 0; font-weight: 900; text-wrap: balance }
 @keyframes sway { 50% { transform: rotate(-1.2deg) translateY(1%) } }
 @keyframes fume { 0%, 70%, 100% { transform: none } 74% { transform: translateX(-1.2%) } 78% { transform: translateX(1.2%) } 82% { transform: translateX(-1%) } 86% { transform: translateX(1%) } }
 @keyframes poke { 40% { transform: scale(.94, 1.05) } }
+.home { align-items: stretch; text-align: center }
+.pet-stage { position: relative; display: grid; place-items: center; padding: 18px 0 6px }
+.pet-stage::before { content: ""; position: absolute; width: 92%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(247,217,138,.20), rgba(230,181,74,.06) 45%, transparent 70%); pointer-events: none }
+.pet-stage .pet.big { position: relative; width: min(320px, 82vw) }
+.home-nm { font-weight: 900; font-size: 1.35rem; color: var(--gold-2); display: inline-flex; align-items: center; gap: 4px }
+.home-msg { color: var(--muted); font-size: .9rem }
 .hero-tx { min-width: 0; display: flex; flex-direction: column; gap: 6px }
 .hero-tx .nm { font-weight: 900; color: var(--gold-2); font-size: 1.02rem; line-height: 1.4; display: flex; align-items: center; gap: 4px }
 .hero-tx .st { font-size: .8rem; color: var(--muted); line-height: 1.6 }
@@ -258,11 +264,11 @@ details.demo summary { font-weight: 800; font-size: .86rem; color: var(--muted);
 </div>
 
 <div class="tabs"><nav role="tablist" id="tabs">
-  <button type="button" role="tab" data-tab="map" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>نقشه</button>
+  <button type="button" role="tab" data-tab="home" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="13" rx="7" ry="8"/><path d="m8 11 2 2 2-2 2 2 2-2"/></svg>اژدها</button>
+  <button type="button" role="tab" data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>نقشه</button>
   <button type="button" role="tab" data-tab="review" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>مرور<span class="badge num" id="rev-badge" hidden></span></button>
   <button type="button" role="tab" data-tab="search" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>جست‌وجو</button>
   <button type="button" role="tab" data-tab="league" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>رتبه‌ها</button>
-  <button type="button" role="tab" data-tab="pet" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="13" rx="7" ry="8"/><path d="m8 11 2 2 2-2 2 2 2-2"/></svg>اژدها</button>
 </nav></div>
 
 <div class="screen" id="screen" hidden></div>
@@ -408,7 +414,7 @@ function syncDay() {
   while (S.today < d) newDay();
   return true;
 }
-let tab = 'map', preview = '', naming = false, nameErr = '', nameDraft = '', run = null, query = '', qLand = -1, onlyMarks = false, showN = 30;
+let tab = 'home', preview = '', naming = false, nameErr = '', nameDraft = '', run = null, query = '', qLand = -1, onlyMarks = false, showN = 30;
 const doneToday = () => S.lastDone === S.today;
 const awayDays = () => S.sleeping ? S.today - S.lastDone - 1 : 0;
 function moodNow() { if (preview) return preview; if (doneToday()) return 'happy'; const a = awayDays(); return a >= 3 ? 'angry' : a === 2 ? 'sad' : a === 1 ? 'sleepy' : 'normal'; }
@@ -547,6 +553,12 @@ function heroMsg() {
   return next ? `${fa(next - S.streak)} روز دیگه تا «${STAGES[stageOf(next)].name}»` : STAGES[st].sub;
 }
 
+function heroCta(big) {
+  const done = LESSONS.length <= S.lessons, c = big ? '' : ' sm';
+  return done ? '<div class="msg">کل دیکشنری رو تموم کردی 🎉</div>'
+    : doneToday() ? `<button class="btn ghost${c}" type="button" id="go-extra">یه درس دیگه هم بخون</button>`
+      : `<button class="btn${c}" type="button" id="go-lesson">${S.sleeping ? 'بیدارش کن: درس امروز' : 'درس امروز: ۴ کلمه'}</button>`;
+}
 function heroCard() {
   const st = stageOf(S.streak), mood = moodNow(), done = LESSONS.length <= S.lessons;
   const cta = done ? '<div class="msg">کل دیکشنری رو تموم کردی 🎉</div>'
@@ -655,10 +667,13 @@ function nameForm() {
 }
 function renderPet() {
   const st = stageOf(S.streak), mood = moodNow();
-  return `<div class="sec" style="align-items:stretch">
-    <button type="button" class="pet big mood-${mood}" id="pet" aria-label="نوازش اژدها">${petMedia(st, mood)}</button>
-    <div style="text-align:center"><div class="nm" style="font-weight:900;font-size:1.25rem;color:var(--gold-2)">${S.petName ? esc(S.petName) : STAGES[st].name} <button type="button" class="pen" id="rename" aria-label="اسم‌گذاری">${IC.pen}</button></div><div style="color:var(--muted);font-size:.86rem">${heroMsg()}</div></div>
+  const L = LESSONS[S.lessons];
+  return `<div class="sec home">
+    <div class="pet-stage"><button type="button" class="pet big mood-${mood}" id="pet" aria-label="نوازش اژدها">${petMedia(st, mood)}</button></div>
+    <div class="home-tx"><div class="home-nm">${S.petName ? esc(S.petName) : STAGES[st].name} <button type="button" class="pen" id="rename" aria-label="اسم‌گذاری">${IC.pen}</button></div><div class="home-msg">${heroMsg()}</div></div>
     ${naming ? nameForm() : ''}
+    ${heroCta(true)}
+    ${L ? `<button type="button" class="link" data-tab="map" style="align-self:center">ایستگاه ${fa(S.lessons + 1)} در سرزمین «${LAND_SHORT[L.land]}» · نقشه‌ی راه ‹</button>` : ''}
     <div class="stagebar" aria-label="مرحله‌ها">${STAGES.map((s, i) => `<i class="${i <= st ? 'on' : ''}"></i>`).join('')}</div>
     <div class="stats3"><div><b class="num">${fa(S.streak)}</b><small>رکورد فعلی</small></div><div><b class="num">${fa(S.best)}</b><small>بهترین رکورد</small></div><div><b class="num">${fa(S.chests.length)}</b><small>صندوق باز شده</small></div></div>
     <h2>مجموعه‌ی من</h2>
@@ -669,11 +684,12 @@ function renderPet() {
 function render() {
   renderTop();
   let h = '';
-  if (tab === 'map') h = heroCard() + (naming ? nameForm() : '') + renderMap();
+  if (tab === 'map') h = `<div class="sec"><h2>نقشه‌ی راه</h2><p>هر ایستگاه یه درس ۴ کلمه‌ایه. ته هر سرزمین یه صندوق گنج منتظرته.</p></div>` + renderMap();
+  else if (tab === 'home') h = renderPet();
   else if (tab === 'review') h = renderReview();
   else if (tab === 'search') h = renderSearch();
   else if (tab === 'league') h = renderLeague();
-  else h = renderPet();
+
   $('#view').innerHTML = h;
   document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
 }
@@ -780,7 +796,7 @@ document.addEventListener('click', e => {
     S.seen = STAGES.map((s, i) => i).filter(i => STAGES[i].at <= n);
     LESSONS.slice(0, S.lessons).forEach((L, k) => L.ids.forEach(i => { S.box[i] = [Math.min(4, Math.floor((n - k) / 5)), k + 3 + (i % 9)]; }));
     LANDS.forEach((l, li) => { if (l.lessons[l.lessons.length - 1] < S.lessons) S.chests.push(li); });
-    preview = ''; tab = 'map'; save(); render(); scrollToCur(); return;
+    preview = ''; tab = 'home'; save(); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); return;
   }
 });
 document.addEventListener('input', e => { if (e.target.id === 'q') { query = e.target.value; showN = 30; const pos = e.target.selectionStart; render(); const i = $('#q'); i.focus(); try { i.setSelectionRange(pos, pos); } catch (er) {} } });
