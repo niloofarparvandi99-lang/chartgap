@@ -63,6 +63,14 @@ button { cursor: pointer }
 .tools { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)) }
 .tool { display: flex; align-items: center; gap: 14px; padding: 18px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg, 16px); color: var(--fg); text-decoration: none; transition: border-color .15s, transform .15s }
 .tool:hover { border-color: var(--accent) } .tool:active { transform: scale(.985) }
+/* the finance dictionary: charcoal and gold in both themes so it stands apart from the tools */
+.tool.dict { background: radial-gradient(120% 140% at 100% 0%, #2A2F37 0%, #171B21 55%, #12161C 100%); border: 1px solid #6E5520; color: #EEF1F5; box-shadow: 0 8px 22px rgba(0,0,0,.28), inset 0 1px 0 rgba(247,217,138,.12) }
+.tool.dict:hover { border-color: #E6B54A }
+.tool.dict .tool-ic { background: linear-gradient(180deg, #F7D98A, #E6B54A); color: #1A1408 }
+.tool.dict .tool-ic svg { stroke-width: 2.4 }
+.tool.dict .tool-tx b { color: #F7D98A }
+.tool.dict .tool-tx small { color: #A9B3C0 }
+.tool.dict .tool-go { color: #E6B54A }
 .tool-ic { width: 56px; height: 56px; flex: none; border-radius: 14px; background: var(--raised); display: grid; place-items: center; color: var(--accent) }
 .tool-ic svg { width: 38px; height: 38px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round }
 .tool-ic .ax { stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 3 3 }
@@ -445,6 +453,11 @@ footer a { color: var(--accent) }
   <section id="view-home">
     <p class="home-lead">کدوم ابزار؟</p>
     <div class="tools">
+      <a class="tool dict" href="dict/">
+        <span class="tool-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 12c-5-3-11-4-17-3v27c6-1 12 0 17 3 5-3 11-4 17-3V9c-6-1-12 0-17 3z"/><path d="M24 12v27"/><path d="M12 17h6M12 23h6M30 17h6M30 23h6"/></svg></span>
+        <span class="tool-tx"><b>دیکشنری مالی</b><small>روزی ۴ واژه روی نقشه‌ی ۱۱ سرزمین، با اژدهایی که با رکوردت بزرگ میشه</small></span>
+        <span class="tool-go" aria-hidden="true">‹</span>
+      </a>
       <a class="tool" href="#options" data-go="payoff">
         <span class="tool-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><path class="ax" d="M4 30h40"/><path d="M4 38l18 0 22-26"/></svg></span>
         <span class="tool-tx"><b>ماشین‌حساب آپشن</b><small>سود و زیان استراتژی‌ها، قیمت تئوری، احتمال سود و وجه تضمین</small></span>
@@ -2165,6 +2178,7 @@ function boot() {
   // ?tool= survives inside Telegram, which replaces the hash with its own #tgWebAppData
   const route = first => {
     const h = location.hash, q = first && new URLSearchParams(location.search).get('tool');
+    if (h === '#dict' || q === 'dict') return location.replace('dict/');
     show(/^#p=/.test(h) ? 'payoff' : { '#options': 'payoff', '#payoff': 'payoff', '#pricing': 'pricing', '#gold': 'gold', '#bubble': 'bubble', '#fx': 'fx', '#history': 'hist', '#assets': 'assets' }[h]
       || { options: 'payoff', pricing: 'pricing', gold: 'gold', bubble: 'bubble', fx: 'fx', history: 'hist', assets: 'assets' }[q] || 'home');
   };
@@ -2213,7 +2227,9 @@ function boot() {
     new MutationObserver(header).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
     const TOOLS = { options: 'payoff', pricing: 'pricing', gold: 'gold', bubble: 'bubble', fx: 'fx', history: 'hist', assets: 'assets' };
-    if (sp && TOOLS[sp]) go(TOOLS[sp]);
+    let dictOnce = false; try { dictOnce = !sessionStorage.getItem('cg-dict-sp'); sessionStorage.setItem('cg-dict-sp', '1'); } catch (e) {}
+    if (sp === 'dict') { if (dictOnce) location.href = 'dict/'; }
+    else if (sp && TOOLS[sp]) go(TOOLS[sp]);
     else if (sp && /^[\w-]+$/.test(sp) && applyCode(sp, 'این موقعیت از لینک باز شد.')) go('payoff');
     if (!tg.BackButton || !tg.isVersionAtLeast('6.1')) return;
     const syncBack = () => { ($('view-home').hidden || !$('sv-sheet').hidden || !$('ex-sheet').hidden) ? tg.BackButton.show() : tg.BackButton.hide(); };

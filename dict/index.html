@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../icon-192.png">
+<meta name="theme-color" content="#12161C">
+<script src="https://telegram.org/js/telegram-web-app.js" async></script>
+<style>@font-face { font-family: "Vazirmatn"; src: url(vazirmatn.woff2) format("woff2"); font-weight: 100 900; font-display: swap }</style>
+<title>دیکشنری مالی · چارت گپ</title>
+<style>
+/* Layout: one phone-width column on deep graphite; a game map is the home, lessons open full screen, bottom tab bar.
+   Deliberately single-theme (always dark graphite) so the dragon art and gold read as one luxury world. */
+:root {
+  --bg: #12161C; --bg-2: #171C23; --surface: #1C222A; --raised: #252C36; --line: #2F3844;
+  --fg: #EEF1F5; --muted: #94A0AE; --dim: #6B7684;
+  --gold: #E6B54A; --gold-2: #F7D98A; --gold-deep: #A9781A; --on-gold: #1A1408;
+  --good: #3FD6A0; --good-soft: rgba(63,214,160,.13); --bad: #FF7A85; --bad-soft: rgba(255,122,133,.12); --ice: #8CC4FF;
+  --font: "Vazirmatn", Tahoma, "Segoe UI", sans-serif;
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --r-lg: 22px; --r-md: 14px; --r-sm: 10px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+html, body { min-height: 100% }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.75; margin: 0; -webkit-tap-highlight-color: transparent }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+button { font: inherit; color: inherit; cursor: pointer }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
+.app { max-width: 480px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 12px 110px; display: flex; flex-direction: column; gap: 16px }
+.lat { font-family: var(--serif); direction: ltr; unicode-bidi: isolate }
+.num { font-variant-numeric: tabular-nums }
+h2 { font-size: 1.12rem; margin: 0; font-weight: 900; text-wrap: balance }
+.sec { display: flex; flex-direction: column; gap: 12px }
+.sec > p { margin: 0; color: var(--muted); font-size: .88rem }
+
+/* top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; background: linear-gradient(var(--bg) 75%, transparent); margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding: 8px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.back { width: 38px; height: 38px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line); color: var(--fg) }
+.back svg { width: 18px; height: 18px }
+.back[hidden] { display: none }
+.brand { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.3 }
+.brand b { font-size: 1.02rem; font-weight: 900; color: var(--gold-2) }
+.brand small { color: var(--muted); font-size: .74rem }
+.pills { display: flex; gap: 6px; flex: none }
+.pill { flex: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px 3px 11px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-weight: 800; font-size: .88rem }
+.pill svg { width: 17px; height: 17px; flex: none }
+.pill.fire { color: var(--gold) } .pill.off { color: var(--dim) } .pill.ice { color: var(--ice) }
+
+/* hero: the dragon */
+.hero { position: relative; border-radius: var(--r-lg); overflow: hidden; background: #1B2027; border: 1px solid var(--line); display: grid; grid-template-columns: 132px 1fr; gap: 14px; padding: 12px; align-items: center }
+.pet { display: block; width: 132px; aspect-ratio: 1; border: 0; padding: 0; background: #1B2027; border-radius: 18px; overflow: hidden; cursor: pointer; transform-origin: 50% 100%; box-shadow: 0 10px 24px rgba(0,0,0,.4) }
+.pet video, .pet img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none }
+.pet.big { width: min(300px, 100%); border-radius: 26px; margin: 0 auto }
+.pet.poke { animation: poke .5s cubic-bezier(.3,1.6,.5,1) }
+.mood-normal img { animation: breathe 3.6s ease-in-out infinite } .mood-happy img { animation: hop 1.6s ease-in-out infinite }
+.mood-sleepy img { animation: breathe 6s ease-in-out infinite } .mood-sad img { animation: sway 5s ease-in-out infinite } .mood-angry img { animation: fume 2.4s ease-in-out infinite }
+.pet img { transform-origin: 50% 88% }
+@keyframes breathe { 50% { transform: scale(1.025, 1.035) } }
+@keyframes hop { 0%, 100% { transform: none } 30% { transform: translateY(-3%) scale(1.02) } 45% { transform: scale(1.03, .97) } }
+@keyframes sway { 50% { transform: rotate(-1.2deg) translateY(1%) } }
+@keyframes fume { 0%, 70%, 100% { transform: none } 74% { transform: translateX(-1.2%) } 78% { transform: translateX(1.2%) } 82% { transform: translateX(-1%) } 86% { transform: translateX(1%) } }
+@keyframes poke { 40% { transform: scale(.94, 1.05) } }
+.hero-tx { min-width: 0; display: flex; flex-direction: column; gap: 6px }
+.hero-tx .nm { font-weight: 900; color: var(--gold-2); font-size: 1.02rem; line-height: 1.4; display: flex; align-items: center; gap: 4px }
+.hero-tx .st { font-size: .8rem; color: var(--muted); line-height: 1.6 }
+.hero-tx .msg { font-size: .86rem; line-height: 1.7 }
+.btn { border: 0; border-radius: var(--r-md); padding: 12px 16px; font-weight: 800; font-size: .98rem; background: linear-gradient(180deg, var(--gold-2), var(--gold)); color: var(--on-gold); width: 100%; box-shadow: 0 6px 18px rgba(230,181,74,.22); transition: transform .1s }
+.btn:active { transform: scale(.98) }
+.btn.ghost { background: var(--raised); color: var(--fg); box-shadow: none }
+.btn.sm { padding: 9px 12px; font-size: .9rem }
+.btn[disabled] { opacity: .45; cursor: default; box-shadow: none }
+.pen { border: 0; background: none; padding: 2px; color: var(--dim); display: inline-grid; place-items: center }
+.pen svg { width: 15px; height: 15px }
+.link { border: 0; background: none; color: var(--gold); font-size: .82rem; font-weight: 800; padding: 0; align-self: flex-start }
+
+/* map */
+.map { position: relative; display: flex; flex-direction: column; gap: 0 }
+.land { position: relative; border-radius: var(--r-lg); padding: 0 0 18px; margin-bottom: 18px; background: linear-gradient(180deg, color-mix(in srgb, var(--lc) 16%, transparent), color-mix(in srgb, var(--lc) 5%, transparent)); border: 1px solid color-mix(in srgb, var(--lc) 30%, var(--line)) }
+.land-head { display: flex; align-items: center; gap: 12px; padding: 14px 14px 6px }
+.land-ic { width: 46px; height: 46px; border-radius: 14px; flex: none; display: grid; place-items: center; background: color-mix(in srgb, var(--lc) 26%, var(--surface)); color: var(--lc); border: 1px solid color-mix(in srgb, var(--lc) 45%, transparent) }
+.land-ic svg { width: 26px; height: 26px }
+.land-head b { display: block; font-size: .95rem; line-height: 1.5 }
+.land-head small { color: var(--muted); font-size: .76rem }
+.land.locked .land-ic { filter: grayscale(1); opacity: .5 }
+.track { position: relative; width: 100% }
+.track svg.path { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none }
+.node { position: absolute; transform: translate(50%, -50%); width: 62px; height: 62px; border-radius: 50%; border: 0; padding: 0; display: grid; place-items: center; font-weight: 900; font-size: 1rem }
+.node.done { background: radial-gradient(circle at 35% 30%, var(--gold-2), var(--gold) 60%, var(--gold-deep)); color: var(--on-gold); box-shadow: 0 5px 0 #6E4F10, 0 8px 18px rgba(0,0,0,.35) }
+.node.cur { background: radial-gradient(circle at 35% 30%, #fff, color-mix(in srgb, var(--lc) 70%, #fff) 45%, var(--lc)); color: #0E1218; box-shadow: 0 5px 0 color-mix(in srgb, var(--lc) 55%, #000), 0 0 0 6px color-mix(in srgb, var(--lc) 25%, transparent); animation: pulse 2s ease-in-out infinite }
+.node.wait { background: color-mix(in srgb, var(--lc) 30%, var(--raised)); color: var(--fg); box-shadow: 0 5px 0 #0B0E12 }
+.node.lock { background: var(--raised); color: var(--dim); box-shadow: 0 5px 0 #0B0E12 }
+.node svg { width: 26px; height: 26px }
+.node.chest { width: 74px; height: 74px; border-radius: 22px; background: linear-gradient(180deg, #3A2E1A, #241C10); box-shadow: 0 5px 0 #0B0E12; color: var(--gold) }
+.node.chest.open { background: linear-gradient(180deg, var(--gold-2), var(--gold)); color: var(--on-gold) }
+.node.chest.ready { animation: pulse 1.6s ease-in-out infinite; box-shadow: 0 5px 0 #0B0E12, 0 0 0 6px rgba(230,181,74,.25) }
+.node.chest svg { width: 40px; height: 40px }
+@keyframes pulse { 50% { transform: translate(50%, -50%) scale(1.07) } }
+.me-tag { position: absolute; width: 54px; height: 54px; border-radius: 14px; overflow: hidden; transform: translate(50%, -50%); border: 2px solid var(--gold); box-shadow: 0 6px 16px rgba(0,0,0,.45); pointer-events: none }
+.me-tag img { width: 100%; height: 100%; object-fit: cover; display: block }
+
+/* lesson screen */
+.screen { position: fixed; inset: 0; z-index: 20; background: var(--bg); overflow-y: auto; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px) }
+.screen-in { max-width: 480px; margin: 0 auto; padding: 12px max(16px, env(safe-area-inset-right, 0px)) 28px max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 14px; min-height: 100% }
+.scr-head { display: flex; align-items: center; gap: 12px }
+.x { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; flex: none; padding: 0 }
+.x svg { width: 18px; height: 18px }
+.prog { flex: 1; height: 10px; border-radius: 99px; background: var(--raised); overflow: hidden }
+.prog i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-2)); border-radius: 99px; transition: width .4s }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 18px 16px; display: flex; flex-direction: column; gap: 12px }
+.eyebrow { font-size: .76rem; color: var(--muted); font-weight: 700; display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 9px; border-radius: 999px; background: var(--raised); color: var(--muted); font-size: .72rem; font-weight: 700 }
+a.chip { text-decoration: none; color: var(--gold) }
+.chip.new { background: var(--good-soft); color: var(--good) }
+.word-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; direction: ltr }
+.word-en { font-family: var(--serif); font-weight: 700; font-size: 1.9rem; line-height: 1.15; overflow-wrap: anywhere; color: var(--fg) }
+.say { width: 44px; height: 44px; flex: none; border-radius: 50%; border: 1px solid var(--line); background: var(--raised); color: var(--gold); display: grid; place-items: center; padding: 0 }
+.say svg { width: 20px; height: 20px }
+.say.on { background: var(--gold); color: var(--on-gold) }
+.word-fa { font-weight: 800; font-size: 1.25rem; color: var(--gold-2) }
+.word-def { margin: 0; font-size: 1rem; max-width: 60ch }
+.tool-link { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); background: var(--raised); border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px 12px; font-size: .86rem; font-weight: 700 }
+.tool-link span { flex: 1 }
+.tool-link svg { width: 20px; height: 20px; color: var(--gold); flex: none }
+.dots { display: flex; gap: 6px; justify-content: center }
+.dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--raised) }
+.dots i.on { background: var(--gold); width: 22px; border-radius: 99px }
+.row2 { display: flex; gap: 10px }
+.row2 > * { flex: 1 }
+.qtext { font-size: 1.02rem; font-weight: 700 }
+.qtext .lat { font-size: 1.45rem; font-weight: 700; display: block; text-align: left; margin-top: 4px }
+.qtext .def { display: block; font-weight: 500; margin-top: 6px; color: var(--fg) }
+.opts { display: flex; flex-direction: column; gap: 8px }
+.opt { text-align: right; background: var(--surface); border: 2px solid var(--line); border-radius: var(--r-md); padding: 11px 14px; font-weight: 600; line-height: 1.6; transition: border-color .15s, background .15s }
+.opt:hover { border-color: var(--gold) }
+.opt.right { border-color: var(--good); background: var(--good-soft) }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); animation: shake .35s }
+.opt[disabled] { cursor: default }
+@keyframes shake { 25% { transform: translateX(-6px) } 50% { transform: translateX(5px) } 75% { transform: translateX(-3px) } }
+.feedback { border-radius: var(--r-md); padding: 10px 14px; font-weight: 700; font-size: .92rem }
+.feedback.ok { background: var(--good-soft); color: var(--good) } .feedback.no { background: var(--bad-soft); color: var(--bad) }
+.spacer { flex: 1 }
+.done-hero { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px }
+.done-hero .big { font-size: 2.4rem; font-weight: 900; color: var(--gold-2); line-height: 1.1 }
+.stats3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100% }
+.stats3 div { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px 6px; text-align: center }
+.stats3 b { display: block; font-size: 1.3rem; color: var(--gold-2) }
+.stats3 small { color: var(--muted); font-size: .74rem }
+
+/* search */
+.search { position: relative }
+.search input { width: 100%; font: inherit; font-size: 1rem; padding: 12px 44px 12px 14px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface); color: var(--fg) }
+.search input:focus { outline: none; border-color: var(--gold) }
+.search svg { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: var(--dim) }
+.filters { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none }
+.filters button { flex: none; border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 4px 12px; font-size: .8rem; font-weight: 700 }
+.filters button[aria-pressed="true"] { background: var(--gold); color: var(--on-gold); border-color: var(--gold) }
+.res { display: flex; flex-direction: column; gap: 8px }
+.res-item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px 12px; display: flex; flex-direction: column; gap: 4px }
+.res-top { display: flex; align-items: center; gap: 8px }
+.res-top .en { font-family: var(--serif); font-weight: 700; font-size: 1.05rem; direction: ltr; flex: 1; text-align: left; min-width: 0; overflow-wrap: anywhere }
+.res-top .fa { font-weight: 800; color: var(--gold-2); font-size: .92rem }
+.res-item p { margin: 0; font-size: .88rem; color: var(--muted) }
+.res-item .acts { display: flex; gap: 6px; align-items: center }
+.ib { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); display: grid; place-items: center; padding: 0; color: var(--muted); flex: none }
+.ib svg { width: 17px; height: 17px }
+.ib.on { color: var(--gold); border-color: var(--gold) }
+.learned { font-size: .7rem; color: var(--good); font-weight: 800 }
+.more { text-align: center; color: var(--muted); font-size: .82rem }
+
+/* league / dragon */
+.league { display: flex; flex-direction: column; gap: 6px }
+.lrow { display: grid; grid-template-columns: 26px 38px 1fr auto; gap: 10px; align-items: center; padding: 8px 12px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line) }
+.lrow.me { border: 2px solid var(--gold) }
+.lrow .rk { font-weight: 900; color: var(--dim); text-align: center } .lrow.top3 .rk { color: var(--gold) }
+.lrow .av { width: 38px; height: 38px; border-radius: 10px; overflow: hidden } .lrow .av img { width: 100%; height: 100%; object-fit: cover; display: block }
+.lrow .nm { font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .lrow .nm small { display: block; font-weight: 500; color: var(--muted); font-size: .72rem; line-height: 1.3 }
+.lrow .sc { font-weight: 800; color: var(--gold); display: flex; align-items: center; gap: 3px } .lrow .sc svg { width: 15px; height: 15px }
+.pct { text-align: center; font-weight: 800; font-size: 1.05rem } .pct span { color: var(--gold-2) }
+.note { color: var(--muted); font-size: .78rem; text-align: center; margin: 0 }
+.coll { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px }
+.cell { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 8px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px }
+.cell .ic { width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden } .cell .ic img { width: 100%; height: 100%; object-fit: cover; display: block }
+.cell .ic img.locked { filter: grayscale(1) brightness(.22) blur(2px) }
+.cell b { font-size: .8rem; line-height: 1.5 } .cell small { color: var(--muted); font-size: .7rem }
+.stagebar { display: flex; gap: 4px } .stagebar i { flex: 1; height: 6px; border-radius: 99px; background: var(--raised) } .stagebar i.on { background: var(--gold) }
+.name-form { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px }
+.name-form label { font-weight: 800; font-size: .9rem }
+.nf-row { display: flex; gap: 8px }
+.nf-row input { flex: 1; min-width: 0; font: inherit; font-size: 1rem; padding: 10px 12px; border-radius: var(--r-sm); border: 2px solid var(--line); background: var(--bg); color: var(--fg) }
+.nf-row input:focus { outline: none; border-color: var(--gold) } .nf-row input[aria-invalid="true"] { border-color: var(--bad) }
+.nf-row .btn { width: auto; padding: 10px 18px }
+.name-form small { color: var(--muted); font-size: .76rem; line-height: 1.6 } .name-form small.err { color: var(--bad); font-weight: 700 }
+
+/* demo */
+details.demo { border: 1px dashed var(--line); border-radius: var(--r-md); padding: 10px 14px }
+details.demo summary { font-weight: 800; font-size: .86rem; color: var(--muted); cursor: pointer }
+.demo-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px }
+.demo-grid button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: .8rem; font-weight: 700 }
+.demo p { margin: 8px 0 0; font-size: .78rem; color: var(--muted) }
+
+/* tabs */
+.tabs { position: fixed; inset: auto 0 0; background: rgba(18,22,28,.94); backdrop-filter: blur(10px); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); z-index: 8 }
+.tabs nav { max-width: 480px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr) }
+.tabs button { border: 0; background: none; padding: 8px 0 10px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: .7rem; font-weight: 700; color: var(--dim); position: relative }
+.tabs button svg { width: 23px; height: 23px }
+.tabs button[aria-selected="true"] { color: var(--gold) }
+.tabs .badge[hidden] { display: none }
+.tabs .badge { position: absolute; top: 4px; left: calc(50% + 6px); min-width: 17px; height: 17px; border-radius: 99px; background: var(--bad); color: #fff; font-size: .64rem; display: grid; place-items: center; padding: 0 4px }
+
+/* evolution / reward overlay */
+.evo { position: fixed; inset: 0; z-index: 30; background: rgba(6,8,12,.88); display: grid; place-items: center; padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)) }
+.evo[hidden] { display: none }
+.evo-box { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 360px }
+.evo-pet { width: 240px; max-width: 100%; aspect-ratio: 1; position: relative }
+.evo-stack, .evo-stack > div { position: absolute; inset: 0 }
+.evo-pet img, .evo-pet video { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 26px }
+.evo-pet .flash { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, #fff 0%, rgba(247,217,138,.85) 30%, transparent 65%); opacity: 0; pointer-events: none }
+.evo.go .flash { animation: flash 1.6s ease-out .9s } .evo.go .old { animation: shakeOld .9s ease-in both } .evo .neu { opacity: 0 } .evo.go .neu { animation: popIn .7s cubic-bezier(.2,1.6,.4,1) 1.2s both }
+.evo h3 { margin: 0; font-size: 1.45rem; font-weight: 900; color: var(--gold-2) } .evo p { margin: 0; color: #C9D3E2; font-size: .95rem }
+.evo .btn { margin-top: 8px; max-width: 260px }
+.evo .chest-big { width: 140px; height: 140px; color: var(--gold) }
+@keyframes flash { 0% { opacity: 0; transform: scale(.3) } 30% { opacity: 1; transform: scale(1.4) } 100% { opacity: 0; transform: scale(1.8) } }
+@keyframes shakeOld { 20% { transform: rotate(-6deg) } 40% { transform: rotate(7deg) } 60% { transform: rotate(-9deg) scale(1.04) } 80% { transform: rotate(10deg) scale(1.08) } 100% { transform: scale(1.15); opacity: 0 } }
+@keyframes popIn { from { opacity: 0; transform: scale(.3) } to { opacity: 1; transform: scale(1) } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important } .evo .neu { opacity: 1 } .evo .old { opacity: 0 } }
+</style>
+
+</head><body>
+<div class="app" dir="rtl">
+  <header class="top">
+    <a class="back" id="back" href="../" hidden aria-label="برگشت به ابزارها"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></a>
+    <div class="brand"><b>دیکشنری مالی</b><small>چارت گپ · ۴۸۵ واژه در ۱۱ سرزمین</small></div>
+    <div class="pills" id="pills"></div>
+  </header>
+  <main id="view"></main>
+  <details class="demo" id="demo">
+    <summary>ابزار آزمایشی (فقط توی این نمونه)</summary>
+    <div class="demo-grid">
+      <button type="button" id="d-next">برو به فردا</button>
+      <button type="button" id="d-skip">یه روز جا بنداز</button>
+      <button type="button" data-jump="6">روز ۶</button>
+      <button type="button" data-jump="13">روز ۱۳</button>
+      <button type="button" data-jump="20">روز ۲۰</button>
+      <button type="button" data-jump="29">روز ۲۹</button>
+      <button type="button" data-jump="59">روز ۵۹</button>
+      <button type="button" data-jump="99">روز ۹۹</button>
+      <button type="button" id="d-reset">شروع از اول</button>
+    </div>
+    <div class="demo-grid">
+      <button type="button" data-mood="">حالت واقعی</button>
+      <button type="button" data-mood="normal">عادی</button>
+      <button type="button" data-mood="happy">خوشحال</button>
+      <button type="button" data-mood="sleepy">خواب‌آلود</button>
+      <button type="button" data-mood="sad">ناراحت</button>
+      <button type="button" data-mood="angry">عصبانی</button>
+    </div>
+    <p>«روز ۱۳» یعنی ۱۳ روز پشت‌سرهم درس خوندی. «برو به فردا» درس بعدی رو باز می‌کنه. «یه روز جا بنداز» رو یک، دو یا سه بار بزن تا خواب‌آلود، ناراحت و عصبانی شدن اژدها رو ببینی.</p>
+  </details>
+</div>
+
+<div class="tabs"><nav role="tablist" id="tabs">
+  <button type="button" role="tab" data-tab="map" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>نقشه</button>
+  <button type="button" role="tab" data-tab="review" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>مرور<span class="badge num" id="rev-badge" hidden></span></button>
+  <button type="button" role="tab" data-tab="search" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>جست‌وجو</button>
+  <button type="button" role="tab" data-tab="league" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>رتبه‌ها</button>
+  <button type="button" role="tab" data-tab="pet" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="13" rx="7" ry="8"/><path d="m8 11 2 2 2-2 2 2 2-2"/></svg>اژدها</button>
+</nav></div>
+
+<div class="screen" id="screen" hidden></div>
+<div class="evo" id="evo" hidden></div>
+
+<script>
+const WORDS = [{"en":"Bid","fa":"قیمت خرید (تقاضا)","d":"بالاترین قیمتی که خریدار حاضر است برای یک دارایی بپردازد.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Ask (Offer)","fa":"قیمت فروش (عرضه)","d":"پایین‌ترین قیمتی که فروشنده حاضر است دارایی را به آن بفروشد.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Bid-Ask Spread","fa":"اسپرد خرید و فروش","d":"فاصله میان بهترین قیمت خرید و بهترین قیمت فروش؛ معیاری از نقدشوندگی و هزینه معامله.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Liquidity","fa":"نقدشوندگی","d":"توانایی خرید یا فروش سریع دارایی بدون اثر قابل توجه بر قیمت آن.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Market Order","fa":"سفارش بازار","d":"سفارشی که بلافاصله با بهترین قیمت موجود در بازار اجرا می‌شود.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Limit Order","fa":"سفارش محدود","d":"سفارشی که فقط در قیمت تعیین‌شده یا بهتر از آن اجرا می‌شود.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Stop-Loss Order","fa":"سفارش حد ضرر","d":"سفارشی که با رسیدن قیمت به سطح معین فعال می‌شود تا زیان را محدود کند.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Order Book","fa":"دفتر سفارش‌ها","d":"فهرست سفارش‌های خرید و فروش ثبت‌شده در سطوح مختلف قیمتی.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Market Maker","fa":"بازارگردان","d":"نهادی که با ارائه همزمان قیمت خرید و فروش، نقدشوندگی بازار را تأمین می‌کند.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Broker","fa":"کارگزار","d":"واسطه‌ای که سفارش‌های مشتریان را در ازای کارمزد در بازار اجرا می‌کند.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Dealer","fa":"معامله‌گر اصیل (دیلر)","d":"نهادی که با حساب و دارایی خود معامله می‌کند و طرف معامله مشتری قرار می‌گیرد.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Clearing House","fa":"اتاق پایاپای","d":"نهادی که تسویه معاملات را تضمین و ریسک طرف مقابل را مدیریت می‌کند.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Settlement","fa":"تسویه","d":"انتقال نهایی دارایی و وجه میان طرفین پس از انجام معامله.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"T+2 Settlement","fa":"تسویه دو روز کاری بعد","d":"انجام تسویه معامله دو روز کاری پس از تاریخ معامله.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Long Position","fa":"موقعیت خرید","d":"داشتن دارایی یا قرارداد با انتظار افزایش قیمت.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Short Position","fa":"موقعیت فروش","d":"فروش دارایی یا تعهد به فروش با انتظار کاهش قیمت.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Short Selling","fa":"فروش استقراضی","d":"فروش دارایی قرض‌گرفته‌شده به امید بازخرید ارزان‌تر در آینده.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Leverage","fa":"اهرم","d":"استفاده از وجوه قرضی یا مشتقات برای بزرگ‌تر کردن اندازه موقعیت نسبت به سرمایه.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Margin","fa":"وجه تضمین","d":"مبلغی که معامله‌گر برای پوشش زیان‌های احتمالی نزد کارگزار یا اتاق پایاپای می‌سپارد.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Margin Call","fa":"اخطار افزایش وجه تضمین","d":"درخواست کارگزار برای واریز وجه بیشتر هنگام کاهش وجه تضمین از حد مجاز.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Volume","fa":"حجم معاملات","d":"تعداد واحدهای معامله‌شده یک دارایی در دوره زمانی معین.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Volatility","fa":"نوسان‌پذیری","d":"میزان پراکندگی تغییرات قیمت یک دارایی در طول زمان.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Bull Market","fa":"بازار گاوی (صعودی)","d":"دوره‌ای با روند افزایشی پایدار قیمت‌ها و خوشبینی فعالان بازار.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Bear Market","fa":"بازار خرسی (نزولی)","d":"دوره‌ای با افت پایدار قیمت‌ها، معمولاً بیش از ۲۰ درصد از اوج.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Arbitrage","fa":"آربیتراژ","d":"کسب سود بدون ریسک از اختلاف قیمت یک دارایی در دو بازار یا دو شکل مختلف.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Hedging","fa":"پوشش ریسک","d":"اتخاذ موقعیت مخالف برای کاهش ریسک ناشی از نوسان قیمت یک دارایی.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Speculation","fa":"سفتهبازی","d":"پذیرش آگاهانه ریسک قیمتی به امید کسب سود از تغییرات قیمت.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Slippage","fa":"لغزش قیمت","d":"تفاوت میان قیمت مورد انتظار و قیمت واقعی اجرای سفارش.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Circuit Breaker","fa":"توقف خودکار معاملات","d":"سازوکاری که در نوسان شدید، معاملات کل بازار یا یک نماد را موقتا متوقف می‌کند.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Price Limit","fa":"دامنه نوسان","d":"حداکثر تغییر مجاز قیمت یک دارایی در یک روز معاملاتی.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Benchmark","fa":"شاخص مبنا","d":"معیاری که عملکرد یک دارایی یا سبد با آن مقایسه می‌شود.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Index","fa":"شاخص","d":"سنجه‌ای آماری که تغییرات قیمت گروهی از دارایی‌ها را نشان می‌دهد.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Portfolio","fa":"سبد دارایی (پرتفوی)","d":"مجموعه دارایی‌هایی که یک سرمایه‌گذار در اختیار دارد.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Asset Class","fa":"طبقه دارایی","d":"گروهی از دارایی‌ها با ویژگی‌های مشابه مانند سهام، اوراق یا کالا.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Primary Market","fa":"بازار اولیه","d":"بازاری که اوراق بهادار برای نخستین بار در آن عرضه می‌شوند.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Secondary Market","fa":"بازار ثانویه","d":"بازاری که اوراق پس از انتشار میان سرمایه‌گذاران دادوستد می‌شوند.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"IPO (Initial Public Offering)","fa":"عرضه اولیه","d":"نخستین عرضه سهام یک شرکت به عموم سرمایه‌گذاران.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"OTC (Over-the-Counter)","fa":"بازار خارج از بورس","d":"معاملاتی که مستقیماً میان طرفین و خارج از بورس رسمی انجام می‌شود.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Algorithmic Trading","fa":"معاملات الگوریتمی","d":"اجرای خودکار سفارش‌ها بر اساس قواعد و مدل‌های از پیش تعریف‌شده.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"High-Frequency Trading (HFT)","fa":"معاملات بسامد بالا","d":"معاملات الگوریتمی با سرعت بسیار زیاد و تعداد سفارش‌های فراوان.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Retail Investor","fa":"سرمایه‌گذار خرد","d":"فرد حقیقی که با سرمایه شخصی و حجم کم معامله می‌کند.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Institutional Investor","fa":"سرمایه‌گذار نهادی","d":"نهادهایی مانند صندوق‌ها و بیمه‌ها که حجم بزرگی از سرمایه را مدیریت می‌کنند.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Mark-to-Market","fa":"ارزش‌گذاری به قیمت روز","d":"بهروزرسانی ارزش موقعیت‌ها بر اساس آخرین قیمت بازار.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Underlying Asset","fa":"دارایی پایه","d":"داراییای که ارزش قرارداد مشتقه از آن مشتق می‌شود.","c":"مفاهیم پایه بازار و معاملات","n":false},{"en":"Securities","fa":"اوراق بهادار","d":"هر ورقه قابل معامله‌ای که حق مالکیت یا طلب را نشان می‌دهد؛ مانند سهام، اوراق قرضه و صکوک.","c":"مفاهیم پایه بازار و معاملات","n":true},{"en":"Natural Person","fa":"شخص حقیقی","d":"سرمایه‌گذار فردی؛ در بورس تهران «ورود و خروج پول حقیقی» از شاخص‌های پرطرفدار رفتار بازار است.","c":"مفاهیم پایه بازار و معاملات","n":true},{"en":"Legal Person","fa":"شخص حقوقی","d":"سرمایه‌گذار در قالب شرکت، صندوق یا نهاد؛ در مقابل شخص حقیقی.","c":"مفاهیم پایه بازار و معاملات","n":true},{"en":"Quote-Driven Market","fa":"بازار مظنه‌محور","d":"بازاری که قیمت‌ها را بازارگردان‌ها اعلام می‌کنند؛ رایج در بازار اوراق بدهی و ارز.","c":"مفاهیم پایه بازار و معاملات","n":true},{"en":"Order-Driven Market","fa":"بازار سفارش‌محور","d":"بازاری که قیمت از تطبیق سفارش‌های خرید و فروش معامله‌گران شکل می‌گیرد؛ مانند بازار سهام.","c":"مفاهیم پایه بازار و معاملات","n":true},{"en":"ISIN Code","fa":"شناسه بین‌المللی اوراق بهادار (ISIN)","d":"کد ۱۲ کاراکتری یکتای هر ورقه بهادار که دو حرف اول آن نشان‌دهنده کشور ناشر است.","c":"مفاهیم پایه بازار و معاملات","n":true},{"en":"Securities Lending","fa":"قرض‌دهی اوراق بهادار","d":"قرض دادن موقت سهام یا اوراق در ازای کارمزد و وثیقه؛ پیش‌نیاز فروش استقراضی.","c":"مفاهیم پایه بازار و معاملات","n":true},{"en":"Prospectus","fa":"امیدنامه (بیانیه ثبت)","d":"سند رسمی عرضه اوراق که اطلاعات ناشر، طرح، ریسک‌ها و شرایط عرضه را افشا می‌کند.","c":"مفاهیم پایه بازار و معاملات","n":true},{"en":"Private Placement","fa":"عرضه خصوصی","d":"فروش اوراق به گروه محدودی از سرمایه‌گذاران نهادی، بدون عرضه عمومی.","c":"مفاهیم پایه بازار و معاملات","n":true},{"en":"Dual Listing","fa":"پذیرش دوگانه","d":"درج سهام یک شرکت به‌طور هم‌زمان در دو بورس، معمولاً در دو کشور.","c":"مفاهیم پایه بازار و معاملات","n":true},{"en":"Commodity","fa":"کالا (کامودیتی)","d":"کالای پایه و استانداردشده مانند نفت، فلزات یا غلات که در بازارها معامله می‌شود.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Hard Commodities","fa":"کالاهای سخت","d":"کالاهای استخراجی مانند نفت، گاز و فلزات.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Soft Commodities","fa":"کالاهای نرم","d":"محصولات کشاورزی مانند قهوه، شکر، کاکائو، پنبه و غلات.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Base Metals","fa":"فلزات پایه","d":"فلزات صنعتی غیرگرانبها مانند مس، آلومینیوم، روی و نیکل.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Precious Metals","fa":"فلزات گرانبها","d":"فلزات کمیاب با ارزش بالا مانند طلا، نقره، پلاتین و پالادیوم.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Energy Commodities","fa":"کالاهای انرژی","d":"نفت خام، گاز طبیعی، فرآورده‌های نفتی، زغالسنگ و برق.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Spot Price","fa":"قیمت نقدی (اسپات)","d":"قیمت تحویل فوری یک کالا در بازار نقد.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Spot Market","fa":"بازار نقد","d":"بازاری که کالا در آن برای تحویل فوری معامله می‌شود.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Physical Market","fa":"بازار فیزیکی","d":"بازار معامله و تحویل واقعی کالا، در برابر بازار کاغذی و مشتقه.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Contango","fa":"کانتانگو","d":"وضعیتی که قیمت قراردادهای آتی بالاتر از قیمت نقدی است.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Backwardation","fa":"بکوارداسیون","d":"وضعیتی که قیمت قراردادهای آتی پایین‌تر از قیمت نقدی است؛ نشانه کمبود عرضه فوری.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Forward Curve","fa":"منحنی قیمت آتی","d":"نمودار قیمت قراردادهای آتی یک کالا در سررسیدهای مختلف.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Cost of Carry","fa":"هزینه نگهداری","d":"مجموع هزینه انبارداری، بیمه و تأمین مالی منهای بازده نگهداری کالا.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Convenience Yield","fa":"بازده رفاهی","d":"منفعت ناشی از در اختیار داشتن فیزیکی کالا به جای قرارداد آتی.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Storage Cost","fa":"هزینه انبارداری","d":"هزینه نگهداری فیزیکی کالا تا زمان تحویل یا فروش.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Basis","fa":"بیس (مبنا)","d":"اختلاف میان قیمت نقدی کالا و قیمت قرارداد آتی آن.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Brent Crude","fa":"نفت برنت","d":"نفت شاخص دریای شمال و مرجع قیمت‌گذاری بخش بزرگی از نفت جهان.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"WTI (West Texas Intermediate)","fa":"نفت وست تگزاس اینترمدیت","d":"نفت شاخص آمریکا که قراردادهای آتی آن در نایمکس معامله می‌شود.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"OPEC+","fa":"اوپک پلاس","d":"ائتلاف کشورهای عضو اوپک و تولیدکنندگان غیرعضو برای هماهنگی سطح تولید نفت.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Crack Spread","fa":"اسپرد پالایشی","d":"اختلاف قیمت فرآورده‌های نفتی و نفت خام؛ معیار حاشیه سود پالایشگاه.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Spark Spread","fa":"اسپرد نیروگاهی","d":"اختلاف قیمت برق و هزینه گاز مصرفی؛ معیار حاشیه سود نیروگاه گازی.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Crush Spread","fa":"اسپرد فرآوری سویا","d":"اختلاف ارزش روغن و کنجاله سویا با قیمت دانه سویا.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Barrel (bbl)","fa":"بشکه","d":"واحد اندازه‌گیری نفت برابر ۴۲ گالن آمریکایی یا حدود ۱۵۹ لیتر.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Troy Ounce (oz t)","fa":"اونس تروا","d":"واحد وزن فلزات گرانبها برابر حدود ۳۱٫۱ گرم.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Metric Ton (t)","fa":"تن متریک","d":"واحد وزن برابر ۱۰۰۰ کیلوگرم؛ رایج در معاملات فلزات و محصولات کشاورزی.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"MMBtu","fa":"میلیون واحد حرارتی بریتانیا","d":"واحد رایج قیمت‌گذاری گاز طبیعی.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"LME (London Metal Exchange)","fa":"بورس فلزات لندن","d":"بزرگ‌ترین بورس جهانی معاملات فلزات پایه.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"COMEX","fa":"کامکس","d":"بخش فلزات گروه CME در نیویورک و مرجع معاملات آتی طلا، نقره و مس.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"NYMEX","fa":"نایمکس","d":"بورس کالای نیویورک و مرجع اصلی قراردادهای آتی انرژی.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"LBMA Gold Price","fa":"قیمت مرجع طلای لندن","d":"قیمت روزانه مرجع طلا که از طریق حراج الکترونیکی LBMA تعیین می‌شود.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Bullion","fa":"شمش","d":"فلز گرانبها به شکل شمش یا سکه با خلوص بالا که بر اساس وزن ارزش‌گذاری می‌شود.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Fineness (Purity)","fa":"عیار","d":"میزان خلوص فلز گرانبها، مانند ۹۹۹٫۹ برای طلای خالص.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Warehouse Receipt","fa":"گواهی سپرده کالایی","d":"سندی که مالکیت مقدار معینی کالای انبارشده در انبار مورد تأیید بورس را نشان می‌دهد.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Inventories (Stocks)","fa":"موجودی انبار","d":"مقدار کالای ذخیره‌شده در انبارهای بورس یا کشورها؛ شاخص مهم عرضه و تقاضا.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Supply Deficit","fa":"کسری عرضه","d":"وضعیتی که تقاضای کالا از عرضه آن بیشتر است.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Supply Surplus","fa":"مازاد عرضه","d":"وضعیتی که عرضه کالا از تقاضای آن بیشتر است.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Commodity Supercycle","fa":"ابرچرخه کالایی","d":"دوره چندساله افزایش قیمت کالاها به دلیل رشد ساختاری تقاضا.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"TC/RC (Treatment & Refining Charges)","fa":"هزینه عملیات ذوب و پالایش","d":"کارمزدی که ذوب‌کننده‌ها برای فرآوری کنسانتره مس دریافت می‌کنند؛ شاخص تنگی بازار کنسانتره.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Concentrate","fa":"کنسانتره","d":"ماده معدنی فرآوری‌شده با عیار بالاتر که برای ذوب و پالایش ارسال می‌شود.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Cathode","fa":"کاتد","d":"شکل نهایی فلز تصفیهشده، مانند کاتد مس با خلوص بالا.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Physical Premium","fa":"پریمیوم فیزیکی","d":"مبلغ اضافه بر قیمت مرجع به دلیل کیفیت، محل تحویل یا شرایط بازار.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Discount","fa":"کسورات (دیسکانت)","d":"مبلغ کمتر از قیمت مرجع به دلیل کیفیت پایین‌تر یا شرایط بازار.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"FOB (Free on Board)","fa":"تحویل روی عرشه (فوب)","d":"شرط تحویلی که مسئولیت فروشنده با بارگیری کالا روی کشتی پایان می‌یابد.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"CIF (Cost, Insurance & Freight)","fa":"سیف","d":"شرط تحویلی که هزینه کالا، بیمه و حمل تا بندر مقصد بر عهده فروشنده است.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Incoterms","fa":"اینکوترمز","d":"مجموعه قواعد بین‌المللی تعیین مسئولیت خریدار و فروشنده در تجارت کالا.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Commodity Exchange","fa":"بورس کالا","d":"بازار سازمانیافته برای معامله نقدی و مشتقه کالاها.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Renewable Energy Certificate (REC)","fa":"گواهی انرژی تجدیدپذیر","d":"گواهی که تولید یک واحد برق از منابع تجدیدپذیر را تأیید می‌کند.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Carbon Credit","fa":"اعتبار کربن","d":"گواهی قابل معامله که حق انتشار یک تن دیاکسید کربن یا معادل آن را نشان می‌دهد.","c":"بازارهای کالایی (کامودیتی)","n":false},{"en":"Option","fa":"اختیار معامله (آپشن)","d":"قراردادی که به دارنده حق، و نه تعهد، خرید یا فروش دارایی پایه در قیمتی معین را می‌دهد.","c":"اختیار معامله (آپشن)","n":false},{"en":"Call Option","fa":"اختیار خرید","d":"حق خرید دارایی پایه در قیمت اعمال، در سررسید یا تا پیش از آن.","c":"اختیار معامله (آپشن)","n":false},{"en":"Put Option","fa":"اختیار فروش","d":"حق فروش دارایی پایه در قیمت اعمال، در سررسید یا تا پیش از آن.","c":"اختیار معامله (آپشن)","n":false},{"en":"Strike Price (Exercise Price)","fa":"قیمت اعمال","d":"قیمتی که دارنده اختیار می‌تواند دارایی پایه را به آن بخرد یا بفروشد.","c":"اختیار معامله (آپشن)","n":false},{"en":"Option Premium","fa":"پرمیوم (قیمت اختیار)","d":"مبلغی که خریدار اختیار به فروشنده آن می‌پردازد.","c":"اختیار معامله (آپشن)","n":false},{"en":"Expiration Date","fa":"تاریخ سررسید","d":"آخرین روزی که اختیار معامله اعتبار دارد.","c":"اختیار معامله (آپشن)","n":false},{"en":"Exercise","fa":"اعمال","d":"استفاده دارنده اختیار از حق خود برای خرید یا فروش دارایی پایه.","c":"اختیار معامله (آپشن)","n":false},{"en":"Assignment","fa":"تخصیص","d":"ملزم شدن فروشنده اختیار به ایفای تعهد پس از اعمال توسط خریدار.","c":"اختیار معامله (آپشن)","n":false},{"en":"Holder (Buyer)","fa":"دارنده (خریدار اختیار)","d":"طرفی که با پرداخت پرمیوم، حق اختیار را به دست می‌آورد.","c":"اختیار معامله (آپشن)","n":false},{"en":"Writer (Seller)","fa":"فروشنده (صادرکننده اختیار)","d":"طرفی که با دریافت پرمیوم، تعهد ایفای قرارداد را می‌پذیرد.","c":"اختیار معامله (آپشن)","n":false},{"en":"European Option","fa":"اختیار اروپایی","d":"اختیاری که فقط در تاریخ سررسید قابل اعمال است.","c":"اختیار معامله (آپشن)","n":false},{"en":"American Option","fa":"اختیار آمریکایی","d":"اختیاری که در هر زمان تا سررسید قابل اعمال است.","c":"اختیار معامله (آپشن)","n":false},{"en":"Bermudan Option","fa":"اختیار برمودایی","d":"اختیاری که فقط در تاریخ‌های معینی پیش از سررسید قابل اعمال است.","c":"اختیار معامله (آپشن)","n":false},{"en":"In the Money (ITM)","fa":"در سود","d":"اختیاری که اعمال فوری آن ارزش ذاتی مثبت دارد.","c":"اختیار معامله (آپشن)","n":false},{"en":"At the Money (ATM)","fa":"در قیمت (بیتفاوت)","d":"اختیاری که قیمت اعمال آن تقریباً برابر قیمت جاری دارایی پایه است.","c":"اختیار معامله (آپشن)","n":false},{"en":"Out of the Money (OTM)","fa":"در زیان","d":"اختیاری که در حال حاضر ارزش ذاتی ندارد.","c":"اختیار معامله (آپشن)","n":false},{"en":"Intrinsic Value","fa":"ارزش ذاتی","d":"سود حاصل از اعمال فوری اختیار؛ برای اختیار خرید برابر بیشینه صفر و اختلاف قیمت پایه با قیمت اعمال.","c":"اختیار معامله (آپشن)","n":false},{"en":"Time Value","fa":"ارزش زمانی","d":"بخشی از پرمیوم که فراتر از ارزش ذاتی است و با نزدیک شدن به سررسید کاهش می‌یابد.","c":"اختیار معامله (آپشن)","n":false},{"en":"Moneyness","fa":"وضعیت سودآوری اختیار","d":"جایگاه قیمت دارایی پایه نسبت به قیمت اعمال (ATM، ITM یا OTM).","c":"اختیار معامله (آپشن)","n":false},{"en":"Contract Size","fa":"اندازه قرارداد","d":"تعداد واحدهای دارایی پایه در هر قرارداد.","c":"اختیار معامله (آپشن)","n":false},{"en":"Open Interest","fa":"موقعیت‌های باز","d":"تعداد قراردادهایی که باز هستند و هنوز بسته یا تسویه نشدهاند.","c":"اختیار معامله (آپشن)","n":false},{"en":"Implied Volatility (IV)","fa":"نوسان ضمنی","d":"نوسانی که از قیمت بازاری اختیار استخراج می‌شود و انتظار بازار از نوسان آینده را نشان می‌دهد.","c":"اختیار معامله (آپشن)","n":false},{"en":"Historical Volatility (HV)","fa":"نوسان تاریخی","d":"انحراف معیار بازده‌های گذشته دارایی پایه، معمولاً به صورت سالانه.","c":"اختیار معامله (آپشن)","n":false},{"en":"Volatility Smile","fa":"لبخند نوسان","d":"الگویی که در آن نوسان ضمنی قیمت‌های اعمال دور از قیمت جاری بالاتر است.","c":"اختیار معامله (آپشن)","n":false},{"en":"Volatility Skew","fa":"چولگی نوسان","d":"تفاوت نامتقارن نوسان ضمنی در قیمت‌های اعمال مختلف.","c":"اختیار معامله (آپشن)","n":false},{"en":"Black-Scholes Model","fa":"مدل بلک شولز","d":"مدل ریاضی مشهور برای قیمت‌گذاری اختیارهای اروپایی.","c":"اختیار معامله (آپشن)","n":false},{"en":"Binomial Model","fa":"مدل دوجمله‌ای","d":"مدل قیمت‌گذاری اختیار با فرض دو حالت افزایش یا کاهش قیمت در هر گام زمانی.","c":"اختیار معامله (آپشن)","n":false},{"en":"Put-Call Parity","fa":"برابری اختیار خرید و فروش","d":"رابطه‌ای که قیمت اختیار خرید و فروش اروپایی با قیمت اعمال و سررسید یکسان را به هم پیوند می‌دهد.","c":"اختیار معامله (آپشن)","n":false},{"en":"The Greeks","fa":"یونانی‌ها","d":"مجموعه سنجه‌هایی که حساسیت قیمت اختیار به عوامل مختلف را اندازه می‌گیرند.","c":"اختیار معامله (آپشن)","n":false},{"en":"Delta (Δ)","fa":"دلتا","d":"تغییر قیمت اختیار به ازای یک واحد تغییر در قیمت دارایی پایه.","c":"اختیار معامله (آپشن)","n":false},{"en":"Gamma (Γ)","fa":"گاما","d":"نرخ تغییر دلتا به ازای تغییر قیمت دارایی پایه.","c":"اختیار معامله (آپشن)","n":false},{"en":"Theta (Θ)","fa":"تتا","d":"کاهش ارزش اختیار با گذشت زمان، با فرض ثابت ماندن سایر عوامل.","c":"اختیار معامله (آپشن)","n":false},{"en":"Vega (ν)","fa":"وگا","d":"تغییر قیمت اختیار به ازای یک واحد درصد تغییر در نوسان ضمنی.","c":"اختیار معامله (آپشن)","n":false},{"en":"Rho (ρ)","fa":"رو","d":"تغییر قیمت اختیار به ازای تغییر نرخ بهره بدون ریسک.","c":"اختیار معامله (آپشن)","n":false},{"en":"Time Decay","fa":"فرسایش زمانی","d":"کاهش تدریجی ارزش زمانی اختیار با نزدیک شدن به سررسید.","c":"اختیار معامله (آپشن)","n":false},{"en":"Delta Hedging","fa":"پوشش دلتا","d":"تنظیم موقعیت در دارایی پایه برای خنثی کردن حساسیت سبد به تغییر قیمت.","c":"اختیار معامله (آپشن)","n":false},{"en":"Covered Call","fa":"اختیار خرید پوشش‌داده‌شده","d":"فروش اختیار خرید همراه با نگهداری دارایی پایه برای کسب درآمد از پرمیوم.","c":"اختیار معامله (آپشن)","n":false},{"en":"Protective Put","fa":"اختیار فروش حمایتی","d":"خرید اختیار فروش روی دارایی در اختیار برای محدود کردن زیان؛ مشابه بیمه سهام.","c":"اختیار معامله (آپشن)","n":false},{"en":"Married Put","fa":"اختیار فروش همراه","d":"خرید همزمان دارایی پایه و اختیار فروش روی آن.","c":"اختیار معامله (آپشن)","n":false},{"en":"Straddle","fa":"استرادل","d":"خرید همزمان اختیار خرید و فروش با قیمت اعمال و سررسید یکسان برای سود از نوسان شدید.","c":"اختیار معامله (آپشن)","n":false},{"en":"Strangle","fa":"استرنگل","d":"خرید اختیار خرید و فروش در زیان با قیمت‌های اعمال متفاوت؛ نسخه ارزان‌تر استرادل.","c":"اختیار معامله (آپشن)","n":false},{"en":"Bull Call Spread","fa":"اسپرد صعودی با اختیار خرید","d":"خرید اختیار خرید با قیمت اعمال پایین و فروش اختیار خرید با قیمت اعمال بالاتر.","c":"اختیار معامله (آپشن)","n":false},{"en":"Bear Put Spread","fa":"اسپرد نزولی با اختیار فروش","d":"خرید اختیار فروش با قیمت اعمال بالا و فروش اختیار فروش با قیمت اعمال پایین‌تر.","c":"اختیار معامله (آپشن)","n":false},{"en":"Butterfly Spread","fa":"راهبرد پروانه","d":"راهبرد سهقیمتی با بیشترین سود در صورت ماندن قیمت نزدیک قیمت اعمال میانی.","c":"اختیار معامله (آپشن)","n":false},{"en":"Iron Condor","fa":"کرکس آهنی","d":"ترکیب دو اسپرد اعتباری برای کسب سود در بازار کمنوسان و محدود.","c":"اختیار معامله (آپشن)","n":false},{"en":"Collar","fa":"راهبرد یقه","d":"خرید اختیار فروش و فروش اختیار خرید روی دارایی در اختیار برای محدود کردن سود و زیان.","c":"اختیار معامله (آپشن)","n":false},{"en":"Calendar Spread","fa":"اسپرد زمانی","d":"خرید و فروش اختیارهای همقیمت با سررسیدهای متفاوت.","c":"اختیار معامله (آپشن)","n":false},{"en":"Synthetic Position","fa":"موقعیت مصنوعی","d":"بازسازی بازده یک دارایی یا اختیار با ترکیب ابزارهای دیگر.","c":"اختیار معامله (آپشن)","n":false},{"en":"Breakeven Point","fa":"نقطه سربهسر","d":"قیمتی از دارایی پایه که در آن سود و زیان راهبرد صفر می‌شود.","c":"اختیار معامله (آپشن)","n":false},{"en":"Payoff Diagram","fa":"نمودار سود و زیان","d":"نمودار بازده یک موقعیت یا راهبرد در سررسید بر حسب قیمت دارایی پایه.","c":"اختیار معامله (آپشن)","n":false},{"en":"IV Crush","fa":"ریزش نوسان ضمنی","d":"افت شدید نوسان ضمنی پس از رویدادی مهم مانند انتشار گزارش سود.","c":"اختیار معامله (آپشن)","n":false},{"en":"Exotic Option","fa":"اختیار غیراستاندارد (اگزوتیک)","d":"اختیاری با ساختار پیچیده‌تر از اختیارهای عادی، مانند اختیار آسیایی یا مانعدار.","c":"اختیار معامله (آپشن)","n":false},{"en":"Asian Option","fa":"اختیار آسیایی","d":"اختیاری که بازده آن به میانگین قیمت دارایی پایه در یک دوره بستگی دارد.","c":"اختیار معامله (آپشن)","n":false},{"en":"Barrier Option","fa":"اختیار مانعدار","d":"اختیاری که با عبور قیمت از یک سطح معین فعال یا باطل می‌شود.","c":"اختیار معامله (آپشن)","n":false},{"en":"Binary (Digital) Option","fa":"اختیار دودویی","d":"اختیاری که در صورت تحقق شرط مبلغ ثابتی می‌پردازد و در غیر این صورت هیچ.","c":"اختیار معامله (آپشن)","n":false},{"en":"Warrant","fa":"ورانت","d":"اوراق اختیاری که ناشر منتشر می‌کند؛ اختیار فروش تبعی در بورس ایران نمونه‌ای از آن است.","c":"اختیار معامله (آپشن)","n":false},{"en":"Cash Settlement","fa":"تسویه نقدی","d":"تسویه قرارداد با پرداخت مابهالتفاوت به جای تحویل دارایی پایه.","c":"اختیار معامله (آپشن)","n":false},{"en":"Derivative","fa":"مشتقه","d":"ابزار مالی که ارزش آن از یک دارایی یا متغیر پایه مشتق می‌شود.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Futures Contract","fa":"قرارداد آتی","d":"قرارداد استاندارد بورسی برای خرید یا فروش دارایی در تاریخ و قیمتی معین در آینده.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Forward Contract","fa":"قرارداد پیمان آتی","d":"قرارداد غیراستاندارد و خارج از بورس برای مبادله دارایی در آینده با قیمت توافقی.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Salam Contract","fa":"قرارداد سلف","d":"پیشخرید کالا با پرداخت کامل وجه در زمان حال و تحویل در آینده.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Standard Parallel Salam","fa":"سلف موازی استاندارد","d":"ابزار بورس انرژی و کالای ایران که امکان معامله ثانویه قرارداد سلف را فراهم می‌کند.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Physical Delivery","fa":"تحویل فیزیکی","d":"تسویه قرارداد با تحویل واقعی دارایی پایه.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Initial Margin","fa":"وجه تضمین اولیه","d":"مبلغی که هنگام باز کردن موقعیت آتی باید سپرده شود.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Maintenance Margin","fa":"وجه تضمین لازم (نگهداری)","d":"حداقل موجودی حساب که باید برای باز ماندن موقعیت حفظ شود.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Variation Margin","fa":"وجه تضمین متغیر","d":"مبلغ تسویه روزانه سود و زیان موقعیت‌های آتی.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Daily Settlement","fa":"تسویه روزانه","d":"محاسبه و تسویه سود و زیان موقعیت‌ها در پایان هر روز معاملاتی.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Settlement Price","fa":"قیمت تسویه","d":"قیمت مرجعی که بورس برای تسویه روزانه یا نهایی قرارداد تعیین می‌کند.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Delivery Month","fa":"ماه تحویل","d":"ماهی که قرارداد آتی در آن سررسید می‌شود.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Front Month","fa":"قرارداد ماه نزدیک","d":"قرارداد آتی با نزدیک‌ترین سررسید که معمولاً بیشترین نقدشوندگی را دارد.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Rollover","fa":"تمدید موقعیت (رول)","d":"بستن قرارداد نزدیک و باز کردن قرارداد با سررسید دورتر.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Roll Yield","fa":"بازده رول","d":"سود یا زیان ناشی از جایگزینی قراردادهای آتی سررسیدشده با قراردادهای جدید.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Tick Size","fa":"حداقل تغییر قیمت","d":"کوچک‌ترین واحد مجاز تغییر قیمت یک قرارداد.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Convergence","fa":"همگرایی","d":"نزدیک شدن قیمت آتی به قیمت نقدی با نزدیک شدن سررسید.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Position Limit","fa":"حد مجاز موقعیت","d":"حداکثر تعداد قراردادی که یک معامله‌گر مجاز به نگهداری است.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Index Futures","fa":"قرارداد آتی شاخص","d":"قرارداد آتی که دارایی پایه آن یک شاخص بورسی است.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Perpetual Futures","fa":"قرارداد آتی دائمی","d":"قرارداد آتی بدون سررسید که با نرخ تأمین مالی به قیمت نقدی نزدیک نگه داشته می‌شود؛ رایج در بازار رمزارز.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Funding Rate","fa":"نرخ تأمین مالی","d":"پرداخت دوره‌ای میان خریداران و فروشندگان قراردادهای دائمی برای همگرایی با قیمت نقدی.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Swap","fa":"سوآپ (معاوضه)","d":"قراردادی برای مبادله جریان‌های نقدی آینده میان دو طرف.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Interest Rate Swap (IRS)","fa":"سوآپ نرخ بهره","d":"مبادله پرداخت‌های نرخ ثابت با نرخ شناور روی یک اصل مبلغ فرضی.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Currency Swap","fa":"سوآپ ارزی","d":"مبادله اصل و بهره در دو ارز مختلف میان دو طرف.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Commodity Swap","fa":"سوآپ کالایی","d":"مبادله قیمت ثابت با قیمت شناور یک کالا برای مدیریت ریسک قیمت.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Credit Default Swap (CDS)","fa":"سوآپ نکول اعتباری","d":"قراردادی که خریدار را در برابر نکول یک وام‌گیرنده یا ناشر بیمه می‌کند.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Total Return Swap (TRS)","fa":"سوآپ بازده کل","d":"مبادله بازده کل یک دارایی با پرداخت‌های مبتنی بر یک نرخ مرجع.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Notional Amount","fa":"اصل مبلغ فرضی","d":"مبلغ مرجعی که پرداخت‌های سوآپ بر اساس آن محاسبه می‌شود.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Forward Rate Agreement (FRA)","fa":"قرارداد نرخ آتی","d":"قراردادی برای تثبیت نرخ بهره یک دوره در آینده.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Counterparty Risk","fa":"ریسک طرف مقابل","d":"احتمال ناتوانی طرف قرارداد در ایفای تعهدات خود.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Basis Risk","fa":"ریسک بیس","d":"ریسک ناشی از حرکت ناهمسان قیمت نقدی و قیمت ابزار پوشش‌دهنده.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Hedge Ratio","fa":"نسبت پوشش","d":"تعداد قراردادهای مشتقه لازم به ازای هر واحد دارایی در معرض ریسک.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Structured Product","fa":"محصول ساختاریافته","d":"ابزاری ترکیبی از اوراق و مشتقات با بازده و ریسک طراحی‌شده.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Embedded Derivative","fa":"مشتقه تعبیه‌شده","d":"جزء مشتقه‌ای که درون یک ابزار مالی دیگر مانند اوراق قابل تبدیل قرار دارد.","c":"آتی، پیمان آتی و سوآپ","n":false},{"en":"Central Bank","fa":"بانک مرکزی","d":"نهاد مسئول سیاست پولی، انتشار پول و نظارت بر نظام بانکی.","c":"پولی و بانکی","n":false},{"en":"Monetary Policy","fa":"سیاست پولی","d":"اقدامات بانک مرکزی برای کنترل نرخ بهره و حجم پول با هدف ثبات قیمت‌ها و رشد.","c":"پولی و بانکی","n":false},{"en":"Policy Rate","fa":"نرخ سیاستی","d":"نرخ بهره کلیدی که بانک مرکزی برای هدایت نرخ‌های بازار تعیین می‌کند.","c":"پولی و بانکی","n":false},{"en":"Federal Funds Rate","fa":"نرخ وجوه فدرال","d":"نرخ هدف وام‌دهی یکشبه میان بانک‌های آمریکا که فدرال رزرو تعیین می‌کند.","c":"پولی و بانکی","n":false},{"en":"FOMC","fa":"کمیته بازار باز فدرال","d":"کمیته تصمیم‌گیر فدرال رزرو درباره نرخ بهره و سیاست پولی آمریکا.","c":"پولی و بانکی","n":false},{"en":"Interbank Market","fa":"بازار بین‌بانکی","d":"بازاری که بانک‌ها در آن به یکدیگر وام کوتاه‌مدت می‌دهند.","c":"پولی و بانکی","n":false},{"en":"Interbank Rate","fa":"نرخ بین‌بانکی","d":"نرخ بهره وام‌های کوتاه‌مدت میان بانک‌ها.","c":"پولی و بانکی","n":false},{"en":"SOFR","fa":"سوفر","d":"نرخ تأمین مالی یکشبه با پشتوانه اوراق خزانه آمریکا؛ جایگزین لایبور.","c":"پولی و بانکی","n":false},{"en":"LIBOR","fa":"لایبور","d":"نرخ بهره بین‌بانکی لندن که تا پیش از کنار گذاشته شدن، مرجع جهانی قراردادها بود.","c":"پولی و بانکی","n":false},{"en":"Open Market Operations (OMO)","fa":"عملیات بازار باز","d":"خرید و فروش اوراق دولتی توسط بانک مرکزی برای تنظیم نقدینگی.","c":"پولی و بانکی","n":false},{"en":"Repo (Repurchase Agreement)","fa":"توافق بازخرید (ریپو)","d":"فروش اوراق با تعهد بازخرید در آینده؛ ابزار تأمین مالی کوتاه‌مدت.","c":"پولی و بانکی","n":false},{"en":"Reverse Repo","fa":"ریپوی معکوس","d":"خرید اوراق با تعهد فروش مجدد؛ ابزاری برای جذب نقدینگی.","c":"پولی و بانکی","n":false},{"en":"Reserve Requirement","fa":"نسبت سپرده قانونی","d":"درصدی از سپرده‌ها که بانک‌ها باید نزد بانک مرکزی نگهداری کنند.","c":"پولی و بانکی","n":false},{"en":"Quantitative Easing (QE)","fa":"تسهیل کمی","d":"خرید گسترده دارایی توسط بانک مرکزی برای افزایش نقدینگی و کاهش نرخ‌های بلندمدت.","c":"پولی و بانکی","n":false},{"en":"Quantitative Tightening (QT)","fa":"انقباض کمی","d":"کوچک کردن ترازنامه بانک مرکزی از طریق فروش یا تمدید نکردن اوراق.","c":"پولی و بانکی","n":false},{"en":"Money Supply","fa":"عرضه پول","d":"کل پول در گردش در اقتصاد در یک زمان معین.","c":"پولی و بانکی","n":false},{"en":"Monetary Base (M0)","fa":"پایه پولی","d":"اسکناس و مسکوک در گردش به همراه ذخایر بانک‌ها نزد بانک مرکزی.","c":"پولی و بانکی","n":false},{"en":"M1 (Narrow Money)","fa":"(M1)پول","d":"اسکناس و مسکوک در دست مردم به همراه سپرده‌های دیداری.","c":"پولی و بانکی","n":false},{"en":"M2 (Broad Money)","fa":"(M2)نقدینگی","d":"مجموع پول و شبهپول شامل سپرده‌های مدتدار و پسانداز.","c":"پولی و بانکی","n":false},{"en":"Money Multiplier","fa":"ضریب فزاینده پولی","d":"نسبت نقدینگی به پایه پولی؛ نشان‌دهنده توان خلق پول بانک‌ها.","c":"پولی و بانکی","n":false},{"en":"Inflation","fa":"تورم","d":"افزایش پایدار سطح عمومی قیمت‌ها و کاهش قدرت خرید پول.","c":"پولی و بانکی","n":false},{"en":"CPI (Consumer Price Index)","fa":"شاخص قیمت مصرف‌کننده","d":"سنجه تغییرات قیمت سبد کالاها و خدمات مصرفی خانوار.","c":"پولی و بانکی","n":false},{"en":"PPI (Producer Price Index)","fa":"شاخص قیمت تولیدکننده","d":"سنجه تغییرات قیمتی که تولیدکنندگان برای محصولات خود دریافت می‌کنند.","c":"پولی و بانکی","n":false},{"en":"Core Inflation","fa":"تورم هسته","d":"تورم بدون اقلام پرنوسان مانند غذا و انرژی.","c":"پولی و بانکی","n":false},{"en":"Deflation","fa":"تورم منفی (کاهش قیمت‌ها)","d":"کاهش پایدار سطح عمومی قیمت‌ها.","c":"پولی و بانکی","n":false},{"en":"Disinflation","fa":"کاهش نرخ تورم","d":"کند شدن سرعت افزایش قیمت‌ها در حالی که تورم همچنان مثبت است.","c":"پولی و بانکی","n":false},{"en":"Stagflation","fa":"رکود تورمی","d":"همزمانی تورم بالا با رکود اقتصادی و بیکاری.","c":"پولی و بانکی","n":false},{"en":"Hawkish","fa":"انقباضی (شاهینی)","d":"موضعی در سیاست پولی که به افزایش نرخ بهره برای مهار تورم تمایل دارد.","c":"پولی و بانکی","n":false},{"en":"Dovish","fa":"انبساطی (کبوتری)","d":"موضعی در سیاست پولی که به کاهش نرخ بهره برای حمایت از رشد تمایل دارد.","c":"پولی و بانکی","n":false},{"en":"Forward Guidance","fa":"هدایت انتظارات","d":"اعلام مسیر آتی سیاست پولی برای اثرگذاری بر انتظارات بازار.","c":"پولی و بانکی","n":false},{"en":"Lender of Last Resort","fa":"آخرین مرجع وام‌دهی","d":"نقش بانک مرکزی در تأمین نقدینگی بانک‌های دچار بحران.","c":"پولی و بانکی","n":false},{"en":"Nominal Interest Rate","fa":"نرخ بهره اسمی","d":"نرخ بهره اعلام‌شده بدون تعدیل بابت تورم.","c":"پولی و بانکی","n":false},{"en":"Real Interest Rate","fa":"نرخ بهره واقعی","d":"نرخ بهره اسمی منهای نرخ تورم.","c":"پولی و بانکی","n":false},{"en":"Capital Adequacy Ratio (CAR)","fa":"نسبت کفایت سرمایه","d":"نسبت سرمایه بانک به دارایی‌های موزون به ریسک؛ سنجه توان جذب زیان.","c":"پولی و بانکی","n":false},{"en":"Basel III","fa":"بازل ۳","d":"چارچوب بین‌المللی مقررات سرمایه، نقدینگی و اهرم بانک‌ها.","c":"پولی و بانکی","n":false},{"en":"Liquidity Coverage Ratio (LCR)","fa":"نسبت پوشش نقدینگی","d":"نسبت دارایی‌های نقد باکیفیت به خروجی‌های نقدی ۳۰ روزه در شرایط تنش.","c":"پولی و بانکی","n":false},{"en":"Non-Performing Loan (NPL)","fa":"مطالبات غیرجاری","d":"وام‌هایی که بازپرداخت آن‌ها برای مدت طولانی متوقف شده است.","c":"پولی و بانکی","n":false},{"en":"Loan-to-Deposit Ratio (LDR)","fa":"نسبت تسهیلات به سپرده","d":"نسبت وام‌های پرداختی بانک به سپرده‌های آن.","c":"پولی و بانکی","n":false},{"en":"Net Interest Margin (NIM)","fa":"حاشیه خالص بهره","d":"تفاوت درآمد و هزینه بهره بانک نسبت به دارایی‌های درآمدزا.","c":"پولی و بانکی","n":false},{"en":"Overdraft","fa":"اضافه برداشت","d":"برداشت بیش از موجودی حساب؛ در ایران به برداشت بانک‌ها از منابع بانک مرکزی هم گفته می‌شود.","c":"پولی و بانکی","n":false},{"en":"Deposit Insurance","fa":"بیمه سپرده","d":"تضمین سپرده‌های مشتریان تا سقف معین در صورت ورشکستگی بانک.","c":"پولی و بانکی","n":false},{"en":"Bank Run","fa":"هجوم بانکی","d":"برداشت همزمان و گسترده سپرده‌ها به دلیل نگرانی از توان پرداخت بانک.","c":"پولی و بانکی","n":false},{"en":"Credit Crunch","fa":"تنگنای اعتباری","d":"کاهش شدید دسترسی به وام و اعتبار در اقتصاد.","c":"پولی و بانکی","n":false},{"en":"Credit Rating","fa":"رتبه اعتباری","d":"ارزیابی توان بازپرداخت بدهی یک ناشر یا وام‌گیرنده توسط مؤسسه رتبه‌بندی.","c":"پولی و بانکی","n":false},{"en":"Letter of Credit (L/C)","fa":"اعتبار اسنادی","d":"تعهد بانک به پرداخت وجه به فروشنده در صورت ارائه اسناد مطابق شرایط.","c":"پولی و بانکی","n":false},{"en":"Bank Guarantee","fa":"ضمانت‌نامه بانکی","d":"تعهد بانک به پرداخت مبلغ معین در صورت عدم ایفای تعهد مشتری.","c":"پولی و بانکی","n":false},{"en":"SWIFT","fa":"سوئیفت","d":"شبکه بین‌المللی پیامرسانی مالی میان بانک‌ها.","c":"پولی و بانکی","n":false},{"en":"Shadow Banking","fa":"بانکداری سایه","d":"فعالیت‌های واسطه‌گری اعتباری خارج از نظام بانکی تحت نظارت.","c":"پولی و بانکی","n":false},{"en":"CBDC","fa":"پول دیجیتال بانک مرکزی","d":"شکل دیجیتال پول ملی که مستقیماً بانک مرکزی منتشر می‌کند.","c":"پولی و بانکی","n":false},{"en":"Islamic Banking","fa":"بانکداری اسلامی","d":"نظام بانکی مبتنی بر عقود شرعی و پرهیز از ربا.","c":"پولی و بانکی","n":false},{"en":"Mudarabah","fa":"مضاربه","d":"عقدی که یک طرف سرمایه و طرف دیگر کار را فراهم می‌کند و سود میان آن‌ها تقسیم می‌شود.","c":"پولی و بانکی","n":false},{"en":"Musharakah","fa":"مشارکت مدنی","d":"عقد شراکت در سرمایه برای انجام فعالیتی مشخص و تقسیم سود و زیان.","c":"پولی و بانکی","n":false},{"en":"Murabaha","fa":"مرابحه","d":"فروش کالا با افزودن سود معلوم به قیمت تمامشده؛ رایج در تسهیلات بانکی.","c":"پولی و بانکی","n":false},{"en":"Investment Banking","fa":"بانکداری سرمایه‌گذاری (تأمین سرمایه)","d":"خدمات تأمین مالی شرکت‌ها از بازار سرمایه، تعهد پذیره‌نویسی، ادغام و تملک و مشاوره مالی.","c":"پولی و بانکی","n":true},{"en":"Commercial Banking","fa":"بانکداری تجاری","d":"پذیرش سپرده و اعطای وام به خانوارها و بنگاه‌ها؛ هسته اصلی فعالیت بانک‌ها.","c":"پولی و بانکی","n":true},{"en":"Correspondent Banking","fa":"بانکداری کارگزاری (کارسپاندنت)","d":"رابطه‌ای که در آن یک بانک خدمات پرداخت و نقل‌وانتقال را برای بانکی در کشور دیگر انجام می‌دهد.","c":"پولی و بانکی","n":true},{"en":"Primary Dealer","fa":"معامله‌گر اصلی اوراق دولتی","d":"بانک یا نهادی که مجاز است مستقیماً با بانک مرکزی اوراق دولتی معامله کند و در حراج‌ها شرکت کند.","c":"پولی و بانکی","n":true},{"en":"Custodian Bank","fa":"بانک امین (کاستودین)","d":"نهادی که دارایی‌های صندوق‌ها و سرمایه‌گذاران را نگهداری و تسویه معاملات آن‌ها را انجام می‌دهد.","c":"پولی و بانکی","n":true},{"en":"Demand Deposit","fa":"سپرده دیداری (حساب جاری)","d":"سپرده‌ای که صاحب آن هر زمان بدون اطلاع قبلی می‌تواند برداشت کند.","c":"پولی و بانکی","n":true},{"en":"Collateral","fa":"وثیقه","d":"دارایی‌ای که وام‌گیرنده برای تضمین بازپرداخت در اختیار وام‌دهنده می‌گذارد.","c":"پولی و بانکی","n":true},{"en":"Haircut","fa":"کسر ارزش وثیقه (هیرکات)","d":"درصدی که از ارزش بازار وثیقه کم می‌شود تا وام‌دهنده در برابر افت قیمت آن محافظت شود.","c":"پولی و بانکی","n":true},{"en":"Secured Loan","fa":"وام با وثیقه","d":"وامی که با پشتوانه یک دارایی مشخص پرداخت می‌شود و در صورت نکول، وام‌دهنده حق تملک آن را دارد.","c":"پولی و بانکی","n":true},{"en":"Mortgage","fa":"وام رهنی (مسکن)","d":"وام بلندمدتی که ملک خریداری‌شده وثیقه آن است.","c":"پولی و بانکی","n":true},{"en":"Grace Period","fa":"دوره تنفس","d":"مدتی پس از دریافت وام که وام‌گیرنده هنوز ملزم به پرداخت قسط اصل نیست.","c":"پولی و بانکی","n":true},{"en":"Leasing","fa":"لیزینگ (اجاره به شرط تملیک)","d":"تأمین مالی دارایی از طریق اجاره، که در پایان دوره مالکیت به اجاره‌گیرنده منتقل می‌شود.","c":"پولی و بانکی","n":true},{"en":"Project Finance","fa":"تأمین مالی پروژه","d":"تأمین مالی بلندمدت یک پروژه که بازپرداخت آن به جریان نقد خود پروژه متکی است، نه ترازنامه حامیان آن.","c":"پولی و بانکی","n":true},{"en":"Bond","fa":"اوراق قرضه (اوراق بدهی)","d":"ابزار بدهی که ناشر آن متعهد به پرداخت سود دوره‌ای و اصل مبلغ در سررسید است.","c":"اوراق با درآمد ثابت","n":false},{"en":"Sukuk","fa":"صکوک","d":"اوراق بهادار اسلامی مبتنی بر دارایی که مالکیت مشاع در دارایی یا طرح را نشان می‌دهد.","c":"اوراق با درآمد ثابت","n":false},{"en":"Ijarah Sukuk","fa":"صکوک اجاره","d":"صکوکی که دارندگان آن مالک دارایی اجاره‌داده‌شده و ذینفع اجاره‌بهای آن هستند.","c":"اوراق با درآمد ثابت","n":false},{"en":"Murabaha Sukuk","fa":"صکوک مرابحه","d":"صکوکی که وجوه آن صرف خرید کالا و فروش اقساطی آن می‌شود.","c":"اوراق با درآمد ثابت","n":false},{"en":"Islamic Treasury Bills","fa":"اسناد خزانه اسلامی (اخزا)","d":"اوراق بدون کوپن دولت ایران که زیر ارزش اسمی فروخته و در سررسید به ارزش اسمی بازپرداخت می‌شود.","c":"اوراق با درآمد ثابت","n":false},{"en":"Face Value (Par)","fa":"ارزش اسمی","d":"مبلغی که ناشر در سررسید به دارنده اوراق می‌پردازد.","c":"اوراق با درآمد ثابت","n":false},{"en":"Coupon","fa":"کوپن (سود دوره‌ای)","d":"پرداخت دوره‌ای سود به دارنده اوراق.","c":"اوراق با درآمد ثابت","n":false},{"en":"Coupon Rate","fa":"نرخ کوپن","d":"نرخ سود سالانه اوراق نسبت به ارزش اسمی.","c":"اوراق با درآمد ثابت","n":false},{"en":"Zero-Coupon Bond","fa":"اوراق بدون کوپن","d":"اوراقی که سود دوره‌ای ندارد و زیر ارزش اسمی فروخته می‌شود.","c":"اوراق با درآمد ثابت","n":false},{"en":"Maturity","fa":"سررسید","d":"تاریخی که اصل مبلغ اوراق بازپرداخت می‌شود.","c":"اوراق با درآمد ثابت","n":false},{"en":"Yield","fa":"بازده","d":"درآمد سرمایه‌گذاری در اوراق به صورت درصدی از قیمت آن.","c":"اوراق با درآمد ثابت","n":false},{"en":"Yield to Maturity (YTM)","fa":"بازده تا سررسید","d":"نرخ بازده کل اوراق در صورت نگهداری تا سررسید؛ معادل نرخ بازده داخلی.","c":"اوراق با درآمد ثابت","n":false},{"en":"Current Yield","fa":"بازده جاری","d":"کوپن سالانه تقسیم بر قیمت فعلی اوراق.","c":"اوراق با درآمد ثابت","n":false},{"en":"Yield Curve","fa":"منحنی بازده","d":"نمودار بازده اوراق همکیفیت در سررسیدهای مختلف.","c":"اوراق با درآمد ثابت","n":false},{"en":"Inverted Yield Curve","fa":"منحنی بازده معکوس","d":"وضعیتی که بازده کوتاه‌مدت از بلندمدت بیشتر است؛ نشانه سنتی رکود.","c":"اوراق با درآمد ثابت","n":false},{"en":"Term Structure of Interest Rates","fa":"ساختار زمانی نرخ بهره","d":"رابطه نرخ‌های بهره با سررسیدهای مختلف.","c":"اوراق با درآمد ثابت","n":false},{"en":"Duration","fa":"دیرش","d":"میانگین موزون زمان دریافت جریان‌های نقدی اوراق؛ سنجه حساسیت قیمت به نرخ بهره.","c":"اوراق با درآمد ثابت","n":false},{"en":"Modified Duration","fa":"دیرش تعدیل‌شده","d":"درصد تقریبی تغییر قیمت اوراق به ازای یک درصد تغییر در بازده.","c":"اوراق با درآمد ثابت","n":false},{"en":"Convexity","fa":"تحدب","d":"سنجه انحنای رابطه قیمت و بازده اوراق؛ مکمل دیرش.","c":"اوراق با درآمد ثابت","n":false},{"en":"Credit Spread","fa":"اسپرد اعتباری","d":"اختلاف بازده اوراق شرکتی با اوراق دولتی همسررسید؛ بیان‌گر ریسک اعتباری.","c":"اوراق با درآمد ثابت","n":false},{"en":"Default","fa":"نکول","d":"ناتوانی ناشر در پرداخت سود یا اصل بدهی در موعد مقرر.","c":"اوراق با درآمد ثابت","n":false},{"en":"Investment Grade","fa":"درجه سرمایه‌گذاری","d":"اوراقی با رتبه اعتباری BBB منفی یا بالاتر.","c":"اوراق با درآمد ثابت","n":false},{"en":"High-Yield (Junk) Bond","fa":"اوراق پرریسک (پربازده)","d":"اوراقی با رتبه اعتباری پایین‌تر از درجه سرمایه‌گذاری و بازده بالاتر.","c":"اوراق با درآمد ثابت","n":false},{"en":"Treasury Bill (T-Bill)","fa":"اسناد خزانه آمریکا","d":"اوراق کوتاه‌مدت دولت آمریکا با سررسید کمتر از یک سال.","c":"اوراق با درآمد ثابت","n":false},{"en":"Treasury Bond (T-Bond)","fa":"اوراق خزانه بلندمدت","d":"اوراق دولت آمریکا با سررسید ۲۰ یا ۳۰ سال.","c":"اوراق با درآمد ثابت","n":false},{"en":"TIPS","fa":"اوراق خزانه حمایت‌شده از تورم","d":"اوراق دولت آمریکا که اصل آن بر اساس تورم تعدیل می‌شود.","c":"اوراق با درآمد ثابت","n":false},{"en":"Callable Bond","fa":"اوراق قابل بازخرید","d":"اوراقی که ناشر می‌تواند پیش از سررسید آن را بازخرید کند.","c":"اوراق با درآمد ثابت","n":false},{"en":"Convertible Bond","fa":"اوراق قابل تبدیل","d":"اوراقی که دارنده می‌تواند آن را به تعداد معینی سهام تبدیل کند.","c":"اوراق با درآمد ثابت","n":false},{"en":"Accrued Interest","fa":"سود تعلقگرفته","d":"سود انباشته از آخرین پرداخت کوپن تا تاریخ معامله.","c":"اوراق با درآمد ثابت","n":false},{"en":"Clean Price","fa":"قیمت تمیز","d":"قیمت اوراق بدون سود تعلقگرفته.","c":"اوراق با درآمد ثابت","n":false},{"en":"Dirty Price","fa":"قیمت کثیف (قیمت کامل)","d":"قیمت اوراق به همراه سود تعلقگرفته.","c":"اوراق با درآمد ثابت","n":false},{"en":"Discount Bond","fa":"اوراق زیر قیمت اسمی","d":"اوراقی که زیر ارزش اسمی معامله می‌شود.","c":"اوراق با درآمد ثابت","n":false},{"en":"Premium Bond","fa":"اوراق بالای قیمت اسمی","d":"اوراقی که بالاتر از ارزش اسمی معامله می‌شود.","c":"اوراق با درآمد ثابت","n":false},{"en":"Issuer","fa":"ناشر","d":"نهادی که اوراق بهادار را منتشر و تعهدات آن را بر عهده می‌گیرد.","c":"اوراق با درآمد ثابت","n":false},{"en":"Underwriting","fa":"تعهد پذیرهنویسی","d":"تعهد نهاد مالی به خرید اوراق فروشنرفته در عرضه.","c":"اوراق با درآمد ثابت","n":false},{"en":"Covenant","fa":"تعهدات قراردادی","d":"شروطی که ناشر باید در طول عمر اوراق رعایت کند.","c":"اوراق با درآمد ثابت","n":false},{"en":"Basis Point (bp)","fa":"واحد پایه","d":"واحد رایج بیان تغییر نرخ‌ها؛ یکصدم درصد (۰٫۰۱٪).","c":"اوراق با درآمد ثابت","n":false},{"en":"Annuity","fa":"مستمری (اقساط ثابت)","d":"مجموعه‌ای از پرداخت‌های مساوی در فواصل زمانی منظم؛ پایه محاسبه اقساط وام و اوراق.","c":"اوراق با درآمد ثابت","n":true},{"en":"Compound Interest","fa":"بهره مرکب","d":"بهره‌ای که علاوه بر اصل، روی بهره‌های انباشته دوره‌های قبل هم محاسبه می‌شود.","c":"اوراق با درآمد ثابت","n":true},{"en":"Floating Rate Note (FRN)","fa":"اوراق با نرخ شناور","d":"اوراق قرضه‌ای که نرخ کوپن آن به‌طور دوره‌ای بر اساس یک نرخ مرجع به‌روز می‌شود.","c":"اوراق با درآمد ثابت","n":true},{"en":"Share (Stock)","fa":"سهم","d":"واحد مالکیت در یک شرکت.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Market Capitalization","fa":"ارزش بازار","d":"قیمت سهم ضربدر تعداد سهام منتشرشده.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Free Float","fa":"سهام شناور آزاد","d":"بخشی از سهام که آزادانه در بازار قابل معامله است.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Blue Chip","fa":"سهام بلوچیپ","d":"سهام شرکت‌های بزرگ، باثبات و معتبر.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Dividend","fa":"سود نقدی (سود تقسیمی)","d":"بخشی از سود شرکت که میان سهامداران توزیع می‌شود.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Dividend Yield","fa":"بازده سود نقدی","d":"سود نقدی سالانه هر سهم تقسیم بر قیمت سهم.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Payout Ratio","fa":"نسبت تقسیم سود","d":"درصدی از سود خالص که به صورت سود نقدی پرداخت می‌شود.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"EPS (Earnings per Share)","fa":"سود هر سهم","d":"سود خالص تقسیم بر تعداد سهام عادی.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"P/E Ratio","fa":"نسبت قیمت به سود","d":"قیمت سهم تقسیم بر سود هر سهم؛ نشان می‌دهد بازار چند برابر سود را می‌پردازد.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"P/B Ratio","fa":"نسبت قیمت به ارزش دفتری","d":"قیمت سهم تقسیم بر ارزش دفتری هر سهم.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"P/S Ratio","fa":"نسبت قیمت به فروش","d":"ارزش بازار تقسیم بر فروش سالانه شرکت.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Enterprise Value (EV)","fa":"ارزش شرکت","d":"ارزش بازار سهام به علاوه خالص بدهی؛ ارزش کل کسبوکار.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"EBITDA","fa":"سود پیش از بهره، مالیات و استهلاک","d":"سنجه سودآوری عملیاتی بدون اثر ساختار سرمایه و استهلاک.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"EV/EBITDA","fa":"EBITDAنسبت ارزش شرکت به","d":"ضریب ارزش‌گذاری رایج برای مقایسه شرکت‌هایی با ساختار سرمایه متفاوت.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Discounted Cash Flow (DCF)","fa":"جریان نقدی تنزیل‌شده","d":"روش ارزش‌گذاری بر پایه ارزش فعلی جریان‌های نقدی آینده.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Free Cash Flow (FCF)","fa":"جریان نقدی آزاد","d":"جریان نقد عملیاتی منهای مخارج سرمایه‌ای.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"WACC","fa":"میانگین موزون هزینه سرمایه","d":"میانگین هزینه تأمین مالی از محل بدهی و حقوق صاحبان سهام.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Discount Rate","fa":"نرخ تنزیل","d":"نرخی که جریان‌های نقدی آینده با آن به ارزش فعلی تبدیل می‌شوند.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Terminal Value","fa":"ارزش پایانی","d":"ارزش جریان‌های نقدی پس از دوره پیش‌بینی صریح در مدل DCF.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Net Present Value (NPV)","fa":"ارزش فعلی خالص","d":"ارزش فعلی جریان‌های ورودی منهای ارزش فعلی جریان‌های خروجی.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Internal Rate of Return (IRR)","fa":"نرخ بازده داخلی","d":"نرخ تنزیلی که ارزش فعلی خالص را صفر می‌کند.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"CAPM","fa":"مدل قیمت‌گذاری دارایی‌های سرمایه‌ای","d":"مدلی که بازده مورد انتظار را بر اساس نرخ بدون ریسک، بتا و صرف ریسک بازار تعیین می‌کند.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Balance Sheet","fa":"ترازنامه (صورت وضعیت مالی)","d":"صورت داراییها، بدهی‌ها و حقوق صاحبان سهام در یک تاریخ معین.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Income Statement","fa":"صورت سود و زیان","d":"گزارش درآمدها، هزینه‌ها و سود یا زیان در یک دوره.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Cash Flow Statement","fa":"صورت جریان‌های نقدی","d":"گزارش ورود و خروج وجه نقد از فعالیت‌های عملیاتی، سرمایه‌گذاری و تأمین مالی.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Revenue","fa":"درآمد عملیاتی (فروش)","d":"مبلغ حاصل از فروش کالا و خدمات در فعالیت اصلی شرکت.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Gross Margin","fa":"حاشیه سود ناخالص","d":"سود ناخالص تقسیم بر فروش.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Operating Margin","fa":"حاشیه سود عملیاتی","d":"سود عملیاتی تقسیم بر فروش.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Net Margin","fa":"حاشیه سود خالص","d":"سود خالص تقسیم بر فروش.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"ROE (Return on Equity)","fa":"بازده حقوق صاحبان سهام","d":"سود خالص تقسیم بر حقوق صاحبان سهام.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"ROA (Return on Assets)","fa":"بازده دارایی‌ها","d":"سود خالص تقسیم بر کل دارایی‌ها.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"CAPEX","fa":"مخارج سرمایه‌ای","d":"هزینه خرید یا ارتقای دارایی‌های ثابت.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Depreciation","fa":"استهلاک","d":"تخصیص بهای دارایی ثابت مشهود در طول عمر مفید آن.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Working Capital","fa":"سرمایه در گردش","d":"دارایی‌های جاری منهای بدهی‌های جاری.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Current Ratio","fa":"نسبت جاری","d":"دارایی‌های جاری تقسیم بر بدهی‌های جاری.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Debt-to-Equity Ratio","fa":"نسبت بدهی به حقوق صاحبان سهام","d":"سنجه میزان اتکای شرکت به تأمین مالی از محل بدهی.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Book Value","fa":"ارزش دفتری","d":"ارزش حقوق صاحبان سهام بر اساس ترازنامه.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Rights Issue","fa":"افزایش سرمایه از محل آورده","d":"انتشار سهام جدید با حق تقدم خرید برای سهامداران فعلی.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Stock Split","fa":"تجزیه سهام","d":"افزایش تعداد سهام و کاهش متناسب قیمت هر سهم بدون تغییر ارزش کل.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Share Buyback","fa":"بازخرید سهام","d":"خرید سهام شرکت توسط خود شرکت از بازار.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Guidance","fa":"پیش‌بینی مدیریت","d":"برآورد مدیریت شرکت از عملکرد مالی دوره‌های آینده.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Earnings Call","fa":"کنفرانس گزارش سود","d":"جلسه ارائه نتایج مالی شرکت به تحلیل‌گران و سرمایه‌گذاران.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"ETF (Exchange-Traded Fund)","fa":"صندوق قابل معامله","d":"صندوقی که واحدهای آن مانند سهام در بورس معامله می‌شود.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Mutual Fund","fa":"صندوق سرمایه‌گذاری مشترک","d":"صندوقی که منابع سرمایه‌گذاران را تجمیع و به صورت حرفه‌ای مدیریت می‌کند.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"NAV (Net Asset Value)","fa":"خالص ارزش دارایی‌ها","d":"ارزش دارایی‌های صندوق منهای بدهیها، تقسیم بر تعداد واحدها.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Hedge Fund","fa":"صندوق پوشش ریسک","d":"صندوق خصوصی با راهبردهای متنوع شامل اهرم، فروش استقراضی و مشتقات.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":false},{"en":"Valuation","fa":"ارزش‌گذاری","d":"برآورد ارزش ذاتی یک دارایی یا شرکت با روش‌هایی مانند جریان نقد تنزیل‌شده یا مقایسه نسبت‌ها.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Hurdle Rate","fa":"نرخ بازده حداقلی (نرخ مانع)","d":"کمترین بازدهی که یک پروژه یا سرمایه‌گذاری باید داشته باشد تا پذیرفته شود.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Goodwill","fa":"سرقفلی","d":"مازاد بهای پرداختی برای خرید یک شرکت نسبت به ارزش منصفانه خالص دارایی‌های آن.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Intangible Assets","fa":"دارایی‌های نامشهود","d":"دارایی‌های بدون وجود فیزیکی مانند حق امتیاز، برند، نرم‌افزار و سرقفلی.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Amortization","fa":"استهلاک دارایی نامشهود","d":"تخصیص بهای دارایی نامشهود به هزینه در طول عمر مفید آن؛ همچنین بازپرداخت تدریجی اصل وام.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Retained Earnings","fa":"سود انباشته","d":"بخشی از سود سال‌های گذشته که میان سهامداران تقسیم نشده و در شرکت مانده است.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Accounts Receivable","fa":"حساب‌ها و اسناد دریافتنی","d":"مبالغی که مشتریان بابت فروش نسیه به شرکت بدهکارند.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Accounts Payable","fa":"حساب‌ها و اسناد پرداختنی","d":"مبالغی که شرکت بابت خرید نسیه به تأمین‌کنندگان بدهکار است.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Consolidated Financial Statements","fa":"صورت‌های مالی تلفیقی","d":"صورت‌هایی که شرکت اصلی و شرکت‌های تابعه را مانند یک واحد اقتصادی گزارش می‌کنند.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Deferred Tax","fa":"مالیات انتقالی (معوق)","d":"مالیاتی که به‌دلیل تفاوت زمانی میان سود حسابداری و سود مشمول مالیات، در آینده پرداخت یا کسر می‌شود.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Provision","fa":"ذخیره","d":"بدهی‌ای با زمان یا مبلغ نامشخص که از محل سود شناسایی می‌شود؛ مانند ذخیره مطالبات مشکوک‌الوصول.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Registered Capital","fa":"سرمایه ثبتی","d":"سرمایه‌ای که در اساسنامه و مدارک ثبتی شرکت درج شده است؛ مبنای افزایش سرمایه در بورس تهران.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Treasury Stock","fa":"سهام خزانه","d":"سهامی که شرکت از بازار بازخرید کرده و نزد خود نگه می‌دارد؛ حق رأی و سود ندارد.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Preferred Stock","fa":"سهام ممتاز","d":"سهامی که در دریافت سود یا دارایی هنگام انحلال بر سهام عادی اولویت دارد.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Capital Gains","fa":"عایدی سرمایه‌ای","d":"سودی که از فروش دارایی به قیمتی بالاتر از قیمت خرید به دست می‌آید.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Private Equity","fa":"سرمایه‌گذاری خصوصی (پرایوت اکوئیتی)","d":"‌سرمایه‌گذاری در سهام شرکت‌هایی که در بورس عرضه نشده‌اند، معمولاً با هدف رشد و خروج سودآور.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Unicorn","fa":"یونیکورن (شرکت تک‌شاخ)","d":"شرکت نوپای خصوصی با ارزش‌گذاری یک میلیارد دلار یا بیشتر.","c":"سهام، ارزش‌گذاری و صورت‌های مالی","n":true},{"en":"Technical Analysis","fa":"تحلیل تکنیکال","d":"پیش‌بینی حرکت قیمت بر پایه داده‌های گذشته قیمت و حجم.","c":"تحلیل تکنیکال","n":false},{"en":"Fundamental Analysis","fa":"تحلیل بنیادی","d":"ارزیابی ارزش ذاتی دارایی بر پایه عوامل اقتصادی و مالی.","c":"تحلیل تکنیکال","n":false},{"en":"Candlestick","fa":"شمع ژاپنی (کندل)","d":"نمایش قیمت باز شدن، بسته شدن، بیشینه و کمینه در یک دوره.","c":"تحلیل تکنیکال","n":false},{"en":"Support","fa":"حمایت","d":"سطح قیمتی که تقاضا معمولاً مانع کاهش بیشتر قیمت می‌شود.","c":"تحلیل تکنیکال","n":false},{"en":"Resistance","fa":"مقاومت","d":"سطح قیمتی که عرضه معمولاً مانع افزایش بیشتر قیمت می‌شود.","c":"تحلیل تکنیکال","n":false},{"en":"Trend Line","fa":"خط روند","d":"خطی که کف‌ها یا سقف‌های متوالی قیمت را به هم وصل می‌کند.","c":"تحلیل تکنیکال","n":false},{"en":"Breakout","fa":"شکست","d":"عبور قیمت از سطح حمایت یا مقاومت، معمولاً همراه با حجم قابل توجه.","c":"تحلیل تکنیکال","n":false},{"en":"Gap","fa":"گپ (شکاف قیمتی)","d":"فاصله میان قیمت بسته شدن یک دوره و باز شدن دوره بعد که در آن معامله‌ای انجام نشده است.","c":"تحلیل تکنیکال","n":false},{"en":"Pullback","fa":"پولبک","d":"بازگشت موقت قیمت به سطح شکسته‌شده پیش از ادامه روند.","c":"تحلیل تکنیکال","n":false},{"en":"Correction","fa":"اصلاح","d":"افت ۱۰ درصدی یا بیشتر قیمت پس از یک دوره رشد.","c":"تحلیل تکنیکال","n":false},{"en":"Consolidation","fa":"تثبیت (حرکت خنثی)","d":"دوره حرکت محدود قیمت در یک دامنه پیش از حرکت بعدی.","c":"تحلیل تکنیکال","n":false},{"en":"Moving Average (MA)","fa":"میانگین متحرک","d":"میانگین قیمت در تعداد معینی دوره اخیر برای هموارسازی روند.","c":"تحلیل تکنیکال","n":false},{"en":"Exponential Moving Average (EMA)","fa":"میانگین متحرک نمایی","d":"میانگین متحرکی که به داده‌های جدیدتر وزن بیشتری می‌دهد.","c":"تحلیل تکنیکال","n":false},{"en":"RSI (Relative Strength Index)","fa":"شاخص قدرت نسبی","d":"نوسان‌نمای صفر تا ۱۰۰ برای سنجش شتاب قیمت و شناسایی اشباع خرید یا فروش.","c":"تحلیل تکنیکال","n":false},{"en":"MACD","fa":"مکدی","d":"اندیکاتور مبتنی بر اختلاف دو میانگین متحرک نمایی برای سنجش روند و شتاب.","c":"تحلیل تکنیکال","n":false},{"en":"Bollinger Bands","fa":"باندهای بولینگر","d":"باندهایی در فاصله دو انحراف معیار بالا و پایین میانگین متحرک.","c":"تحلیل تکنیکال","n":false},{"en":"ATR (Average True Range)","fa":"میانگین دامنه واقعی","d":"سنجه میانگین دامنه نوسان قیمت در دوره‌های اخیر.","c":"تحلیل تکنیکال","n":false},{"en":"Fibonacci Retracement","fa":"اصلاح فیبوناچی","d":"سطوح بازگشتی احتمالی بر پایه نسبت‌های فیبوناچی مانند ۳۸٫۲ و ۶۱٫۸ درصد.","c":"تحلیل تکنیکال","n":false},{"en":"Ichimoku Cloud","fa":"ابر ایچیموکو","d":"سیستم اندیکاتوری ژاپنی برای شناسایی روند، حمایت و مقاومت.","c":"تحلیل تکنیکال","n":false},{"en":"Elliott Wave","fa":"امواج الیوت","d":"نظریه‌ای که حرکت قیمت را در قالب پنج موج روند و سه موج اصلاحی توصیف می‌کند.","c":"تحلیل تکنیکال","n":false},{"en":"Overbought","fa":"اشباع خرید","d":"وضعیتی که قیمت سریع و زیاد رشد کرده و احتمال اصلاح وجود دارد.","c":"تحلیل تکنیکال","n":false},{"en":"Oversold","fa":"اشباع فروش","d":"وضعیتی که قیمت سریع و زیاد افت کرده و احتمال بازگشت وجود دارد.","c":"تحلیل تکنیکال","n":false},{"en":"Divergence","fa":"واگرایی","d":"ناهمخوانی جهت حرکت قیمت و یک اندیکاتور؛ هشدار احتمالی تغییر روند.","c":"تحلیل تکنیکال","n":false},{"en":"Momentum","fa":"مومنتوم (شتاب)","d":"سرعت و قدرت تغییرات قیمت.","c":"تحلیل تکنیکال","n":false},{"en":"Head and Shoulders","fa":"الگوی سر و شانه","d":"الگوی بازگشتی با سه قله که قله میانی از دو قله دیگر بلندتر است.","c":"تحلیل تکنیکال","n":false},{"en":"Double Top / Double Bottom","fa":"سقف دوقلو / کف دوقلو","d":"الگوهای بازگشتی با دو سقف یا دو کف تقریباً همسطح.","c":"تحلیل تکنیکال","n":false},{"en":"Volume Profile","fa":"پروفایل حجمی","d":"توزیع حجم معاملات در سطوح مختلف قیمت.","c":"تحلیل تکنیکال","n":false},{"en":"Risk","fa":"ریسک","d":"عدم اطمینان درباره بازده آینده و احتمال انحراف آن از انتظار.","c":"ریسک و مدیریت سبد","n":false},{"en":"Systematic Risk","fa":"ریسک سیستماتیک","d":"ریسک کل بازار که با تنوعبخشی حذف نمی‌شود.","c":"ریسک و مدیریت سبد","n":false},{"en":"Unsystematic Risk","fa":"ریسک غیرسیستماتیک","d":"ریسک خاص یک شرکت یا صنعت که با تنوعبخشی کاهش می‌یابد.","c":"ریسک و مدیریت سبد","n":false},{"en":"Market Risk","fa":"ریسک بازار","d":"ریسک زیان ناشی از تغییر قیمتها، نرخ‌های بهره و نرخ ارز.","c":"ریسک و مدیریت سبد","n":false},{"en":"Credit Risk","fa":"ریسک اعتباری","d":"ریسک ناتوانی وام‌گیرنده یا ناشر در ایفای تعهدات.","c":"ریسک و مدیریت سبد","n":false},{"en":"Liquidity Risk","fa":"ریسک نقدشوندگی","d":"ریسک ناتوانی در فروش دارایی بدون زیان قابل توجه.","c":"ریسک و مدیریت سبد","n":false},{"en":"Operational Risk","fa":"ریسک عملیاتی","d":"ریسک زیان ناشی از خطای انسانی، سیستم‌ها یا فرایندها.","c":"ریسک و مدیریت سبد","n":false},{"en":"Tail Risk","fa":"ریسک دنباله","d":"ریسک رویدادهای نادر با اثر بسیار شدید.","c":"ریسک و مدیریت سبد","n":false},{"en":"Black Swan","fa":"قوی سیاه","d":"رویداد بسیار نامحتمل و پیش‌بینیناپذیر با پیامدهای گسترده.","c":"ریسک و مدیریت سبد","n":false},{"en":"Diversification","fa":"تنوعبخشی","d":"پخش سرمایه میان دارایی‌های مختلف برای کاهش ریسک.","c":"ریسک و مدیریت سبد","n":false},{"en":"Beta (β)","fa":"بتا","d":"حساسیت بازده دارایی به بازده بازار.","c":"ریسک و مدیریت سبد","n":false},{"en":"Alpha (α)","fa":"آلفا","d":"بازده مازاد سرمایه‌گذاری نسبت به بازده مورد انتظار یا شاخص مبنا.","c":"ریسک و مدیریت سبد","n":false},{"en":"Standard Deviation (σ)","fa":"انحراف معیار","d":"سنجه آماری پراکندگی بازدهها؛ رایج‌ترین معیار ریسک.","c":"ریسک و مدیریت سبد","n":false},{"en":"Correlation","fa":"همبستگی","d":"سنجه همجهتی حرکت دو دارایی در بازه منفی یک تا مثبت یک.","c":"ریسک و مدیریت سبد","n":false},{"en":"Covariance","fa":"کوواریانس","d":"سنجه تغییرات همزمان بازده دو دارایی.","c":"ریسک و مدیریت سبد","n":false},{"en":"Sharpe Ratio","fa":"نسبت شارپ","d":"بازده مازاد بر نرخ بدون ریسک تقسیم بر انحراف معیار.","c":"ریسک و مدیریت سبد","n":false},{"en":"Sortino Ratio","fa":"نسبت سورتینو","d":"مشابه نسبت شارپ، اما فقط با در نظر گرفتن نوسانات منفی.","c":"ریسک و مدیریت سبد","n":false},{"en":"Treynor Ratio","fa":"نسبت ترینر","d":"بازده مازاد بر نرخ بدون ریسک تقسیم بر بتا.","c":"ریسک و مدیریت سبد","n":false},{"en":"Value at Risk (VaR)","fa":"ارزش در معرض ریسک","d":"بیشینه زیان مورد انتظار در افق زمانی و سطح اطمینان معین.","c":"ریسک و مدیریت سبد","n":false},{"en":"Expected Shortfall (CVaR)","fa":"ریزش مورد انتظار","d":"میانگین زیان در بدترین حالت‌های فراتر از VaR.","c":"ریسک و مدیریت سبد","n":false},{"en":"Drawdown","fa":"افت سرمایه","d":"کاهش ارزش سبد از اوج تا کف.","c":"ریسک و مدیریت سبد","n":false},{"en":"Maximum Drawdown (MDD)","fa":"بیشینه افت سرمایه","d":"بزرگ‌ترین افت از اوج تا کف در یک دوره.","c":"ریسک و مدیریت سبد","n":false},{"en":"Stress Testing","fa":"آزمون تنش","d":"بررسی عملکرد سبد یا بانک در سناریوهای شدید و نامطلوب.","c":"ریسک و مدیریت سبد","n":false},{"en":"Monte Carlo Simulation","fa":"شبیه‌سازی مونت کارلو","d":"تولید هزاران سناریوی تصادفی برای برآورد توزیع نتایج ممکن.","c":"ریسک و مدیریت سبد","n":false},{"en":"Risk-Free Rate","fa":"نرخ بدون ریسک","d":"بازده دارایی بدون ریسک نکول؛ معمولاً بازده اوراق دولتی کوتاه‌مدت.","c":"ریسک و مدیریت سبد","n":false},{"en":"Risk Premium","fa":"صرف ریسک","d":"بازده اضافه‌ای که سرمایه‌گذار برای پذیرش ریسک انتظار دارد.","c":"ریسک و مدیریت سبد","n":false},{"en":"Efficient Frontier","fa":"مرز کارا","d":"مجموعه سبدهایی با بیشترین بازده مورد انتظار در هر سطح ریسک.","c":"ریسک و مدیریت سبد","n":false},{"en":"Modern Portfolio Theory (MPT)","fa":"نظریه مدرن پرتفوی","d":"چارچوب مارکوویتز برای انتخاب سبد بهینه بر پایه بازده و ریسک.","c":"ریسک و مدیریت سبد","n":false},{"en":"Asset Allocation","fa":"تخصیص دارایی","d":"تقسیم سرمایه میان طبقات مختلف دارایی.","c":"ریسک و مدیریت سبد","n":false},{"en":"Rebalancing","fa":"تعادلبخشی مجدد","d":"بازگرداندن وزن دارایی‌های سبد به اوزان هدف.","c":"ریسک و مدیریت سبد","n":false},{"en":"Assets Under Management (AUM)","fa":"دارایی تحت مدیریت","d":"کل ارزش بازار دارایی‌هایی که یک صندوق یا مدیر از طرف سرمایه‌گذاران مدیریت می‌کند.","c":"ریسک و مدیریت سبد","n":true},{"en":"Investment Policy Statement (IPS)","fa":"بیانیه سیاست سرمایه‌گذاری","d":"سندی که هدف، ریسک‌پذیری، افق زمانی و قواعد مدیریت سبد را مکتوب می‌کند.","c":"ریسک و مدیریت سبد","n":true},{"en":"Pension Fund","fa":"صندوق بازنشستگی","d":"نهادی که کسورات بازنشستگی را برای پرداخت مستمری آینده سرمایه‌گذاری می‌کند.","c":"ریسک و مدیریت سبد","n":true},{"en":"Exchange Rate","fa":"نرخ ارز","d":"قیمت یک واحد پول بر حسب پول دیگر.","c":"ارز و اقتصاد کلان","n":false},{"en":"Currency Pair","fa":"جفتارز","d":"نمایش نرخ مبادله دو ارز، مانند EUR/USD.","c":"ارز و اقتصاد کلان","n":false},{"en":"Base Currency","fa":"ارز پایه","d":"ارز اول در جفتارز.","c":"ارز و اقتصاد کلان","n":false},{"en":"Quote Currency","fa":"ارز مظنه","d":"ارز دوم در جفتارز که قیمت بر حسب آن بیان می‌شود.","c":"ارز و اقتصاد کلان","n":false},{"en":"Pip","fa":"پیپ","d":"کوچک‌ترین واحد رایج تغییر نرخ در بازار فارکس.","c":"ارز و اقتصاد کلان","n":false},{"en":"Appreciation","fa":"تقویت ارزش پول","d":"افزایش ارزش یک پول نسبت به پول‌های دیگر.","c":"ارز و اقتصاد کلان","n":false},{"en":"Currency Depreciation","fa":"تضعیف ارزش پول","d":"کاهش ارزش یک پول در نظام ارزی شناور.","c":"ارز و اقتصاد کلان","n":false},{"en":"Devaluation","fa":"کاهش رسمی ارزش پول","d":"کاهش عمدی ارزش پول ملی توسط دولت در نظام ارزی ثابت.","c":"ارز و اقتصاد کلان","n":false},{"en":"Fixed Exchange Rate","fa":"نظام ارزی ثابت","d":"نظامی که دولت نرخ ارز را در سطح معینی تثبیت می‌کند.","c":"ارز و اقتصاد کلان","n":false},{"en":"Floating Exchange Rate","fa":"نظام ارزی شناور","d":"نظامی که نرخ ارز با عرضه و تقاضا تعیین می‌شود.","c":"ارز و اقتصاد کلان","n":false},{"en":"Managed Float","fa":"شناور مدیریت‌شده","d":"نظام ارزی شناور با مداخله گاهبهگاه بانک مرکزی.","c":"ارز و اقتصاد کلان","n":false},{"en":"Carry Trade","fa":"معامله کری","d":"قرض گرفتن در ارز کمبهره و سرمایه‌گذاری در ارز پربهره.","c":"ارز و اقتصاد کلان","n":false},{"en":"Purchasing Power Parity (PPP)","fa":"برابری قدرت خرید","d":"نظریه‌ای که نرخ ارز تعادلی را بر پایه نسبت سطح قیمت‌ها تعیین می‌کند.","c":"ارز و اقتصاد کلان","n":false},{"en":"Interest Rate Parity","fa":"برابری نرخ بهره","d":"رابطه نرخ آتی و نقدی ارز با اختلاف نرخ بهره دو کشور.","c":"ارز و اقتصاد کلان","n":false},{"en":"Dollar Index (DXY)","fa":"شاخص دلار","d":"سنجه ارزش دلار آمریکا در برابر سبدی از شش ارز اصلی.","c":"ارز و اقتصاد کلان","n":false},{"en":"Foreign Exchange Reserves","fa":"ذخایر ارزی","d":"دارایی‌های خارجی در اختیار بانک مرکزی.","c":"ارز و اقتصاد کلان","n":false},{"en":"Balance of Payments","fa":"تراز پرداخت‌ها","d":"ثبت تمام مبادلات اقتصادی یک کشور با سایر کشورها.","c":"ارز و اقتصاد کلان","n":false},{"en":"Current Account","fa":"حساب جاری","d":"بخشی از تراز پرداخت‌ها شامل تجارت کالا و خدمات و درآمدها.","c":"ارز و اقتصاد کلان","n":false},{"en":"Trade Balance","fa":"تراز تجاری","d":"صادرات منهای واردات کالا.","c":"ارز و اقتصاد کلان","n":false},{"en":"GDP","fa":"تولید ناخالص داخلی","d":"ارزش بازاری کل کالاها و خدمات نهایی تولیدشده در یک کشور طی یک دوره.","c":"ارز و اقتصاد کلان","n":false},{"en":"Recession","fa":"رکود","d":"کاهش گسترده فعالیت اقتصادی؛ معمولاً دو فصل متوالی رشد منفی تولید.","c":"ارز و اقتصاد کلان","n":false},{"en":"Business Cycle","fa":"چرخه تجاری","d":"نوسانات دوره‌ای فعالیت اقتصادی میان رونق و رکود.","c":"ارز و اقتصاد کلان","n":false},{"en":"PMI (Purchasing Managers' Index)","fa":"شاخص مدیران خرید","d":"شاخص پیمایشی فعالیت بخش تولید و خدمات؛ عدد بالای ۵۰ نشانه رونق است.","c":"ارز و اقتصاد کلان","n":false},{"en":"Unemployment Rate","fa":"نرخ بیکاری","d":"درصد افراد جویای کار در جمعیت فعال که شاغل نیستند.","c":"ارز و اقتصاد کلان","n":false},{"en":"Nonfarm Payrolls (NFP)","fa":"اشتغال بخش غیرکشاورزی","d":"گزارش ماهانه تغییر شمار شاغلان آمریکا به جز بخش کشاورزی؛ از مهم‌ترین داده‌های اقتصادی.","c":"ارز و اقتصاد کلان","n":false},{"en":"Fiscal Policy","fa":"سیاست مالی","d":"تصمیمات دولت درباره مخارج و مالیات‌ها برای اثرگذاری بر اقتصاد.","c":"ارز و اقتصاد کلان","n":false},{"en":"Budget Deficit","fa":"کسری بودجه","d":"بیشتر بودن مخارج دولت از درآمدهای آن.","c":"ارز و اقتصاد کلان","n":false},{"en":"Sovereign Debt","fa":"بدهی دولتی","d":"بدهی منتشرشده یا تضمین‌شده توسط دولت.","c":"ارز و اقتصاد کلان","n":false},{"en":"Safe Haven","fa":"دارایی امن","d":"دارایی که در دوره‌های بحران ارزش خود را حفظ می‌کند یا افزایش می‌دهد، مانند طلا.","c":"ارز و اقتصاد کلان","n":false},{"en":"Risk-On / Risk-Off","fa":"ریسک‌پذیری / ریسکگریزی","d":"تغییر تمایل جمعی بازار میان دارایی‌های پرریسک و دارایی‌های امن.","c":"ارز و اقتصاد کلان","n":false},{"en":"Sanctions","fa":"تحریم","d":"محدودیت‌های اقتصادی و مالی که کشورها علیه یکدیگر اعمال می‌کنند.","c":"ارز و اقتصاد کلان","n":false},{"en":"Forex (FX)","fa":"بازار ارز (فارکس)","d":"بازار جهانی و خارج از بورس مبادله ارزها؛ بزرگ‌ترین بازار مالی دنیا از نظر حجم معاملات.","c":"ارز و اقتصاد کلان","n":true},{"en":"Foreign Direct Investment (FDI)","fa":"سرمایه‌گذاری مستقیم خارجی","d":"سرمایه‌گذاری خارجی با هدف مالکیت و نفوذ مؤثر در یک بنگاه، نه صرفاً خرید اوراق.","c":"ارز و اقتصاد کلان","n":true},{"en":"Purchasing Power","fa":"قدرت خرید","d":"مقدار کالا و خدماتی که با یک واحد پول می‌توان خرید؛ با تورم کاهش می‌یابد.","c":"ارز و اقتصاد کلان","n":true},{"en":"Public Joint Stock Company","fa":"شرکت سهامی عام","d":"شرکتی که سرمایه آن به سهام تقسیم شده و می‌تواند سهامش را به عموم عرضه کند.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Limited Liability Company (LLC)","fa":"شرکت با مسئولیت محدود","d":"شرکتی که مسئولیت هر شریک به میزان آورده او محدود است.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Subsidiary","fa":"شرکت فرعی (تابعه)","d":"شرکتی که بیش از نیمی از سهام یا کنترل آن در اختیار شرکت دیگری است.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Affiliated Company","fa":"شرکت وابسته","d":"شرکتی که شرکت دیگر در آن نفوذ قابل ملاحظه دارد، بدون آنکه کنترلش کند.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Special Purpose Vehicle (SPV)","fa":"شرکت با مقصود خاص","d":"شرکتی که فقط برای یک پروژه یا انتشار اوراق مشخص تأسیس می‌شود تا ریسک آن از بانی جدا بماند.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Joint Venture","fa":"سرمایه‌گذاری مشترک","d":"همکاری دو یا چند شرکت در یک کسب‌وکار مشخص با سهیم شدن در سرمایه، سود و ریسک.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Merger & Acquisition (M&A)","fa":"ادغام و تملک","d":"ترکیب دو شرکت در یک شرکت (ادغام) یا خرید کنترل یک شرکت توسط دیگری (تملک).","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Spin-off","fa":"تجزیه (جداسازی)","d":"جدا کردن بخشی از کسب‌وکار یک شرکت و تبدیل آن به شرکتی مستقل.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Board of Directors","fa":"هیئت‌مدیره","d":"گروهی که مجمع انتخاب می‌کند تا شرکت را اداره کنند و بر مدیران نظارت داشته باشند.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"General Meeting","fa":"مجمع عمومی","d":"نشست سهامداران برای تصویب صورت‌های مالی، تقسیم سود و انتخاب هیئت‌مدیره.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Articles of Association","fa":"اساسنامه","d":"سندی که قواعد اداره شرکت، اختیارات ارکان و حقوق سهامداران را تعیین می‌کند.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Shareholder Agreement (SHA)","fa":"توافق‌نامه سهامداران","d":"قرارداد میان سهامداران درباره اداره شرکت، انتقال سهام و حل اختلاف.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Pre-emption Right","fa":"حق تقدم","d":"حق سهامداران فعلی برای خرید سهام جدید پیش از دیگران در افزایش سرمایه.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Right of First Refusal","fa":"حق اولویت خرید","d":"‌حق سهامداران برای خرید سهامی که یک شریک قصد فروشش را دارد، پیش از اشخاص ثالث.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Corporate Governance","fa":"حاکمیت شرکتی","d":"مجموعه قواعد و سازوکارهایی که روابط مدیران، هیئت‌مدیره و سهامداران را تنظیم می‌کند.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Corporate Social Responsibility (CSR)","fa":"مسئولیت اجتماعی شرکت","d":"تعهد شرکت به پیامدهای اجتماعی و زیست‌محیطی فعالیتش، فراتر از سود.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Code of Conduct","fa":"منشور اخلاق حرفه‌ای","d":"اصول رفتاری که فعالان بازار سرمایه باید در برابر مشتریان و بازار رعایت کنند.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Conflict of Interest","fa":"تعارض منافع","d":"وضعیتی که منافع شخصی یک فرد یا نهاد با وظیفه‌اش در برابر مشتری یا سهامدار در تضاد است.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Audit","fa":"حسابرسی","d":"بررسی مستقل صورت‌های مالی برای اظهارنظر درباره درستی و انطباق آن‌ها با استانداردها.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Disclosure","fa":"افشای اطلاعات","d":"انتشار به‌موقع اطلاعات بااهمیت ناشر برای همه سرمایه‌گذاران؛ در ایران از طریق سامانه کدال.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Material Non-Public Information (MNPI)","fa":"اطلاعات نهانی","d":"اطلاعات بااهمیتی که هنوز عمومی نشده و انتشارش می‌تواند قیمت را تغییر دهد.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Insider Trading","fa":"معامله با اطلاعات نهانی","d":"خرید یا فروش اوراق با استفاده از اطلاعات نهانی؛ تخلفی جرم‌انگاری‌شده در بیشتر بازارها.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Market Manipulation","fa":"دستکاری بازار","d":"ایجاد ظاهر گمراه‌کننده از قیمت یا حجم معاملات برای فریب دیگر معامله‌گران.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Related-Party Transactions","fa":"معاملات با اشخاص وابسته","d":"معاملاتی که شرکت با مدیران، سهامداران عمده یا شرکت‌های هم‌گروه خود انجام می‌دهد.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Compliance Officer","fa":"مسئول تطبیق مقررات","d":"فردی در نهاد مالی که بر رعایت قوانین و مقررات و سیاست‌های داخلی نظارت می‌کند.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Prudential Regulation","fa":"مقررات احتیاطی","d":"قواعدی که نهادهای مالی را به حفظ سرمایه و نقدینگی کافی برای کنترل ریسک ملزم می‌کند.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Deregulation","fa":"مقررات‌زدایی","d":"کاهش یا حذف محدودیت‌های قانونی بر فعالیت یک بازار یا صنعت.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Due Diligence","fa":"بررسی موشکافانه (دیودیلیجنس)","d":"بررسی جامع مالی، حقوقی و عملیاتی یک شرکت یا طرح پیش از سرمایه‌گذاری یا تملک.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true},{"en":"Bankruptcy","fa":"ورشکستگی","d":"وضعیت قانونی ناتوانی بنگاه یا شخص از پرداخت دیون، که به تصفیه یا تجدید ساختار می‌انجامد.","c":"حاکمیت شرکتی، مقررات و نظارت","n":true}];
+const PROD = true;
+const APP = PROD ? '../' : 'https://niloofarparvandi99-lang.github.io/chartgap/';
+const LINK_T = PROD ? '' : ' target="_blank" rel="noopener"';
+const FA_DIG = '۰۱۲۳۴۵۶۷۸۹';
+const fa = n => String(n).replace(/\d/g, d => FA_DIG[d]);
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const PER = 4;           // new words per day
+const haptic = t => { try { const h = Telegram.WebApp.HapticFeedback; t === 'ok' || t === 'no' ? h.notificationOccurred(t === 'ok' ? 'success' : 'error') : h.impactOccurred('light'); } catch (e) {} };
+
+/* ---------- lands and lessons ---------- */
+const LAND_STYLE = [
+  ['#5FC6A4', 'candles'], ['#D9A441', 'barrel'], ['#4FB3BF', 'option'], ['#7D9CF0', 'clock'], ['#4C86D9', 'bank'], ['#C98A5B', 'bond'],
+  ['#7FB069', 'pie'], ['#E07A5F', 'chart'], ['#A3B1C2', 'shield'], ['#5FB8A6', 'globe'], ['#C9A227', 'gavel'],
+];
+const LAND_SHORT = ['مفاهیم پایه', 'کالا', 'آپشن', 'آتی و سوآپ', 'پولی و بانکی', 'درآمد ثابت', 'سهام و صورت‌های مالی', 'تحلیل تکنیکال', 'ریسک و سبد', 'ارز و کلان', 'حاکمیت شرکتی'];
+const LANDS = [];
+WORDS.forEach((w, i) => { let l = LANDS[LANDS.length - 1]; if (!l || l.name !== w.c) { l = { name: w.c, start: i, count: 0 }; LANDS.push(l); } l.count++; });
+const LESSONS = [];
+LANDS.forEach((l, li) => { l.lessons = []; for (let k = 0; k < l.count; k += PER) { const ids = []; for (let j = k; j < Math.min(k + PER, l.count); j++) ids.push(l.start + j); l.lessons.push(LESSONS.length); LESSONS.push({ land: li, ids }); } });
+const landOfWord = i => LANDS.findIndex(l => i >= l.start && i < l.start + l.count);
+
+/* words that open a Chart Gap tool */
+const TOOLS = [
+  { id: 'options', name: 'ماشین‌حساب آپشن', re: /\boption|\bcall\b|\bput\b|strike|premium|exercise|assignment|money\b|moneyness|intrinsic|time value|implied vol|black-scholes|parity|greek|delta|gamma|theta|vega|rho|straddle|strangle|collar|covered|protective|married put|butterfly|calendar spread|bull call|bear put/i },
+  { id: 'gold', name: 'آپشن صندوق طلا', re: /precious|bullion|lbma|comex|troy|fineness/i },
+  { id: 'bubble', name: 'حباب طلا و سکه', re: /spot price/i },
+  { id: 'fx', name: 'نرخ ارز', re: /exchange rate|currency pair|base currency|quote currency|forex|dollar index|devaluation/i },
+];
+const toolFor = w => TOOLS.find(t => t.re.test(w.en) && !/bond|earnings|risk premium|margin call|bid-ask|crack|spark|crush|physical premium/i.test(w.en));
+
+/* ---------- dragon ---------- */
+const STAGES = [
+  { at: 0, name: 'تخم اژدها', sub: 'یه تخم گرم که منتظر توئه' },
+  { at: 7, name: 'جوجه‌اژدها', sub: 'یه هفته پشت‌سرهم، پوسته ترک خورد' },
+  { at: 14, name: 'بچه‌اژدها', sub: 'دو هفته، از تخم اومد بیرون' },
+  { at: 21, name: 'اژدهای کوچولو', sub: 'سه هفته، بال‌هاش دراومد' },
+  { at: 30, name: 'اژدها', sub: 'یه ماه کامل، بال‌هاش طلایی شد' },
+  { at: 60, name: 'اژدهای طلایی', sub: 'دو ماه، سر تا پاش طلا شد' },
+  { at: 100, name: 'اژدهای افسانه‌ای', sub: 'صد روز، پادشاه واژه‌ها' },
+];
+const MILESTONES = [7, 14, 21, 30, 60, 100];
+const stageOf = s => { let k = 0; STAGES.forEach((st, i) => { if (s >= st.at) k = i; }); return k; };
+const VIDS = new Set(["s1-angry", "s1-normal", "s1-sad", "s1-sleepy", "s2-angry", "s2-happy", "s2-normal", "s2-sad", "s2-sleepy", "s3-angry", "s3-happy", "s3-normal", "s3-sad", "s3-sleepy", "s4-angry", "s4-happy", "s4-normal", "s4-sad", "s4-sleepy", "s5-happy", "s5-normal", "s5-sad", "s5-sleepy", "s7-normal"]);
+const petSrc = (s, m) => `img/s${s + 1}-${m || 'normal'}.webp`;
+function vidKey(s, m) { let k = `s${s + 1}-${m || 'normal'}`; if (k === 's1-happy') k = 's1-normal'; return VIDS.has(k) ? k : null; }
+const petImg = (s, m, cls) => `<img class="${cls || ''}" src="${petSrc(s, m)}" alt="${STAGES[s].name}" width="640" height="640" decoding="async">`;
+function petMedia(s, m) { const k = vidKey(s, m); return k ? `<video src="vid/${k}.mp4" poster="${petSrc(s, m)}" autoplay muted loop playsinline disablepictureinpicture aria-label="${STAGES[s].name}"></video>` : petImg(s, m); }
+
+/* ---------- dragon names: rules and bad-word filter (Persian, Finglish, English) ---------- */
+const NAME_MIN = 2, NAME_MAX = 16;
+function normName(s) {
+  return String(s).toLowerCase()
+    .replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/[ؤ]/g, 'و').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه')
+    .replace(/[صث]/g, 'س').replace(/[ذظض]/g, 'ز').replace(/ط/g, 'ت').replace(/ح/g, 'ه').replace(/غ/g, 'ق')
+    .replace(/[ً-ٰٟـ]/g, '')
+    .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's').replace(/7/g, 't').replace(/@/g, 'a').replace(/\$/g, 's')
+    .replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/q/g, 'k').replace(/x/g, 'ks').replace(/z/g, 's');
+}
+const squash = s => s.replace(/(.)\1+/g, '$1');
+// roots that are bad anywhere inside a name
+const BAD_ANY = [
+  'کیر', 'جنده', 'جاکش', 'گایید', 'بگای', 'میگام', 'گاییدم', 'لاشی', 'قرمساق', 'کسکش', 'کسخل', 'کسده', 'کسنن', 'کسمادر', 'کونی', 'کوندن', 'کونکش',
+  'هرومزاده', 'هرامزاده', 'پفیوز', 'دیوس', 'بیناموس', 'مادرجنده', 'خارکس', 'خوارکس', 'تخمی', 'تخمسگ', 'شاشو', 'گوهخور', 'سکس', 'پورن',
+  'ممه', 'جلق', 'جقی', 'اسپرم', 'فاهشه', 'روسپی', 'هرزه', 'بیشرف', 'پدرسگ', 'سگپدر', 'تولهسگ', 'کساقا', 'کسشر', 'کسلیس', 'کیرخر', 'ساکزن', 'همجنسباز',
+  'کسافت', 'آشقال', 'اشقال', 
+  'fuk', 'fuc', 'shit', 'bich', 'bitch', 'cunt', 'kunt', 'dick', 'pusy', 'porn', 'sex', 'slut', 'whore', 'niga', 'niger', 'fag', 'bastard',
+  'asshole', 'ashole', 'penis', 'vagina', 'boob', 'tits', 'hitler', 'dildo', 'horny', 'milf', 'wank', 'jerkof', 'blowjob',   'jende', 'jakesh', 'gaid', 'gaeid', 'lashi', 'koskesh', 'kosk', 'kosnan', 'kosmadar', 'kiir', 'haromsade', 'haroomsade', 'harumsade', 'haramsade', 'haramsadeh',
+  'madarjende', 'kharkos', 'tokhmi', 'pofius', 'pofiyus', 'dayus', 'bisharaf', 'pedarsag', 'kesafat', 'sakzan', 'jaghi', 'jalgh',
+];
+// short words that are bad only as a whole word or at a word start
+const BAD_WORD = ['کس', 'کون', 'گه', 'گوه', 'عن', 'خر', 'الاغ', 'گی', 'ساک', 'کثافت', 'احمق', 'عوضی', 'نفهم', 'kir', 'kos', 'kon', 'kun', 'koon', 'goh', 'gooh', 'khar', 'ass', 'gay', 'ahmagh', 'avasi', 'cock', 'whore', 'nazi', 'cum', 'rape', 'koni', 'kooni', 'kuni', 'kiri', 'ریدم', 'ریدی', 'رید'];
+const BAD_ANY_N = BAD_ANY.map(w => squash(normName(w)));
+const BAD_WORD_N = BAD_WORD.map(w => normName(w));
+function checkName(raw) {
+  const name = String(raw || '').replace(/\s+/g, ' ').trim();
+  if (name.length < NAME_MIN) return { ok: false, msg: 'اسم حداقل ۲ حرف باشه.' };
+  if (name.length > NAME_MAX) return { ok: false, msg: 'اسم حداکثر ۱۶ حرف باشه.' };
+  if (!/^[؀-ۿa-zA-Z‌ ]+$/.test(name)) return { ok: false, msg: 'فقط حرف فارسی یا انگلیسی، بدون عدد، لینک یا علامت.' };
+  const n = normName(name);
+  const words = n.split(/[\s‌]+/).filter(Boolean);
+  const joined = n.replace(/[\s‌]+/g, '');
+  const forms = [joined, squash(joined)];
+  const bad = BAD_ANY_N.some(b => forms.some(f => f.includes(b))) ||
+    words.some(w => BAD_WORD_N.some(b => w === b || squash(w) === b)) ||
+    BAD_WORD_N.some(b => b.length >= 3 && joined === b);
+  if (bad) return { ok: false, msg: 'این اسم مجاز نیست. یه اسم قشنگ‌تر انتخاب کن.' };
+  return { ok: true, name };
+}
+
+
+/* ---------- state ---------- */
+const KEY = 'cg-dict-v2';
+const fresh = () => ({ today: 0, lastDone: -1, streak: 0, best: 0, lessons: 0, freezes: 1, sleeping: false, frozeNote: 0, seen: [0], petName: '', box: {}, marks: [], chests: [] });
+let S = fresh();
+const load = j => { if (j && typeof j.today === 'number') S = Object.assign(fresh(), j); };
+try { load(JSON.parse(localStorage.getItem(KEY))); } catch (e) {}
+/* Telegram cloud copy: progress follows the user to any phone. Values are capped at 4096 chars, so the state is split. */
+const TG = () => { const t = window.Telegram && window.Telegram.WebApp; try { return t && t.initData && t.CloudStorage && t.isVersionAtLeast('6.9') ? t : null; } catch (e) { return null; } };
+let cloudT = 0, cloudReady = false;
+function cloudSave() {
+  const t = TG(); if (!t || !cloudReady) return;
+  clearTimeout(cloudT);
+  cloudT = setTimeout(() => {
+    const str = JSON.stringify(S), parts = [];
+    for (let i = 0; i < str.length; i += 4000) parts.push(str.slice(i, i + 4000));
+    try { parts.forEach((v, i) => t.CloudStorage.setItem('d' + i, v)); t.CloudStorage.setItem('dn', String(parts.length)); } catch (e) {}
+  }, 500);
+}
+function cloudLoad(done) {
+  const t = TG(); let fin = false;
+  const end = () => { if (!fin) { fin = true; cloudReady = true; done(); } };
+  if (!t) return end();
+  setTimeout(end, 3000);
+  try {
+    t.CloudStorage.getItem('dn', (e, n) => {
+      n = +n; if (e || !n) return end();
+      const keys = Array.from({ length: n }, (_, i) => 'd' + i);
+      t.CloudStorage.getItems(keys, (e2, v) => {
+        if (!e2 && v) try { const j = JSON.parse(keys.map(k => v[k] || '').join('')); if (j && (j.at || 0) > (S.at || 0)) load(j); } catch (x) {}
+        end();
+      });
+    });
+  } catch (e) { end(); }
+}
+const save = () => { S.at = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} cloudSave(); };
+/* real calendar: a new day starts at midnight Tehran time */
+const realDay = () => Math.floor((Date.now() + 3.5 * 3600e3) / 864e5);
+function syncDay() {
+  if (!PROD) return false;
+  const d = realDay();
+  if (S.lastDone < 0 && S.today !== d) { S.today = d; return true; }
+  if (S.today >= d) return false;
+  if (d - S.today > 10) S.today = d - 10;
+  while (S.today < d) newDay();
+  return true;
+}
+let tab = 'map', preview = '', naming = false, nameErr = '', nameDraft = '', run = null, query = '', qLand = -1, onlyMarks = false, showN = 30;
+const doneToday = () => S.lastDone === S.today;
+const awayDays = () => S.sleeping ? S.today - S.lastDone - 1 : 0;
+function moodNow() { if (preview) return preview; if (doneToday()) return 'happy'; const a = awayDays(); return a >= 3 ? 'angry' : a === 2 ? 'sad' : a === 1 ? 'sleepy' : 'normal'; }
+const learnedCount = () => Math.min(WORDS.length, LESSONS.slice(0, S.lessons).reduce((n, l) => n + l.ids.length, 0));
+const isLearned = i => Object.prototype.hasOwnProperty.call(S.box, i);
+const dueIds = () => Object.keys(S.box).filter(i => S.box[i][1] <= S.today).map(Number);
+
+function newDay() {
+  S.today++; S.frozeNote = 0;
+  if (S.lastDone < 0) return;
+  const missed = S.today - S.lastDone - 1;
+  if (missed <= 0) return;
+  if (S.sleeping) { if (S.today - S.lastDone > 4) { S.sleeping = false; S.streak = 0; S.lastDone = S.today - 1; S.frozeNote = -1; } return; }
+  if (S.freezes >= missed) { S.freezes -= missed; S.lastDone = S.today - 1; S.frozeNote = missed; }
+  else if (S.streak > 0) S.sleeping = true;
+}
+
+/* Leitner boxes: 1, 2, 4, 8, 16 days */
+const GAPS = [1, 2, 4, 8, 16];
+function grade(i, ok) {
+  const b = S.box[i] || [0, 0];
+  const nb = ok ? Math.min(4, b[0] + 1) : 0;
+  S.box[i] = [nb, S.today + GAPS[nb]];
+}
+
+/* ---------- questions ---------- */
+function others(idx, n, field) {
+  const l = LANDS[landOfWord(idx)];
+  let pool = [];
+  for (let i = l.start; i < l.start + l.count; i++) if (i !== idx && WORDS[i][field] !== WORDS[idx][field]) pool.push(i);
+  if (pool.length < n) pool = WORDS.map((x, i) => i).filter(i => i !== idx);
+  return shuffle(pool).slice(0, n);
+}
+function makeQ(idx, kind) {
+  const w = WORDS[idx];
+  if (kind === 'def') return { idx, prompt: `کدوم اصطلاح این تعریف رو داره؟<span class="def">«${esc(w.d)}»</span>`, opts: shuffle([idx, ...others(idx, 3, 'fa')]).map(i => ({ i, t: esc(WORDS[i].fa) })) };
+  if (kind === 'en') return { idx, say: w.en, prompt: `معادل فارسی این اصطلاح چیه؟<span class="lat">${esc(w.en)}</span>`, opts: shuffle([idx, ...others(idx, 3, 'fa')]).map(i => ({ i, t: esc(WORDS[i].fa) })) };
+  if (kind === 'fa') return { idx, prompt: `انگلیسیِ «${esc(w.fa)}» کدومه؟`, latin: true, opts: shuffle([idx, ...others(idx, 3, 'en')]).map(i => ({ i, t: `<span class="lat">${esc(WORDS[i].en)}</span>` })) };
+  return { idx, prompt: `«${esc(w.fa)}» یعنی چی؟`, opts: shuffle([idx, ...others(idx, 2, 'd')]).map(i => ({ i, t: esc(WORDS[i].d) })) };
+}
+const KINDS = ['def', 'en', 'fa', 'mean'];
+
+/* ---------- runs: lesson / review / chest ---------- */
+function startLesson() {
+  const L = LESSONS[S.lessons]; if (!L) return;
+  const qs = L.ids.map((i, k) => makeQ(i, KINDS[k % 4]));
+  const extra = S.sleeping ? 4 : 2;
+  const pool = shuffle(dueIds().length ? dueIds() : Object.keys(S.box).map(Number)).slice(0, extra);
+  pool.forEach((i, k) => qs.push(makeQ(i, KINDS[(k + 1) % 4])));
+  run = { type: 'lesson', ids: L.ids, step: 'learn', card: 0, qs: shuffle(qs.slice(0, L.ids.length)).concat(qs.slice(L.ids.length)), at: 0, answered: null, right: 0, total: qs.length, mistakes: 0 };
+  openScreen();
+}
+function startReview() {
+  const ids = shuffle(dueIds()).slice(0, 10); if (!ids.length) return;
+  const qs = ids.map((i, k) => makeQ(i, KINDS[k % 4]));
+  run = { type: 'review', step: 'quiz', qs, at: 0, answered: null, right: 0, total: qs.length, mistakes: 0 };
+  openScreen();
+}
+function startChest(li) {
+  const l = LANDS[li];
+  const ids = shuffle(Array.from({ length: l.count }, (_, k) => l.start + k)).slice(0, 8);
+  const qs = ids.map((i, k) => makeQ(i, KINDS[k % 4]));
+  run = { type: 'chest', land: li, step: 'quiz', qs, at: 0, answered: null, right: 0, total: qs.length, mistakes: 0, firstTry: 0, asked: new Set() };
+  openScreen();
+}
+function openScreen() { $('#screen').hidden = false; document.body.style.overflow = 'hidden'; renderScreen(); }
+function closeScreen() { $('#screen').hidden = true; document.body.style.overflow = ''; run = null; render(); }
+
+function finishRun() {
+  const r = run;
+  if (r.type === 'lesson') {
+    const before = stageOf(S.streak);
+    S.lessons++;
+    if (!doneToday()) {
+      S.streak++; S.best = Math.max(S.best, S.streak); S.lastDone = S.today; S.sleeping = false;
+      if (S.streak % 7 === 0) S.freezes = Math.min(2, S.freezes + 1);
+    }
+    const after = stageOf(S.streak);
+    if (!S.seen.includes(after)) S.seen.push(after);
+    save();
+    r.step = 'done'; r.evolve = after !== before ? [before, after] : null;
+  } else if (r.type === 'chest') {
+    const pass = r.firstTry >= 6;
+    if (pass && !S.chests.includes(r.land)) { S.chests.push(r.land); S.freezes = Math.min(3, S.freezes + 1); }
+    save(); r.step = 'done'; r.pass = pass;
+  } else { save(); r.step = 'done'; }
+  renderScreen();
+}
+
+/* ---------- icons ---------- */
+const IC = {
+  flame: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-4-1-6 1-9.5z"/></svg>',
+  ice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M4 7l16 10M20 7 4 17M9 4l3 2 3-2M9 20l3-2 3 2"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  say: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+  star0: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+  tool: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg>',
+  pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  chest: '<svg viewBox="0 0 48 48"><path d="M6 20c0-7 6-12 18-12s18 5 18 12v4H6z" fill="currentColor" opacity=".9"/><rect x="6" y="22" width="36" height="18" rx="3" fill="currentColor"/><path d="M6 24h36" stroke="#000" stroke-opacity=".35" stroke-width="2"/><rect x="20" y="20" width="8" height="10" rx="2" fill="#000" fill-opacity=".35"/><circle cx="24" cy="25" r="1.6" fill="#fff" fill-opacity=".8"/><path d="M14 10v30M34 10v30" stroke="#000" stroke-opacity=".25" stroke-width="2"/></svg>',
+  chestOpen: '<svg viewBox="0 0 48 48"><path d="M8 6l32 4-2 12L6 18z" fill="currentColor" opacity=".85"/><rect x="6" y="22" width="36" height="18" rx="3" fill="currentColor"/><path d="M10 22c4-4 24-4 28 0" fill="#FFF3C4"/><circle cx="18" cy="20" r="3" fill="#FFF3C4"/><circle cx="26" cy="19" r="3.4" fill="#FFF3C4"/><circle cx="33" cy="21" r="2.6" fill="#FFF3C4"/></svg>',
+};
+const LAND_IC = {
+  candles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3v18M17 5v14"/><rect x="5" y="7" width="4" height="8" rx="1" fill="currentColor"/><rect x="15" y="9" width="4" height="6" rx="1"/></svg>',
+  barrel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="7" ry="2.5"/><path d="M5 5v14c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V5M5 10c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5M5 15c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/></svg>',
+  option: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h6l8-10h4"/><path d="M3 7h6l2.5 3M14 14l3 3h4"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  bank: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 9 12 4l9 5zM5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>',
+  bond: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h5"/></svg>',
+  pie: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9h-9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z" fill="currentColor"/></svg>',
+  chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M4 16l5-6 4 3 7-8"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>',
+  globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/></svg>',
+  gavel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 4 6 6M11 7l6 6M12.5 5.5l-4 4 6 6 4-4M10 12l-7 7M4 21h9"/></svg>',
+};
+
+/* ---------- render: top ---------- */
+function renderTop() {
+  $('#pills').innerHTML = `<span class="pill ${doneToday() ? 'fire' : 'off'}" title="روزهای پشت‌سرهم">${IC.flame}<span class="num">${fa(S.streak)}</span></span><span class="pill ice" title="یخ‌زدگی: یه روز جاافتاده رو نجات میده">${IC.ice}<span class="num">${fa(S.freezes)}</span></span>`;
+  const due = dueIds().length, b = $('#rev-badge');
+  b.hidden = !due; b.textContent = fa(due > 99 ? 99 : due);
+}
+
+function heroMsg() {
+  const nm = S.petName ? esc(S.petName) : 'اژدهات';
+  const a = awayDays(), next = MILESTONES.find(m => m > S.streak), st = stageOf(S.streak);
+  if (a === 1) return `دیروز نیومدی و ${nm} خوابش برد. درس امروز رو بزن تا بیدار شه.`;
+  if (a === 2) return `دو روزه نیومدی و ${nm} ناراحته.`;
+  if (a >= 3) return `سه روزه نیومدی و ${nm} عصبانیه! امروز آخرین فرصته.`;
+  if (S.frozeNote > 0) return 'دیروز نیومدی ولی یخ‌زدگی رکوردت رو نجات داد.';
+  if (S.frozeNote < 0) return 'چند روز نیومدی و یه تخم تازه گذاشت. از نو شروع کن.';
+  if (doneToday()) return `${nm} امروز خوشحاله. فردا ۴ کلمه‌ی تازه.`;
+  return next ? `${fa(next - S.streak)} روز دیگه تا «${STAGES[stageOf(next)].name}»` : STAGES[st].sub;
+}
+
+function heroCard() {
+  const st = stageOf(S.streak), mood = moodNow(), done = LESSONS.length <= S.lessons;
+  const cta = done ? '<div class="msg">کل دیکشنری رو تموم کردی 🎉</div>'
+    : doneToday() ? `<button class="btn ghost sm" type="button" id="go-extra">یه درس دیگه هم بخون</button>`
+      : `<button class="btn sm" type="button" id="go-lesson">${S.sleeping ? 'بیدارش کن: درس امروز' : 'درس امروز: ۴ کلمه'}</button>`;
+  return `<section class="hero">
+    <button type="button" class="pet mood-${mood}" id="pet" aria-label="نوازش اژدها">${petMedia(st, mood)}</button>
+    <div class="hero-tx">
+      <div class="nm">${S.petName ? esc(S.petName) : STAGES[st].name}<button type="button" class="pen" id="rename" aria-label="اسم‌گذاری">${IC.pen}</button></div>
+      <div class="st">${S.petName ? STAGES[st].name + ' · ' : ''}${fa(learnedCount())} واژه یاد گرفتی</div>
+      <div class="msg">${heroMsg()}</div>
+      ${cta}
+    </div>
+  </section>`;
+}
+
+/* ---------- render: map ---------- */
+const STEP = 96;
+function renderMap() {
+  const cur = S.lessons;
+  let html = '<div class="map">';
+  LANDS.forEach((l, li) => {
+    const [col, ic] = LAND_STYLE[li % LAND_STYLE.length];
+    const doneHere = l.lessons.filter(x => x < cur).length;
+    const locked = l.lessons[0] > cur;
+    const nodes = l.lessons.length + 1; // + chest
+    const h = nodes * STEP + 20;
+    const xs = Array.from({ length: nodes }, (_, k) => 50 + Math.sin(k * 1.05 + li) * 26);
+    const ys = Array.from({ length: nodes }, (_, k) => 46 + k * STEP);
+    const px = xs.map(x => 100 - x);
+    let d = `M ${px[0]} ${ys[0]}`;
+    for (let k = 1; k < nodes; k++) { const my = (ys[k - 1] + ys[k]) / 2; d += ` C ${px[k - 1]} ${my}, ${px[k]} ${my}, ${px[k]} ${ys[k]}`; }
+    let inner = '';
+    l.lessons.forEach((L, k) => {
+      let cls = 'lock', label = IC.lock;
+      if (L < cur) { cls = 'done'; label = IC.check; }
+      else if (L === cur) { cls = doneToday() ? 'wait' : 'cur'; label = doneToday() ? IC.moon : `<span class="num">${fa(L + 1)}</span>`; }
+      inner += `<button type="button" class="node ${cls}" data-node="${L}" style="right:${xs[k]}%;top:${ys[k]}px" aria-label="درس ${fa(L + 1)}">${label}</button>`;
+      if (L === cur) inner += `<span class="me-tag" style="right:${xs[k] + (xs[k] > 50 ? -22 : 22)}%;top:${ys[k] - 6}px">${petImg(stageOf(S.streak), moodNow())}</span>`;
+    });
+    const allDone = doneHere === l.lessons.length, open = S.chests.includes(li);
+    inner += `<button type="button" class="node chest ${open ? 'open' : allDone ? 'ready' : ''}" data-chest="${li}" style="right:${xs[nodes - 1]}%;top:${ys[nodes - 1]}px" aria-label="صندوق گنج سرزمین ${fa(li + 1)}">${open ? IC.chestOpen : IC.chest}</button>`;
+    html += `<section class="land ${locked ? 'locked' : ''}" style="--lc:${col}" id="land-${li}">
+      <div class="land-head"><span class="land-ic">${LAND_IC[ic]}</span><div><b>سرزمین ${fa(li + 1)}: ${esc(LAND_SHORT[li] || l.name)}</b><small class="num">${fa(Math.min(l.count, Math.max(0, doneHere * PER)))} از ${fa(l.count)} واژه · ${fa(l.lessons.length)} ایستگاه</small></div></div>
+      <div class="track" style="height:${h}px"><svg class="path" viewBox="0 0 100 ${h}" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="${col}" stroke-opacity=".45" stroke-width="5" stroke-dasharray="2 10" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>${inner}</div>
+    </section>`;
+  });
+  return html + '</div>';
+}
+
+/* ---------- render: review ---------- */
+function renderReview() {
+  const due = dueIds().length, total = Object.keys(S.box).length;
+  const boxes = [0, 0, 0, 0, 0]; Object.values(S.box).forEach(b => boxes[b[0]]++);
+  return `<div class="sec"><h2>جعبه‌ی مرور</h2>
+    <p>هر واژه‌ای که یاد می‌گیری میره توی جعبه. درست جواب بدی میره خونه‌ی بعد و دیرتر برمی‌گرده (۱، ۲، ۴، ۸ و ۱۶ روز بعد). غلط بزنی برمی‌گرده خونه‌ی اول.</p>
+    <div class="stats3"><div><b class="num">${fa(due)}</b><small>امروز برای مرور</small></div><div><b class="num">${fa(boxes[4])}</b><small>کاملاً بلدی</small></div><div><b class="num">${fa(total)}</b><small>کل واژه‌های جعبه</small></div></div>
+    <div class="stagebar" aria-label="خونه‌های جعبه">${boxes.map((n, i) => `<i class="${n ? 'on' : ''}" title="خونه‌ی ${fa(i + 1)}: ${fa(n)}"></i>`).join('')}</div>
+    ${due ? `<button class="btn" type="button" id="go-review">مرور ${fa(Math.min(10, due))} واژه</button>` : `<div class="card" style="text-align:center">${total ? 'امروز چیزی برای مرور نداری 👌' : 'اول درس امروز رو بخون تا جعبه پر شه.'}</div>`}
+  </div>`;
+}
+
+/* ---------- render: search ---------- */
+const normFa = s => String(s).toLowerCase().replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/[‌\s]+/g, ' ').trim();
+const SEARCH = WORDS.map(w => normFa(w.en + ' ' + w.fa + ' ' + w.d));
+function renderSearch() {
+  const q = normFa(query);
+  let ids = WORDS.map((w, i) => i).filter(i => (!q || SEARCH[i].includes(q)) && (qLand < 0 || landOfWord(i) === qLand) && (!onlyMarks || S.marks.includes(i)));
+  const shown = ids.slice(0, showN);
+  return `<div class="sec"><h2>کل دیکشنری</h2>
+    <label class="search"><input id="q" type="search" placeholder="جست‌وجو: Delta یا تورم یا …" value="${esc(query)}" autocomplete="off" aria-label="جست‌وجو">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></label>
+    <div class="filters"><button type="button" data-fl="-1" aria-pressed="${qLand < 0 && !onlyMarks}">همه</button><button type="button" data-fm="1" aria-pressed="${onlyMarks}">★ نشان‌شده‌ها</button>${LAND_SHORT.map((n, i) => `<button type="button" data-fl="${i}" aria-pressed="${qLand === i}">${n}</button>`).join('')}</div>
+    <p class="num">${fa(ids.length)} واژه</p>
+    <div class="res">${shown.map(i => { const w = WORDS[i], t = toolFor(w), on = S.marks.includes(i); return `<div class="res-item">
+      <div class="res-top"><span class="en">${esc(w.en)}</span><span class="fa">${esc(w.fa)}</span></div>
+      <p>${esc(w.d)}</p>
+      <div class="acts">${'speechSynthesis' in window ? `<button type="button" class="ib" data-say="${esc(w.en)}" aria-label="تلفظ">${IC.say}</button>` : ''}<button type="button" class="ib ${on ? 'on' : ''}" data-mark="${i}" aria-label="نشان کردن">${on ? IC.star : IC.star0}</button>${t ? `<a class="chip" href="${APP}?tool=${t.id}"${LINK_T}>${IC.tool.replace('<svg', '<svg width="13" height="13"')}${t.name}</a>` : ''}<span class="spacer"></span>${isLearned(i) ? '<span class="learned">یاد گرفتی ✓</span>' : `<span class="chip">${LAND_SHORT[landOfWord(i)]}</span>`}</div>
+    </div>`; }).join('')}</div>
+    ${ids.length > shown.length ? `<button type="button" class="btn ghost" id="more">${fa(Math.min(30, ids.length - shown.length))} واژه‌ی دیگه</button>` : ''}
+  </div>`;
+}
+
+/* ---------- render: league ---------- */
+const SAMPLE = [['سارا', 41, 4, 0, 'شعله', 164], ['امیرحسین', 33, 4, 0, 'Blaze', 132], ['مهسا', 26, 3, 0, 'نسیم', 104], ['رضا', 19, 2, 0, 'Bolt', 76], ['نگار', 15, 2, 0, 'ماهی‌سیاه', 60], ['علی', 12, 1, 0, 'رستم', 48], ['پریا', 9, 1, 0, 'Pixel', 36], ['حمید', 6, 0, 0, '', 24], ['زهرا', 4, 0, 0, '', 16], ['کیان', 2, 0, 0, '', 8]];
+function renderLeague() {
+  if (PROD) return `<div class="sec"><h2>رتبه‌ها</h2>
+    <div class="card pct"><div>جدول رتبه‌ها به‌زودی راه می‌افته</div></div>
+    <div class="stats3"><div><b class="num">${fa(S.streak)}</b><small>رکورد فعلی</small></div><div><b class="num">${fa(S.best)}</b><small>بهترین رکورد</small></div><div><b class="num">${fa(learnedCount())}</b><small>واژه یاد گرفتی</small></div></div>
+    <p class="note">رکوردت از همین الان ذخیره میشه و وقتی جدول راه بیفته، با همین عددها واردش میشی.</p></div>`;
+  const me = ['تو', S.streak, stageOf(S.streak), true, S.petName, learnedCount()];
+  const all = [...SAMPLE, me].sort((a, b) => b[1] - a[1] || (b[3] ? 1 : 0) - (a[3] ? 1 : 0));
+  const pct = Math.round(SAMPLE.filter(p => p[1] < S.streak).length / SAMPLE.length * 100);
+  return `<div class="sec"><h2>جدول این هفته</h2>
+    <div class="card pct"><div>${S.streak ? `از <span class="num">${fa(pct)}٪</span> بقیه جلوتری` : 'درس امروز رو بزن تا وارد جدول بشی'}</div></div>
+    <div class="league">${all.map((p, i) => `<div class="lrow ${p[3] ? 'me' : ''} ${i < 3 ? 'top3' : ''}"><span class="rk num">${fa(i + 1)}</span><span class="av">${petImg(p[2], p[3] ? moodNow() : 'normal')}</span><span class="nm">${esc(p[0])}<small>${p[4] ? 'اژدها: ' + esc(p[4]) + ' · ' : ''}${fa(p[5])} واژه</small></span><span class="sc num">${IC.flame}${fa(p[1])}</span></div>`).join('')}</div>
+    <p class="note">اسم‌ها و عددهای این جدول نمونه‌ان. توی نسخه‌ی اصلی از سرور ربات میاد.</p></div>`;
+}
+
+/* ---------- render: dragon ---------- */
+function nameForm() {
+  return `<form class="name-form" id="name-form" novalidate><label for="pet-name-input">اسم اژدهات</label>
+    <div class="nf-row"><input id="pet-name-input" maxlength="16" autocomplete="off" value="${esc(nameDraft)}" placeholder="مثلاً آتشین یا Ember"><button type="submit" class="btn">ثبت</button></div>
+    <small class="${nameErr ? 'err' : ''}">${nameErr ? esc(nameErr) : 'بین ۲ تا ۱۶ حرف، فارسی یا انگلیسی. اسم‌های زشت و توهین‌آمیز قبول نمیشن.'}</small>
+    <button type="button" class="link" id="name-cancel">بی‌خیال</button></form>`;
+}
+function renderPet() {
+  const st = stageOf(S.streak), mood = moodNow();
+  return `<div class="sec" style="align-items:stretch">
+    <button type="button" class="pet big mood-${mood}" id="pet" aria-label="نوازش اژدها">${petMedia(st, mood)}</button>
+    <div style="text-align:center"><div class="nm" style="font-weight:900;font-size:1.25rem;color:var(--gold-2)">${S.petName ? esc(S.petName) : STAGES[st].name} <button type="button" class="pen" id="rename" aria-label="اسم‌گذاری">${IC.pen}</button></div><div style="color:var(--muted);font-size:.86rem">${heroMsg()}</div></div>
+    ${naming ? nameForm() : ''}
+    <div class="stagebar" aria-label="مرحله‌ها">${STAGES.map((s, i) => `<i class="${i <= st ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="stats3"><div><b class="num">${fa(S.streak)}</b><small>رکورد فعلی</small></div><div><b class="num">${fa(S.best)}</b><small>بهترین رکورد</small></div><div><b class="num">${fa(S.chests.length)}</b><small>صندوق باز شده</small></div></div>
+    <h2>مجموعه‌ی من</h2>
+    <div class="coll">${STAGES.map((s, i) => { const got = S.seen.includes(i); return `<div class="cell"><div class="ic">${petImg(i, 'normal', got ? '' : 'locked')}</div><b>${got ? s.name : '؟؟؟'}</b><small class="num">${i ? 'روز ' + fa(s.at) : 'روز اول'}</small></div>`; }).join('')}</div>
+  </div>`;
+}
+
+function render() {
+  renderTop();
+  let h = '';
+  if (tab === 'map') h = heroCard() + (naming ? nameForm() : '') + renderMap();
+  else if (tab === 'review') h = renderReview();
+  else if (tab === 'search') h = renderSearch();
+  else if (tab === 'league') h = renderLeague();
+  else h = renderPet();
+  $('#view').innerHTML = h;
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+}
+
+/* ---------- render: lesson / quiz screen ---------- */
+function wordCard(i) {
+  const w = WORDS[i], t = toolFor(w);
+  return `<div class="card">
+    <div class="eyebrow"><span class="chip">سرزمین ${fa(landOfWord(i) + 1)}: ${LAND_SHORT[landOfWord(i)]}</span>${w.n ? '<span class="chip new">واژه‌ی تازه‌ی ویرایش دوم</span>' : ''}</div>
+    <div class="word-row"><div class="word-en">${esc(w.en)}</div>${'speechSynthesis' in window ? `<button type="button" class="say" data-say="${esc(w.en)}" aria-label="تلفظ">${IC.say}</button>` : ''}</div>
+    <div class="word-fa">${esc(w.fa)}</div>
+    <p class="word-def">${esc(w.d)}</p>
+    ${t ? `<a class="tool-link" href="${APP}?tool=${t.id}"${LINK_T}>${IC.tool}<span>توی چارت گپ امتحانش کن: ${t.name}</span>‹</a>` : ''}
+  </div>`;
+}
+function renderScreen() {
+  const r = run; if (!r) return;
+  let body = '';
+  const pr = r.step === 'learn' ? (r.card / (r.ids.length + 1)) * 40 : r.step === 'quiz' ? 40 + (r.right / r.total) * 60 : 100;
+  const head = `<div class="scr-head"><button type="button" class="x" id="close" aria-label="بستن">${IC.x}</button><div class="prog"><i style="width:${r.type === 'lesson' ? pr : r.step === 'done' ? 100 : (r.right / r.total) * 100}%"></i></div></div>`;
+  if (r.step === 'learn') {
+    const i = r.ids[r.card];
+    body = `<div class="eyebrow">واژه‌ی ${fa(r.card + 1)} از ${fa(r.ids.length)}</div>${wordCard(i)}
+      <div class="dots">${r.ids.map((_, k) => `<i class="${k === r.card ? 'on' : ''}"></i>`).join('')}</div>
+      <div class="spacer"></div>
+      <div class="row2">${r.card ? '<button class="btn ghost" type="button" id="prev">قبلی</button>' : ''}<button class="btn" type="button" id="next-card">${r.card < r.ids.length - 1 ? 'واژه‌ی بعد' : 'بریم سراغ سؤال‌ها'}</button></div>`;
+  } else if (r.step === 'quiz') {
+    const q = r.qs[r.at], a = r.answered;
+    const opts = q.opts.map(o => { let c = ''; if (a) { if (o.i === q.idx) c = 'right'; else if (o.i === a.pick) c = 'wrong'; } return `<button type="button" class="opt ${c}" data-pick="${o.i}" ${a ? 'disabled' : ''}>${o.t}</button>`; }).join('');
+    const lbl = r.type === 'chest' ? `آزمون صندوق گنج · ${fa(r.at + 1)} از ${fa(r.total)}` : r.type === 'review' ? 'مرور' : (r.ids && r.ids.includes(q.idx) ? 'واژه‌های امروز' : 'مرور واژه‌های قبلی');
+    body = `<div class="eyebrow">${lbl}</div><div class="qtext">${q.prompt}</div>
+      ${q.say && 'speechSynthesis' in window ? `<button type="button" class="link" data-say="${esc(q.say)}">🔊 بشنو</button>` : ''}
+      <div class="opts">${opts}</div>
+      ${a ? (a.ok ? `<div class="feedback ok">درسته! ${esc(WORDS[q.idx].en)} = ${esc(WORDS[q.idx].fa)}</div>` : `<div class="feedback no">جواب درست: «${esc(WORDS[q.idx].fa)}»${r.type !== 'chest' ? '. آخر کار دوباره می‌پرسمش.' : ''}</div>`) : ''}
+      <div class="spacer"></div>${a ? `<button class="btn" type="button" id="next-q">ادامه</button>` : ''}`;
+  } else {
+    if (r.type === 'lesson') body = `<div class="done-hero"><div class="pet big mood-happy" style="width:220px">${petMedia(stageOf(S.streak), 'happy')}</div><div class="big num">${fa(S.streak)} روز</div><div>۴ واژه‌ی تازه یاد گرفتی و رفتن توی جعبه‌ی مرور.</div></div>
+      <div class="stats3"><div><b class="num">${fa(learnedCount())}</b><small>واژه تا حالا</small></div><div><b class="num">${fa(r.total - r.mistakes)}/${fa(r.total)}</b><small>بار اول درست</small></div><div><b class="num">${fa(S.freezes)}</b><small>یخ‌زدگی</small></div></div>
+      <div class="spacer"></div><button class="btn" type="button" id="close">برگرد به نقشه</button>`;
+    else if (r.type === 'chest') body = `<div class="done-hero"><div class="chest-big" style="width:140px;height:140px;color:var(--gold)">${r.pass ? IC.chestOpen : IC.chest}</div><div class="big num">${fa(r.firstTry)} از ${fa(r.total)}</div><div>${r.pass ? 'صندوق باز شد! یه یخ‌زدگی جایزه گرفتی.' : 'برای باز کردن صندوق باید حداقل ۶ تا رو بار اول درست بزنی. یه کم مرور کن و دوباره بیا.'}</div></div><div class="spacer"></div><button class="btn" type="button" id="close">برگرد به نقشه</button>`;
+    else body = `<div class="done-hero"><div class="big num">${fa(r.total - r.mistakes)} از ${fa(r.total)}</div><div>مرور امروز تموم شد. درست‌ها رفتن خونه‌ی بعد.</div></div><div class="spacer"></div><button class="btn" type="button" id="close">تموم</button>`;
+  }
+  $('#screen').innerHTML = `<div class="screen-in">${head}${body}</div>`;
+}
+
+/* ---------- overlays ---------- */
+function evolve(a, b) {
+  const box = $('#evo');
+  box.innerHTML = `<div class="evo-box"><div class="evo-pet"><div class="evo-stack"><div class="old">${petImg(a, 'normal')}</div><div class="neu">${petMedia(b, 'happy')}</div></div><div class="flash"></div></div>
+    <h3>${STAGES[b].name}!</h3><p>${S.petName ? esc(S.petName) + ' بزرگ‌تر شد. ' : ''}${STAGES[b].sub}</p>${!S.petName ? '<button type="button" class="btn" id="evo-name">حالا اسمش رو بذار</button><button type="button" class="link" id="evo-ok" style="align-self:center;color:#C9D3E2">بعداً</button>' : '<button type="button" class="btn" id="evo-ok">ایول</button>'}</div>`;
+  box.hidden = false; box.classList.remove('go'); void box.offsetWidth; box.classList.add('go');
+}
+function speak(t, btn) {
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t.replace(/\(.*?\)/g, '')); u.lang = 'en-US'; u.rate = .9; if (btn) { btn.classList.add('on'); u.onend = () => btn.classList.remove('on'); } speechSynthesis.speak(u); } catch (e) {}
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.tab) { tab = t.dataset.tab; naming = false; render(); window.scrollTo({ top: 0 }); if (tab === 'map') scrollToCur(); return; }
+  if (t.dataset.say) { speak(t.dataset.say, t); return; }
+  if (t.id === 'pet') { t.classList.remove('poke'); void t.offsetWidth; t.classList.add('poke'); haptic(); return; }
+  if (t.id === 'go-lesson' || t.id === 'go-extra') { startLesson(); return; }
+  if (t.dataset.node !== undefined) {
+    const n = +t.dataset.node;
+    if (n === S.lessons) startLesson();
+    else if (n < S.lessons) { run = { type: 'peek', ids: LESSONS[n].ids, step: 'learn', card: 0, qs: [], total: 1, right: 0 }; openScreen(); }
+    else { haptic(); t.animate([{ transform: 'translate(50%,-50%) translateX(-4px)' }, { transform: 'translate(50%,-50%) translateX(4px)' }, { transform: 'translate(50%,-50%)' }], { duration: 250 }); }
+    return;
+  }
+  if (t.dataset.chest !== undefined) {
+    const li = +t.dataset.chest, l = LANDS[li];
+    if (l.lessons[l.lessons.length - 1] < S.lessons) startChest(li); else haptic();
+    return;
+  }
+  if (t.id === 'go-review') { startReview(); return; }
+  if (t.id === 'close') { const ev = run && run.evolve; closeScreen(); if (ev) evolve(ev[0], ev[1]); return; }
+  if (t.id === 'next-card') { if (run.card < run.ids.length - 1) { run.card++; renderScreen(); } else if (run.type === 'peek') closeScreen(); else { run.step = 'quiz'; renderScreen(); } return; }
+  if (t.id === 'prev') { run.card--; renderScreen(); return; }
+  if (t.dataset.pick && run && run.step === 'quiz' && !run.answered) {
+    const q = run.qs[run.at], pick = +t.dataset.pick, ok = pick === q.idx;
+    run.answered = { pick, ok }; haptic(ok ? 'ok' : 'no');
+    const first = !q.retry;
+    if (ok) run.right++;
+    if (run.type === 'chest') { if (ok) run.firstTry++; else run.right++; }   // chest: one try per question
+    else { if (!ok) { run.mistakes += first ? 1 : 0; run.qs.push(Object.assign({}, q, { retry: true, opts: shuffle(q.opts) })); } if (first) grade(q.idx, ok); }
+    renderScreen(); return;
+  }
+  if (t.id === 'next-q') { if (run.at >= run.qs.length - 1) finishRun(); else { run.at++; run.answered = null; renderScreen(); } return; }
+  if (t.id === 'more') { showN += 30; render(); return; }
+  if (t.dataset.fl !== undefined) { qLand = +t.dataset.fl; onlyMarks = false; showN = 30; render(); return; }
+  if (t.dataset.fm) { onlyMarks = !onlyMarks; qLand = -1; showN = 30; render(); return; }
+  if (t.dataset.mark !== undefined) { const i = +t.dataset.mark, k = S.marks.indexOf(i); if (k >= 0) S.marks.splice(k, 1); else S.marks.push(i); save(); render(); return; }
+  if (t.id === 'evo-ok') { $('#evo').hidden = true; return; }
+  if (t.id === 'evo-name' || t.id === 'rename') { $('#evo').hidden = true; naming = true; nameErr = ''; nameDraft = S.petName; render(); setTimeout(() => { const i = $('#pet-name-input'); if (i) { i.focus(); i.scrollIntoView({ block: 'center' }); } }, 50); return; }
+  if (t.id === 'name-cancel') { naming = false; render(); return; }
+  if (t.dataset.mood !== undefined) { preview = t.dataset.mood; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  if (t.id === 'd-next') { newDay(); save(); render(); scrollToCur(); return; }
+  if (t.id === 'd-skip') { if (doneToday() || S.lastDone < 0) newDay(); newDay(); save(); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  if (t.id === 'd-reset') { S = fresh(); preview = ''; save(); render(); return; }
+  if (t.dataset.jump) {
+    const n = +t.dataset.jump; S = fresh();
+    S.today = n; S.lastDone = n - 1; S.streak = n; S.best = n; S.lessons = Math.min(n, LESSONS.length); S.freezes = 0;
+    S.seen = STAGES.map((s, i) => i).filter(i => STAGES[i].at <= n);
+    LESSONS.slice(0, S.lessons).forEach((L, k) => L.ids.forEach(i => { S.box[i] = [Math.min(4, Math.floor((n - k) / 5)), k + 3 + (i % 9)]; }));
+    LANDS.forEach((l, li) => { if (l.lessons[l.lessons.length - 1] < S.lessons) S.chests.push(li); });
+    preview = ''; tab = 'map'; save(); render(); scrollToCur(); return;
+  }
+});
+document.addEventListener('input', e => { if (e.target.id === 'q') { query = e.target.value; showN = 30; const pos = e.target.selectionStart; render(); const i = $('#q'); i.focus(); try { i.setSelectionRange(pos, pos); } catch (er) {} } });
+document.addEventListener('submit', e => {
+  if (e.target.id !== 'name-form') return; e.preventDefault();
+  nameDraft = $('#pet-name-input').value; const r = checkName(nameDraft);
+  if (!r.ok) { nameErr = r.msg; render(); const i = $('#pet-name-input'); if (i) { i.focus(); i.setAttribute('aria-invalid', 'true'); } return; }
+  S.petName = r.name; naming = false; nameErr = ''; save(); render();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('#evo').hidden) $('#evo').hidden = true; else if (run) closeScreen(); } });
+function scrollToCur() { setTimeout(() => { const n = document.querySelector('.node.cur, .node.wait'); const y = n && n.getBoundingClientRect().top; if (n && (y > window.innerHeight * .8 || y < 60)) n.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 60); }
+
+if (PROD) {
+  if (!/[?&]demo=1/.test(location.search)) $('#demo').remove();
+  $('#back').hidden = false;
+  syncDay();
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !run && syncDay()) { save(); render(); } });
+  let tries = 0;
+  const tgInit = () => {
+    const t = window.Telegram && window.Telegram.WebApp;
+    if (!t || !t.initData) { if (++tries < 40) setTimeout(tgInit, 100); return; }
+    try { t.ready(); t.expand(); if (t.isVersionAtLeast('6.1')) { t.setHeaderColor('#12161C'); t.setBackgroundColor('#12161C'); } } catch (e) {}
+    try { if (t.isVersionAtLeast('6.1')) { $('#back').hidden = true; t.BackButton.show(); t.BackButton.onClick(() => { if (!$('#evo').hidden) $('#evo').hidden = true; else if (run) closeScreen(); else location.href = '../'; }); } } catch (e) {}
+    cloudLoad(() => { syncDay(); save(); if (!run) render(); });
+  };
+  tgInit();
+}
+render();
+</script>
+
+</body></html>

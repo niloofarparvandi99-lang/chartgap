@@ -1,5 +1,5 @@
 // Offline cache for the calculator. Bump VERSION whenever index.html changes.
-const VERSION = 'chartgap-v12';
+const VERSION = 'chartgap-v13';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
@@ -19,10 +19,12 @@ self.addEventListener('fetch', e => {
     return;
   }
   if (req.mode === 'navigate' || new URL(req.url).pathname.endsWith('/index.html')) {
+    // each page keeps its own saved copy: the tools page, and the dictionary under dict/
+    const page = /\/dict\/(index\.html)?$/.test(new URL(req.url).pathname) ? 'dict/index.html' : 'index.html';
     e.respondWith(caches.open(VERSION).then(c => {
-      const net = fetch(req, { cache: 'no-cache' }).then(r => { if (r.ok) c.put('index.html', r.clone()); return r; });
-      const late = new Promise(ok => setTimeout(ok, 4000)).then(() => c.match('index.html'));
-      return Promise.race([net.catch(() => c.match('index.html')), late.then(h => h || net)])
+      const net = fetch(req, { cache: 'no-cache' }).then(r => { if (r.ok) c.put(page, r.clone()); return r; });
+      const late = new Promise(ok => setTimeout(ok, 4000)).then(() => c.match(page));
+      return Promise.race([net.catch(() => c.match(page)), late.then(h => h || net)])
         .then(r => r || new Response('', { status: 504 }));
     }));
     return;
